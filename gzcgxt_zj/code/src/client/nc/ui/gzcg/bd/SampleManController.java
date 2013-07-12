@@ -1,6 +1,6 @@
 package nc.ui.gzcg.bd;
 
-import nc.itf.gzcg.bd.BDConstant;
+import nc.itf.gzcg.pub.GZCGConstant;
 import nc.ui.trade.bill.ICardController;
 import nc.ui.trade.bill.ISingleController;
 import nc.ui.trade.businessaction.IBusinessActionType;
@@ -55,7 +55,7 @@ public class SampleManController implements ICardController,ISingleController {
 	 * @see nc.ui.trade.controller.IControllerBase#getBillType()
 	 */
 	public String getBillType() {
-		return BDConstant.FUNCODE.getValue();
+		return GZCGConstant.SAMPLEUIFUNCODE.getValue();
 	}
 
 	/* £¨·Ç Javadoc£©

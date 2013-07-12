@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import nc.bs.bd.pub.AbstractBDBackCheck;
 import nc.bs.framework.common.NCLocator;
-import nc.itf.gzcg.bd.BDConstant;
+import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.uap.bd.refcheck.IReferenceCheck;
 import nc.vo.gzcg.bd.samplevo;
 import nc.vo.pub.BusinessException;
@@ -68,7 +68,7 @@ public class SampleManCheckBack extends AbstractBDBackCheck {
 	 * @see nc.bs.bd.pub.AbstractBDBackCheck#getFun_code()
 	 */
 	public String getFun_code() {
-		return BDConstant.FUNCODE.getValue();
+		return GZCGConstant.SAMPLEUIFUNCODE.getValue();
 	}
 
 }
