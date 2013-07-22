@@ -1,9 +1,19 @@
 package nc.ui.gzcg.report;
 
+
+import java.util.Vector;
+
+import nc.bs.framework.common.NCLocator;
 import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.gzcg.pub.GZCGReportAnalysisConst;
+import nc.itf.uap.IUAPQueryBS;
+import nc.jdbc.framework.processor.VectorProcessor;
+import nc.ui.gzcg.pub.ReportLinkQueryData;
+import nc.ui.pub.ClientEnvironment;
 import nc.ui.scm.pub.report.ReportPanel;
+import nc.vo.pub.BusinessException;
 
+@SuppressWarnings("restriction")
 public class CustomerAnalysisUI extends ReportAnalysisUI{
 	/**
 	 * 
@@ -55,5 +65,38 @@ public class CustomerAnalysisUI extends ReportAnalysisUI{
 
 	@Override
 	protected void hideReportPanel(ReportPanel reportpanel) {
+	}
+	
+	@Override
+	protected String getMainViewName() {
+		return GZCGConstant.MATERIALMAINVIEW.getValue();
+	}
+	
+	@Override
+	protected String setReportLinkData(ReportLinkQueryData queryLinkData) {
+		String targetFunCode = super.setReportLinkData(queryLinkData);
+		if (targetFunCode==null) return targetFunCode;
+		
+		int[] rows = getReportPanel().getBillTable().getSelectedRows();
+		
+		String vcustcode = getReportPanel().getBillModel().getValueAt(rows[0], "vcustcode").toString();
+		
+		IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
+		StringBuffer sql = new StringBuffer();
+		sql.append("select bd_cumandoc.pk_cumandoc from bd_cubasdoc, bd_cumandoc where bd_cubasdoc.pk_cubasdoc=bd_cumandoc.pk_cubasdoc and bd_cumandoc.pk_corp='");
+		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+		sql.append("' and bd_cubasdoc.custcode='");
+		sql.append(vcustcode);
+		sql.append("' and bd_cumandoc.custflag='3'");
+		
+		try {
+			@SuppressWarnings("unchecked")
+			Vector<Vector<Object>> cvendorpkdata = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
+			if (cvendorpkdata!=null && cvendorpkdata.size()>0)
+				queryLinkData.setCvendormangid(cvendorpkdata.get(0).get(0).toString());
+		} catch (BusinessException e) {
+		}
+		
+		return targetFunCode;
 	}
 }

@@ -9,7 +9,7 @@ import nc.ui.pub.beans.UICheckBox;
 import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
-public class MaterialStatisticsUI extends ReportStatisticsUI{
+public class AssistMaterialStatisticsUI extends ReportStatisticsUI{
 
 	/**
 	 * 
@@ -56,7 +56,7 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 			sqlProcesser = new IAdditionSQLProcess() {	
 				public void additionSQLWhereClause(StringBuffer sql) {
 					sql.append(" and gzcg_qcrp_checkbill_v.cmangid in (select pk_invmandoc from bd_invmandoc where bd_invmandoc.def3='"+
-							GZCGConstant.DEFDOCMATERAILPK.getValue()+"')");
+							GZCGConstant.DEFDOCSUBMATERAILPK.getValue()+"')");
 				}				
 				public void additionSQLQueryClause(StringBuffer sql) {
 				}				
@@ -67,9 +67,10 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 			};
 		}
 	}
-
+	
 	@Override
 	protected String getMainViewName() {
 		return GZCGConstant.MATERIALMAINVIEW.getValue();
 	}
 }
+

@@ -4,7 +4,7 @@ import nc.itf.gzcg.pub.GZCGConstant;
 import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
-public class MaterialAnalysisUI extends ReportAnalysisUI{
+public class AssistMaterialAnalysisUI extends ReportAnalysisUI{
 	/**
 	 * 
 	 */
@@ -33,7 +33,7 @@ public class MaterialAnalysisUI extends ReportAnalysisUI{
 			sqlProcesser = new IAdditionSQLProcess() {	
 				public void additionSQLWhereClause(StringBuffer sql) {
 					sql.append(" and gzcg_qcrp_checkbill_v.cmangid in (select pk_invmandoc from bd_invmandoc where bd_invmandoc.def3='"+
-							GZCGConstant.DEFDOCMATERAILPK.getValue()+"')");
+							GZCGConstant.DEFDOCSUBMATERAILPK.getValue()+"')");
 				}				
 				public void additionSQLQueryClause(StringBuffer sql) {
 				}				
@@ -58,7 +58,7 @@ public class MaterialAnalysisUI extends ReportAnalysisUI{
 	protected void hideReportPanel(ReportPanel reportpanel) {
 		reportpanel.hideColumn(new String[]{"vcustcode", "vcustname", "vinvclcode", "vinvclname", "namountorder", "ncountorder"});
 	}
-	
+
 	@Override
 	protected String getMainViewName() {
 		return GZCGConstant.MATERIALMAINVIEW.getValue();

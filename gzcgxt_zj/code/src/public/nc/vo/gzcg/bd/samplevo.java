@@ -22,6 +22,7 @@ public class samplevo extends SuperVO {
 	private java.lang.String pk_corp;
 	private java.lang.String vqctype;
 	private java.lang.String vsampleno;
+	private java.lang.String vsamplenofar;
 	private java.lang.String pk_invmandoc;
 	private java.lang.String vorderbill;
 	private java.lang.String vstockbatch;
@@ -46,6 +47,7 @@ public class samplevo extends SuperVO {
 	public static final String PK_CORP = "pk_corp";
 	public static final String VQCTYPE = "vqctype";
 	public static final String VSAMPLENO = "vsampleno";
+	public static final String VSAMPLENOFAR = "vsamplenofar";
 	public static final String PK_INVMANDOC = "pk_invmandoc";
 	public static final String VORDERBILL = "vorderbill";
 	public static final String VSTOCKBATCH = "vstockbatch";
@@ -127,6 +129,22 @@ public class samplevo extends SuperVO {
 	 */
 	public void setVsampleno (java.lang.String newVsampleno ) {
 	 	this.vsampleno = newVsampleno;
+	} 	  
+	/**
+	 * 属性vsamplenofar的Getter方法.
+	 * 创建日期:2013-07-09 08:15:27
+	 * @return java.lang.String
+	 */
+	public java.lang.String getVsamplenofar () {
+		return vsamplenofar;
+	}   
+	/**
+	 * 属性vsamplenofar的Setter方法.
+	 * 创建日期:2013-07-09 08:15:27
+	 * @param newVsamplenofar java.lang.String
+	 */
+	public void setVsamplenofar (java.lang.String newVsamplenofar ) {
+	 	this.vsamplenofar = newVsamplenofar;
 	} 	  
 	/**
 	 * 属性pk_invmandoc的Getter方法.

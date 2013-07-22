@@ -7,17 +7,23 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 import javax.swing.BoxLayout;
+
 import nc.bs.framework.common.NCLocator;
+import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.gzcg.pub.GZCGReportAnalysisConst;
 import nc.itf.gzcg.pub.ISQLSection;
 import nc.itf.uap.IUAPQueryBS;
 import nc.jdbc.framework.processor.VectorProcessor;
+import nc.ui.gzcg.pub.ReportLinkQueryData;
+import nc.ui.gzcg.pub.ReportUIEx;
 import nc.ui.pub.ButtonObject;
+import nc.ui.pub.ClientEnvironment;
+import nc.ui.pub.beans.MessageDialog;
 import nc.ui.pub.beans.UICheckBox;
 import nc.ui.pub.beans.UIPanel;
 import nc.ui.pub.report.ReportItem;
 import nc.ui.scm.pub.report.ReportPanel;
-import nc.ui.scm.pub.report.ReportUI;
+import nc.ui.uap.sf.SFClientUtil;
 import nc.vo.gzcg.report.AnalysisReportVO;
 import nc.vo.pub.BusinessException;
 import nc.vo.pub.cquery.FldgroupVO;
@@ -25,8 +31,8 @@ import nc.vo.pub.lang.UFDouble;
 import nc.vo.pub.query.ConditionVO;
 
 @SuppressWarnings("restriction")
-public abstract class ReportAnalysisUI extends ReportUI{
-	private Hashtable<ISQLSection, UICheckBox> conditionCtrls;
+public abstract class ReportAnalysisUI extends ReportUIEx{
+	protected Hashtable<ISQLSection, UICheckBox> conditionCtrls;
 	private ReportItem[] initBodyItems;
 	/**
 	 * 
@@ -37,6 +43,8 @@ public abstract class ReportAnalysisUI extends ReportUI{
 	protected IAdditionSQLProcess sqlProcesser;
 	
 	protected abstract void setReportAnalysisConfig();
+	
+	protected abstract String getMainViewName();
 
 	@Override
 	public ButtonObject[] getButtons() {
@@ -87,6 +95,10 @@ public abstract class ReportAnalysisUI extends ReportUI{
 		getReportPanel().showHiddenColumn(allshowcols.toArray(new String[]{}));
 		
 		String sql = new SQLBuildUtil(GZCGReportAnalysisConst.values(), reportConfig, sqlProcesser).getSQLForReportAnalysis(conditionCtrls, voCondition);
+		
+		if (!getMainViewName().equals(GZCGConstant.MATERIALMAINVIEW.getValue()))
+			sql = sql.replaceAll(GZCGConstant.MATERIALMAINVIEW.getValue(), getMainViewName());
+		
 		IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
 		int dimensionCount = getDimensionCount();
 		Hashtable<String, AnalysisReportVO> reportSet = new Hashtable<String, AnalysisReportVO>();
@@ -271,5 +283,57 @@ public abstract class ReportAnalysisUI extends ReportUI{
 	@Override
 	public void onRefresh() {
 		setReportData(getQueryPanel().getConditionVO());
+	}
+	
+	@Override
+	public void onOrderQuery() {
+		ReportLinkQueryData queryLinkData = new ReportLinkQueryData();
+		String targetFunCode = setReportLinkData(queryLinkData);
+		
+		SFClientUtil.openLinkedQueryDialog(targetFunCode, this, queryLinkData);
+	}
+
+	protected String setReportLinkData(ReportLinkQueryData queryLinkData) {
+		String targetFunCode = null;
+		int[] rows = getReportPanel().getBillTable().getSelectedRows();
+		
+		if (rows==null || rows.length==0){
+			MessageDialog.showWarningDlg(this, "提示", "请先选择一行数据再联查质检数据。");
+			return null;
+		}
+		Object vmanagecode = getReportPanel().getBillModel().getValueAt(rows[0], "vinvdoccode");
+		if (vmanagecode==null || vmanagecode.toString().length()==0){
+			MessageDialog.showWarningDlg(this, "提示", "请先勾选存货分析项查询后再联查质检数据。");
+			return null;
+		}
+		
+		IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
+		StringBuffer sql = new StringBuffer();
+		sql.append("select bd_invmandoc.pk_invmandoc, nvl(bd_invmandoc.def3,'-') from bd_invbasdoc, bd_invmandoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_corp='");
+		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+		sql.append("' and bd_invbasdoc.invcode='");
+		sql.append(vmanagecode);
+		sql.append("'");
+		
+		try {
+			@SuppressWarnings("unchecked")
+			Vector<Vector<Object>> cmanagepkdata = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
+			if (cmanagepkdata!=null && cmanagepkdata.size()>0){
+				queryLinkData.setCmanageid(cmanagepkdata.get(0).get(0).toString());
+				if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCMATERAILPK.getValue()))
+					targetFunCode = GZCGConstant.MATERIALSTATISTICSUIFUNCODE.getValue();
+				else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCSUBMATERAILPK.getValue()))
+					targetFunCode = GZCGConstant.ASSISTMATERIALSTATISTICSUIFUNCODE.getValue();
+				else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCSEMIPRODUCTPK.getValue()))
+					targetFunCode = GZCGConstant.SEMIPRODUCTSTATISTICSUIFUNCODE.getValue();
+				else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCPODUCTPK.getValue()))
+					targetFunCode = GZCGConstant.PRODUCTSTATISTICSUIFUNCODE.getValue();
+			}
+		} catch (BusinessException e) {
+		}
+			
+		queryLinkData.setVoCondition(getQueryPanel().getConditionVO());
+		
+		return targetFunCode;
 	}
 }

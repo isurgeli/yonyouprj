@@ -27,6 +27,8 @@ import nc.bs.framework.common.NCLocator;
 import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.uap.IUAPQueryBS;
 import nc.jdbc.framework.processor.VectorProcessor;
+import nc.ui.gzcg.pub.BillTableValueRangeRender;
+import nc.ui.gzcg.pub.ReportUIEx;
 import nc.ui.pub.ButtonObject;
 import nc.ui.pub.ClientEnvironment;
 import nc.ui.pub.beans.MessageDialog;
@@ -37,12 +39,12 @@ import nc.ui.pub.beans.UITextField;
 import nc.ui.pub.beans.ValueChangedEvent;
 import nc.ui.pub.beans.ValueChangedListener;
 import nc.ui.pub.bill.BillCardPanel;
+import nc.ui.pub.bill.BillItem;
 import nc.ui.pub.bill.IBillItem;
 import nc.ui.pub.report.ReportItem;
 import nc.ui.qc.standard.CheckstandardDef;
 import nc.ui.qc.standard.CheckstandardHelper;
 import nc.ui.scm.pub.report.ReportPanel;
-import nc.ui.scm.pub.report.ReportUI;
 import nc.vo.gzcg.report.AnalysisReportVO;
 import nc.vo.pub.BusinessException;
 import nc.vo.pub.cquery.FldgroupVO;
@@ -51,7 +53,7 @@ import nc.vo.pub.query.ConditionVO;
 import nc.vo.qc.query.CheckstandardItemVO;
 
 @SuppressWarnings({ "restriction", "deprecation" })
-public class MixtureToolUI extends ReportUI{
+public class MixtureToolUI extends ReportUIEx{
 
 	/**
 	 * 
@@ -68,7 +70,8 @@ public class MixtureToolUI extends ReportUI{
 	protected ButtonObject bnStock; 
 	protected ButtonObject bnCompute;
 	private CheckBoxRenderer stockChecker;
-	private ReportItem[] initBodyItems; 
+	private ReportItem[] initBodyItems;
+	private UITextField invSpec; 
 
 	@Override
 	public String getBusitype() {
@@ -279,8 +282,7 @@ public class MixtureToolUI extends ReportUI{
 		} catch (BusinessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		
+		}
 		setButtonStatusEx();
 	}
 
@@ -326,14 +328,14 @@ public class MixtureToolUI extends ReportUI{
 						reportVO.setAttributeValue("_CROSS"+checkItemidNo.get(checkitemid), checkvalue);
 				}
 			}
-			processTableLayout(getCheckItemName());
+			processTableLayout(getCheckItemName(), checkitemids);
 		} catch (BusinessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 	}
 	
-	private void processTableLayout(String[] checkitemnames) {
+	private void processTableLayout(String[] checkitemnames, String[] checkitemids) {
 		ReportItem[] reportItems = new ReportItem[checkitemnames.length];
 		for(int i=0;i<checkitemnames.length;i++){
 			ReportItem item = new ReportItem();
@@ -341,6 +343,7 @@ public class MixtureToolUI extends ReportUI{
 			item.setKey("_CROSS"+i);
 			item.setName(checkitemnames[i]);
 			item.setDataType(IBillItem.DECIMAL);
+			item.setDecimalDigits(4);
 			reportItems[i] = item;
 		}
 		ArrayList<ReportItem> finalBodyItems = new ArrayList<ReportItem>();
@@ -368,12 +371,24 @@ public class MixtureToolUI extends ReportUI{
 			
 			groupVOs.add(groupVO);
 		}
-//		
-//		getReportPanel().setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
+		
+		getReportPanel().setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
 		getReportPanel().setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
+		
+		setReportPanelCellRender(checkitemnames, checkitemids);
 		setReportPanelHeader();
 	}
 	
+	private void setReportPanelCellRender(String[] checkitemnames, String[] checkitemids) {
+		Hashtable<String, double[]> standardValue = getStandardValue();
+		for(int i=0;i<checkitemnames.length;i++) {
+			double[] itemStandardValue = standardValue.get(checkitemids[i]);
+			BillItem billItem = reportpanel.getBodyItem("_CROSS"+i);
+			BillTableValueRangeRender render = new BillTableValueRangeRender(billItem, itemStandardValue[0], itemStandardValue[1]);
+			reportpanel.getBillTable().getColumn(checkitemnames[i]).setCellRenderer(render);
+		}
+	}
+
 	private String getInsqlClause(String[] pks){
 		StringBuffer sql = new StringBuffer();
 		sql.append("(");
@@ -446,6 +461,12 @@ public class MixtureToolUI extends ReportUI{
 				}
 			});
 			
+			invSpec = new UITextField();
+			panel1.add(new UILabel("规格"));
+			panel1.add(invSpec);
+			invSpec.setEditable(false);
+			invSpec.setColumns(10);
+			
 			checkStandardRef = new UIRefPane();
 			checkStandardRef.setRefModel(new CheckstandardDef(ClientEnvironment.getInstance().getCorporation().getPrimaryKey()));
 			panel1.add(new UILabel("检测标准"));
@@ -469,23 +490,27 @@ public class MixtureToolUI extends ReportUI{
 	}
 	
 	private void updateCheckStandardCtrl() {
+		reportpanel.getBillModel().clearBodyData();
 		setButtonStatusEx();
 		
 		String pk_invmandoc = invDocRef.getRefPK();
 		if (pk_invmandoc==null || pk_invmandoc.length()!=20) {
 			checkStandardRef.setPK(null);
 			m_billCardPanel.getBillModel().clearBodyData();
+			
 			return;
 		}
 
 		StringBuffer sql = new StringBuffer();
-		sql.append("select qc_invrelate.ccheckstandardid from qc_invrelate where qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
+		sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
 		sql.append(invDocRef.getRefPK()+"'");
 		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
 		try {
 			@SuppressWarnings("unchecked")
 			Vector<Vector<Object>> checkStandard = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
 			if (checkStandard!=null && checkStandard.size()>0) {
+				invSpec.setText(checkStandard.get(0).get(1).toString());
+				
 				checkStandardRef.setPK(checkStandard.get(0).get(0).toString());
 				updateCheckStandardGrid();
 			}
@@ -496,6 +521,7 @@ public class MixtureToolUI extends ReportUI{
 	}
 	
 	private void updateCheckStandardGrid() {
+		reportpanel.getBillModel().clearBodyData();
 		setButtonStatusEx();
 		
 		String checkStandardid = checkStandardRef.getRefPK();
@@ -599,6 +625,12 @@ public class MixtureToolUI extends ReportUI{
 		
 		updateButton(bnStock);
 		updateButton(bnCompute);
+		
+		if (reportpanel.getBillModel().getRowCount()!=0)
+			setButtonStatus("QUERY");
+		else
+			setButtonStatus("INIT");
+		updateUI();
 	}
 	
 	@Override

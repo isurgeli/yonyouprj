@@ -9,7 +9,7 @@ import nc.ui.pub.beans.UICheckBox;
 import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
-public class MaterialStatisticsUI extends ReportStatisticsUI{
+public class ProductStatisticsUI extends ReportStatisticsUI{
 
 	/**
 	 * 
@@ -28,6 +28,7 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 
 	@Override
 	protected void hideReportPanel(ReportPanel reportpanel) {
+		reportpanel.hideColumn(new String[]{"vorderbillcode", "vcustcode", "vcustname"});
 	}
 
 	@Override
@@ -37,7 +38,7 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 		sqlCtrls.put(GZCGReportStatisticsConst.MATERIAL, new UICheckBox());
 		sqlCtrls.put(GZCGReportStatisticsConst.PROJECT, new UICheckBox());
 		sqlCtrls.get(GZCGReportStatisticsConst.PUBLIC).setSelected(true);
-		sqlCtrls.get(GZCGReportStatisticsConst.MATERIAL).setSelected(true);
+		sqlCtrls.get(GZCGReportStatisticsConst.MATERIAL).setSelected(false);
 		sqlCtrls.get(GZCGReportStatisticsConst.PROJECT).setSelected(true);
 		
 		if (reportConfig==null){
@@ -56,7 +57,7 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 			sqlProcesser = new IAdditionSQLProcess() {	
 				public void additionSQLWhereClause(StringBuffer sql) {
 					sql.append(" and gzcg_qcrp_checkbill_v.cmangid in (select pk_invmandoc from bd_invmandoc where bd_invmandoc.def3='"+
-							GZCGConstant.DEFDOCMATERAILPK.getValue()+"')");
+							GZCGConstant.DEFDOCPODUCTPK.getValue()+"')");
 				}				
 				public void additionSQLQueryClause(StringBuffer sql) {
 				}				
@@ -70,6 +71,6 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 
 	@Override
 	protected String getMainViewName() {
-		return GZCGConstant.MATERIALMAINVIEW.getValue();
+		return GZCGConstant.PRODUCTMAINVIEW.getValue();
 	}
 }
