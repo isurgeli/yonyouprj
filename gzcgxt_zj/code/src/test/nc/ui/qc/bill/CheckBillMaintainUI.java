@@ -141,6 +141,8 @@ import org.apache.commons.lang.StringUtils;
  * modified:czp 20070621 支持库存报检
  * 
  * modify:liyc 20080725 支持各种类型质检单多页签，检验信息多表头，检验信息动态列打印
+ * 
+ * lxt 2013-07 cgxf：赣州晨光稀土项目，样本增加功能与质检数据自动填写。
  */
 public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeListener, BillEditListener,
 		ActionListener, javax.swing.event.ListSelectionListener, IBillRelaSortListener2, ILinkApprove,// 审批流
@@ -6885,7 +6887,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 	private String[] getAutoCheckData(String vsmplecode, ArrayList<Hashtable<String, String>> data) {
 		// TODO 获取检测数据
 		StringBuffer sql = new StringBuffer();
-		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.zdy1, qc_cghzbg_b.zdy2 from gzcg_bd_sampledoc, qc_cghzbg_b, qc_cghzbg_h where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
+		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b, qc_cghzbg_h where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
 		sql.append(" and qc_cghzbg_b.cghzbg_array=qc_cghzbg_h.pk_cghzbg_h and (gzcg_bd_sampledoc.vsampleno='");
 		sql.append(vsmplecode);
 		sql.append("' or gzcg_bd_sampledoc.vsamplenofar='");
@@ -6894,7 +6896,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
 		sql.append("' and qc_cghzbg_h.pk_corp='");
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
-		sql.append("' order by gzcg_bd_sampledoc.vsampleno");
+		sql.append("' and nvl(qc_cghzbg_h,0)=0 order by gzcg_bd_sampledoc.vsampleno");
 		
 		ArrayList<String> vsamplecodes = new ArrayList<String>();
 		

@@ -3,10 +3,8 @@ package nc.itf.gzcg.bd;
 import java.io.Serializable;
 
 import nc.bs.framework.server.util.NewObjectService;
-import nc.bs.gzcg.bd.SampleManCheckBack;
 import nc.bs.trade.business.IBDBusiCheck;
 import nc.bs.trade.comsave.IQueryAfterSave;
-import nc.ui.gzcg.bd.SampleManCheckBefore;
 import nc.vo.gzcg.bd.samplevo;
 import nc.vo.trade.pub.IBDGetCheckClass2;
 import nc.vo.trade.pub.IRetCurrentDataAfterSave;
@@ -33,7 +31,7 @@ public class SampleManGetCheck implements IBDGetCheckClass2,IServerSideFactory,I
 	 * @see nc.vo.trade.pub.IBDGetCheckClass2#getUICheckClass()
 	 */
 	public String getUICheckClass() {
-		return SampleManCheckBefore.class.getName();
+		return "nc.ui.gzcg.bd.SampleManCheckBefore";
 	}
 
 	/* £¨·Ç Javadoc£©
@@ -41,7 +39,7 @@ public class SampleManGetCheck implements IBDGetCheckClass2,IServerSideFactory,I
 	 */
 	public String getCheckClass() {
 		
-		return SampleManCheckBack.class.getName();
+		return "nc.bs.gzcg.bd.SampleManCheckBack";
 	}
 	/* £¨·Ç Javadoc£©
 	 * @see nc.vo.trade.pub.IServerSideFactory#getQueryAfterSaveInstance()
@@ -56,7 +54,7 @@ public class SampleManGetCheck implements IBDGetCheckClass2,IServerSideFactory,I
 	 */
 	public IBDBusiCheck getBDBusiCheckInstance()
 	{
-		return (IBDBusiCheck)NewObjectService.newInstance("qc",SampleManCheckBack.class.getName());
+		return (IBDBusiCheck)NewObjectService.newInstance("qc","nc.bs.gzcg.bd.SampleManCheckBack");
 	}
 
 }

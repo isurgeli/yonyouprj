@@ -3,7 +3,6 @@ package nc.bs.gzcg.bd;
 import java.util.ArrayList;
 
 import nc.bs.bd.pub.AbstractBDBackCheck;
-import nc.bs.framework.common.NCLocator;
 import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.uap.bd.refcheck.IReferenceCheck;
 import nc.vo.gzcg.bd.samplevo;

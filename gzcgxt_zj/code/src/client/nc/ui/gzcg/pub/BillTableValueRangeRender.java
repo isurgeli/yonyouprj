@@ -2,7 +2,6 @@ package nc.ui.gzcg.pub;
 
 import nc.ui.pub.bill.BillItem;
 import nc.ui.pub.bill.BillTableCellRenderer;
-import nc.vo.pub.lang.UFDouble;
 
 public class BillTableValueRangeRender extends BillTableCellRenderer{
 
