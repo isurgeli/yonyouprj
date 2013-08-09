@@ -572,10 +572,10 @@ public class ClientUI extends SpecialBillBaseUI {
 			curVO[0] = new PubTransBillPaneVO(getBillType(), "ת�ⵥ", null,
 					null, "IC", null, null);
 
-			HashMap<String, String> haparam = new HashMap<String, String>();
-			haparam.put("cbiztype", "100989100000000001JQ");
+			//HashMap<String, String> haparam = new HashMap<String, String>();
+			//haparam.put("cbiztype", "100989100000000001JQ");
 
-			PubRedunMultiDlg refdlg = new PubRedunMultiDlg(this, sourecVO,	curVO, true, haparam);
+			PubRedunMultiDlg refdlg = new PubRedunMultiDlg(this, sourecVO,	curVO, true, null);
 			if (refdlg.showModal() != UIDialog.ID_OK)
 				return;
 			AggregatedValueObject[] sourcebillvos = refdlg.getRetBillVos();
