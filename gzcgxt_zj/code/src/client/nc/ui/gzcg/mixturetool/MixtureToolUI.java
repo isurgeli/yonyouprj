@@ -40,6 +40,7 @@ import nc.ui.pub.beans.ValueChangedEvent;
 import nc.ui.pub.beans.ValueChangedListener;
 import nc.ui.pub.bill.BillCardPanel;
 import nc.ui.pub.bill.BillItem;
+import nc.ui.pub.bill.BillModelCellEditableController;
 import nc.ui.pub.bill.IBillItem;
 import nc.ui.pub.report.ReportItem;
 import nc.ui.qc.standard.CheckstandardDef;
@@ -640,6 +641,15 @@ public class MixtureToolUI extends ReportUIEx{
 			stockChecker = new CheckBoxRenderer();
 			setReportPanelHeader();
 			initBodyItems = reportpanel.getBody_Items();
+			((nc.ui.pub.bill.BillModel)getReportPanel().getBillTable().getModel()).setCellEditableController(new BillModelCellEditableController() {
+				
+				public boolean isCellEditable(boolean value, int row, String itemkey) {
+					if (itemkey.equals("bselect")) 
+						return true;
+					else
+						return false;
+				}
+			});
 		}
 		return reportpanel;
 	}
