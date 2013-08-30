@@ -1,25 +1,19 @@
 package nc.ui.gzcg.mixturetool;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.TableCellRenderer;
 
 import org.apache.commons.math3.optimization.GoalType;
 import org.apache.commons.math3.optimization.PointValuePair;
 import org.apache.commons.math3.optimization.linear.LinearConstraint;
 import org.apache.commons.math3.optimization.linear.LinearObjectiveFunction;
+import org.apache.commons.math3.optimization.linear.NoFeasibleSolutionException;
 import org.apache.commons.math3.optimization.linear.Relationship;
 import org.apache.commons.math3.optimization.linear.SimplexSolver;
 
@@ -28,10 +22,12 @@ import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.uap.IUAPQueryBS;
 import nc.jdbc.framework.processor.VectorProcessor;
 import nc.ui.gzcg.pub.BillTableValueRangeRender;
+import nc.ui.gzcg.pub.BillColumnHelper;
 import nc.ui.gzcg.pub.ReportUIEx;
 import nc.ui.pub.ButtonObject;
 import nc.ui.pub.ClientEnvironment;
 import nc.ui.pub.beans.MessageDialog;
+import nc.ui.pub.beans.UIDialog;
 import nc.ui.pub.beans.UILabel;
 import nc.ui.pub.beans.UIPanel;
 import nc.ui.pub.beans.UIRefPane;
@@ -40,6 +36,7 @@ import nc.ui.pub.beans.ValueChangedEvent;
 import nc.ui.pub.beans.ValueChangedListener;
 import nc.ui.pub.bill.BillCardPanel;
 import nc.ui.pub.bill.BillItem;
+import nc.ui.pub.bill.BillModelCellEditableController;
 import nc.ui.pub.bill.IBillItem;
 import nc.ui.pub.report.ReportItem;
 import nc.ui.qc.standard.CheckstandardDef;
@@ -47,6 +44,7 @@ import nc.ui.qc.standard.CheckstandardHelper;
 import nc.ui.scm.pub.report.ReportPanel;
 import nc.vo.gzcg.report.AnalysisReportVO;
 import nc.vo.pub.BusinessException;
+import nc.vo.pub.CircularlyAccessibleValueObject;
 import nc.vo.pub.cquery.FldgroupVO;
 import nc.vo.pub.lang.UFDouble;
 import nc.vo.pub.query.ConditionVO;
@@ -65,13 +63,18 @@ public class MixtureToolUI extends ReportUIEx{
 	private UITextField mixtureAmountText;
 	private UIPanel leftgridpanel;
 	private BillCardPanel m_billCardPanel;
-	private CheckBoxRenderer checkItemheadChecker;
+	private BillColumnHelper leftColHelper;
 	
 	protected ButtonObject bnStock; 
+	protected ButtonObject bnClearStock; 
 	protected ButtonObject bnCompute;
-	private CheckBoxRenderer stockChecker;
+	protected ButtonObject bnTry;
+	private BillColumnHelper reportColHelper;
 	private ReportItem[] initBodyItems;
-	private UITextField invSpec; 
+	private UITextField invSpec;
+	private UITextField invUnit;
+	private UIRefPane srcInvDocRef;
+	private UITextField mixtureUnitText; 
 
 	@Override
 	public String getBusitype() {
@@ -80,11 +83,13 @@ public class MixtureToolUI extends ReportUIEx{
 
 	@Override
 	public ButtonObject[] getButtons() {
-		if (bnStock==null && bnCompute==null) {
+		if (bnStock==null && bnCompute==null && bnTry==null && bnClearStock==null) {
 			bnStock = new ButtonObject("获取库存", "获取库存", 2, "获取库存"); 
 			bnCompute = new ButtonObject("混料计算", "混料计算", 2, "混料计算");
+			bnTry = new ButtonObject("试算", "试算", 2, "试算");
+			bnClearStock = new ButtonObject("清除库存", "清除库存", 2, "清除库存");
 		}
-		return new ButtonObject[]{bnPrint, bnModelPrint, bnPreview, bnOut, bnStock, bnCompute};
+		return new ButtonObject[]{bnPrint, bnModelPrint, bnPreview, bnOut, bnStock, bnClearStock, bnCompute, bnTry};
 	}
 	
 	@Override
@@ -95,19 +100,99 @@ public class MixtureToolUI extends ReportUIEx{
 			onGetStock();
 		else if (bo == bnCompute)
 			onMixtureCompute();
+		else if (bo == bnTry)
+			onTryCompute();
+		else if (bo == bnClearStock)
+			onClearStock();
+	}
+
+	private void onClearStock() {
+		ArrayList<CircularlyAccessibleValueObject> retList = new ArrayList<CircularlyAccessibleValueObject>();
+		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
+			if (!reportpanel.getBillModel().getValueAt(row, "bselect").equals(true)){
+				retList.add(report[row]);
+			}
+		}
+		setData(retList.toArray(new CircularlyAccessibleValueObject[]{}));
+		setButtonStatusEx();
+	}
+
+	private void onTryCompute() {
+		String[] checkitemids = getCheckItemId();
+		Hashtable<String, Integer> checkItemidNo = new Hashtable<String, Integer>();
+		for(int i=0;i<checkitemids.length;i++)
+			checkItemidNo.put(checkitemids[i], i);
+		ArrayList<Integer> joinStockRowNo = new ArrayList<Integer>();
+	
+		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
+			if (reportpanel.getBillModel().getValueAt(row, "bselect").equals(true) && haveCheckValue(row, checkitemids, checkItemidNo)){
+				joinStockRowNo.add(row);
+			}
+		}
+		double totalUnitUse = 0;
+    	for (int i=0;i<joinStockRowNo.size();i++){
+			UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
+			totalUnitUse+=unitUse.doubleValue();
+		}
+    	Double[] ret = new Double[joinStockRowNo.size()];
+    	for (int i=0;i<joinStockRowNo.size();i++){
+    		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
+			ret[i]=unitUse.doubleValue()/totalUnitUse;
+		}
+    	
+    	setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
+	}
+
+	private void onGetStock() {
+		StockSelectDlg dlg = new StockSelectDlg(this, srcInvDocRef.getRefPK(), getCheckItemId(), getCheckItemName());
+		dlg.showModal();
+		if (dlg.getResult()==UIDialog.ID_OK){
+			processTableLayout(getReportPanel(), initBodyItems, getCheckItemName(), getCheckItemId());
+			setReportPanelHeader();
+			ArrayList<CircularlyAccessibleValueObject> allData = new ArrayList<CircularlyAccessibleValueObject>();
+			if (report!=null)
+				allData.addAll(Arrays.asList(report));
+			allData.addAll(Arrays.asList(dlg.retData));
+			setData(allData.toArray(new CircularlyAccessibleValueObject[]{}));
+			setButtonStatusEx();
+		}
 	}
 
 	private void onMixtureCompute() {
+		UFDouble unitAmount=null;
+		UFDouble unitCount=null;
+		boolean computeMax = false;
+		
 		if (mixtureAmountText.getText()==null || mixtureAmountText.getText().length()==0){
-			MessageDialog.showWarningDlg(this, "错误", "请先设置混料数量。");
+			MessageDialog.showWarningDlg(this, "错误", "请设置单位数量。");
 			return;
 		}
-		UFDouble mixAmount=null;
+		
 		try{
-			mixAmount = new UFDouble(mixtureAmountText.getText());
+			unitAmount = new UFDouble(mixtureAmountText.getText());
 		} catch (Exception ex) {
-			MessageDialog.showWarningDlg(this, "错误", "请设置正确的混料数量。");
+			MessageDialog.showWarningDlg(this, "错误", "请设置正确的单位数量。");
 			return;
+		}
+		if (unitAmount.doubleValue()==0){
+			MessageDialog.showWarningDlg(this, "错误", "请设置正确的单位数量。");
+			return;
+		}
+		
+		if (mixtureUnitText.getText()==null || mixtureUnitText.getText().length()==0){
+			unitCount = new UFDouble(0);
+			computeMax = true;
+		}else{
+			try{
+				unitCount = new UFDouble(mixtureUnitText.getText());
+			} catch (Exception ex) {
+				MessageDialog.showWarningDlg(this, "错误", "请设置正确的混料拌数。");
+				return;
+			}
+			if (unitCount.doubleValue()==0){
+				MessageDialog.showWarningDlg(this, "错误", "请设置正确的混料拌数。");
+				return;
+			}
 		}
 		
 		Hashtable<String, double[]> standardValue = getStandardValue();
@@ -118,6 +203,9 @@ public class MixtureToolUI extends ReportUIEx{
 			checkItemidNo.put(checkitemids[i], i);
 		ArrayList<Integer> joinStockRowNo = new ArrayList<Integer>();
 		
+		
+		int firstRowNoIdx = -1;
+		String timeValue = null;
 		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
 			if (reportpanel.getBillModel().getValueAt(row, "bselect").equals(true) && haveCheckValue(row, checkitemids, checkItemidNo)){
 				joinStockRowNo.add(row);
@@ -130,18 +218,36 @@ public class MixtureToolUI extends ReportUIEx{
 						if (!needComputeCheckItemId.containsKey(checkitemids[col]))
 							needComputeCheckItemId.put(checkitemids[col], checkitemids[col]);
 				}
+				if (reportpanel.getBillModel().getValueAt(row, "vinvdocname").toString().equals(invDocRef.getRefName()) && (
+						firstRowNoIdx==-1 || reportpanel.getBillModel().getValueAt(row, "vbatchcode").toString().compareTo(timeValue)==-1)){
+					firstRowNoIdx = joinStockRowNo.size()-1;
+					timeValue = reportpanel.getBillModel().getValueAt(row, "vbatchcode").toString(); //TODO 批次号或日期
+				}
 			}
 		}
-		
-		double[] ret = doComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, mixAmount);
-		for (int i=0;i<joinStockRowNo.size();i++){
-        	reportpanel.getBillModel().setValueAt(mixAmount.multiply(ret[i]), joinStockRowNo.get(i), "nusenum");
-        }
-		
-		setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
+		ArrayList<Double> retList = new ArrayList<Double>();
+		double retCount = doComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList);
+		if (retCount == 0){
+			MessageDialog.showWarningDlg(this, "警告", "无法根据设定条件进行混料。");
+		}else{
+			Double[] ret = retList.toArray(new Double[]{});
+			
+			for (int i=0;i<joinStockRowNo.size();i++){
+				reportpanel.getBillModel().setValueAt(unitAmount.multiply(ret[i]).intValue(), joinStockRowNo.get(i), "nunitusenum");
+				reportpanel.getBillModel().setValueAt(unitAmount.multiply(ret[i]).intValue()*retCount, joinStockRowNo.get(i), "nusenum");
+				UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
+				reportpanel.getBillModel().setValueAt(stockAmount.sub(unitAmount.multiply(ret[i]).intValue()*retCount), joinStockRowNo.get(i), "nremainnum");
+			}
+			
+			setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
+			
+			if (computeMax){
+				mixtureUnitText.setText(String.valueOf(retCount));
+			}
+		}
 	}
 	
-	private void setComputeCheckValue(double[] ret, ArrayList<Integer> joinStockRowNo, Hashtable<String, Integer> checkItemidNo){
+	private void setComputeCheckValue(Double[] ret, ArrayList<Integer> joinStockRowNo, Hashtable<String, Integer> checkItemidNo){
 		for (int i=0;i<m_billCardPanel.getBillModel().getRowCount();i++){
 			if (m_billCardPanel.getBillModel().getValueAt(i, "bselect").equals(true)){
 				String checkItemid = m_billCardPanel.getBillModel().getValueAt(i, "ccheckitemid").toString();
@@ -156,14 +262,75 @@ public class MixtureToolUI extends ReportUIEx{
 		}
 	}
 	
-	private double[] doComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
-			Hashtable<String, double[]> standardValue, Hashtable<String, Integer> checkItemidNo, UFDouble mixAmount){
+	private double doComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
+			Hashtable<String, double[]> standardValue, Hashtable<String, Integer> checkItemidNo, UFDouble unitCount, 
+			UFDouble unitAmount, int firstRowNoIdx, ArrayList<Double> retList){
+		boolean countMax = false;
+		if (unitCount.doubleValue()==0){
+			unitCount = new UFDouble(1);
+			countMax = true;
+		}
+		
 		double[] objectiveFunctionCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
-		objectiveFunctionCoefficients[0] = 1.0;
+		objectiveFunctionCoefficients[firstRowNoIdx] = 1.0;
 		LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveFunctionCoefficients, 0.0);
         
-        ArrayList <LinearConstraint>constraints = new ArrayList<LinearConstraint>();
-        for(String checkItemId : needComputeCheckItemId.keySet()){
+        ArrayList<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
+		ArrayList<LinearConstraint> regConstraints = getRegConstraints(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo);
+		ArrayList<LinearConstraint> chgConstraints = getStockNumConstraints(joinStockRowNo, unitCount.multiply(unitAmount));
+        
+	    PointValuePair solution = null;
+        try{
+        	constraints.addAll(regConstraints);
+        	constraints.addAll(chgConstraints);
+        	solution = new SimplexSolver().optimize(f, constraints, GoalType.MAXIMIZE, true);
+        }
+        catch(NoFeasibleSolutionException ex){
+        	return 0;
+        }
+        
+        if (!countMax){
+        	retList.clear();
+        	for(int i=0;i<solution.getPoint().length;i++) 
+        		retList.add(solution.getPoint()[i]);
+        	return unitCount.toDouble();
+        }else{
+        	double totalStock = 0;
+        	for (int i=0;i<joinStockRowNo.size();i++){
+				UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nmaxusenum").toString());
+				totalStock+=stockAmount.doubleValue();
+			}
+        	int maxCountNum = (int)Math.floor(totalStock/unitAmount.doubleValue());
+        	for(;maxCountNum>0;maxCountNum--){
+        		chgConstraints = getStockNumConstraints(joinStockRowNo, unitAmount.multiply(maxCountNum));
+        		
+                try{
+                	constraints.clear();
+                	constraints.addAll(regConstraints);
+                	constraints.addAll(chgConstraints);
+                	solution = new SimplexSolver().optimize(f, constraints, GoalType.MAXIMIZE, true);
+                }
+                catch(NoFeasibleSolutionException ex){
+                	continue;
+                }
+                
+                retList.clear();
+            	for(int i=0;i<solution.getPoint().length;i++) 
+            		retList.add(solution.getPoint()[i]);
+            	return maxCountNum;
+        	}
+        	
+        	return 0;
+        }
+	}
+
+	private ArrayList<LinearConstraint> getRegConstraints(ArrayList<Integer> joinStockRowNo,
+			Hashtable<String, String> needComputeCheckItemId,
+			Hashtable<String, double[]> standardValue,
+			Hashtable<String, Integer> checkItemidNo) {
+		ArrayList<LinearConstraint> regConstraints = new ArrayList<LinearConstraint>();
+		
+		for(String checkItemId : needComputeCheckItemId.keySet()){
         	double[] itemStandardValue = standardValue.get(checkItemId);
         	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
     		for (int i=0;i<joinStockRowNo.size();i++){
@@ -171,27 +338,32 @@ public class MixtureToolUI extends ReportUIEx{
 						(joinStockRowNo.get(i), "_CROSS"+checkItemidNo.get(checkItemId)).toString());
     		}
         	if (itemStandardValue[0]>epsilon){
-        		constraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.GEQ, itemStandardValue[0]));
+        		regConstraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.GEQ, itemStandardValue[0]));
         	}
         	if (itemStandardValue[0]<1-epsilon){
-        		constraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.LEQ, itemStandardValue[1]));
+        		regConstraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.LEQ, itemStandardValue[1]));
         	}
         }
-        for (int i=0;i<joinStockRowNo.size();i++){
-        	double stockAmount = Double.parseDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
-        	if (stockAmount < mixAmount.doubleValue()){
-        		double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
-        		constraintCoefficients[i] = 1.0;
-        		constraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, stockAmount/mixAmount.doubleValue()));
-        	}
-        }
-        {
-        	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 1.0);
-        	constraints.add(new LinearConstraint(constraintCoefficients, Relationship.EQ, 1));
-        }
-        
-        PointValuePair solution = new SimplexSolver().optimize(f, constraints, GoalType.MAXIMIZE, true);
-        return solution.getPoint();
+	    
+	    {
+	       	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 1.0);
+	       	regConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.EQ, 1));
+	    }
+	    
+	    return regConstraints;
+	}
+
+	private ArrayList<LinearConstraint> getStockNumConstraints(ArrayList<Integer> joinStockRowNo, UFDouble mixAmount) {
+		ArrayList<LinearConstraint> chgConstraints = new ArrayList<LinearConstraint>();
+		for (int i=0;i<joinStockRowNo.size();i++){
+	      	double stockAmount = Double.parseDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nmaxusenum").toString());
+	       	if (stockAmount < mixAmount.doubleValue()){
+	       		double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+	       		constraintCoefficients[i] = 1.0;
+	       		chgConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, stockAmount/mixAmount.doubleValue()));
+	       	}
+	    }
+		return chgConstraints;
 	}
 	
 	private double[] getDoubleArray(int count, double value){
@@ -240,102 +412,8 @@ public class MixtureToolUI extends ReportUIEx{
 		
 		return standardValue;
 	}
-
-	private void onGetStock() {
-		getReportPanel().setBody_Items(initBodyItems);
-		
-		StringBuffer sql = new StringBuffer();
-		sql.append("select bd_invbasdoc.invname, bd_stordoc.storname, ic_onhandnum.vlot, sum(ic_onhandnum.nonhandnum), ic_onhandnum.cwarehouseid from ic_onhandnum, bd_invbasdoc, bd_stordoc ");
-		sql.append("where ic_onhandnum.cwarehouseid=bd_stordoc.pk_stordoc and ic_onhandnum.cinvbasid=bd_invbasdoc.pk_invbasdoc and ic_onhandnum.cinventoryid='");
-		sql.append(invDocRef.getRefPK()+"' and ic_onhandnum.nonhandnum > 0 group by bd_invbasdoc.invname, bd_stordoc.storname, ic_onhandnum.vlot, ic_onhandnum.cwarehouseid order by ic_onhandnum.vlot");
-		
-		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
-		try {
-			@SuppressWarnings("unchecked")
-			Vector<Vector<Object>> stock = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
-			AnalysisReportVO[] uiStocks = new AnalysisReportVO[stock.size()];
-			Hashtable<String, AnalysisReportVO> uiStockSet = new Hashtable<String, AnalysisReportVO>();
-			Hashtable<String, String> warehousePKSet = new Hashtable<String, String>();
-			Hashtable<String, String> stockBatchSet = new Hashtable<String, String>();
-			for(int i=0;i<stock.size();i++){
-				uiStocks[i] = new AnalysisReportVO();
-				
-				String cwarehouseid = stock.get(i).get(4).toString();
-				String vstockbatch = stock.get(i).get(2).toString();
-				
-				uiStocks[i].setAttributeValue("bselect", true);
-				uiStocks[i].setAttributeValue("vinvdocname", stock.get(i).get(0).toString());
-				uiStocks[i].setAttributeValue("vstock", stock.get(i).get(1).toString());
-				uiStocks[i].setAttributeValue("vbatchcode", vstockbatch);
-				uiStocks[i].setAttributeValue("nstocknum", new UFDouble(stock.get(i).get(3).toString()));
-				
-				String key=cwarehouseid+vstockbatch;
-				uiStockSet.put(key, uiStocks[i]);
-				
-				if (!warehousePKSet.containsKey(cwarehouseid)) warehousePKSet.put(cwarehouseid, cwarehouseid);
-				if (!stockBatchSet.containsKey(vstockbatch)) stockBatchSet.put(vstockbatch, vstockbatch);
-			}
-			
-			getCheckValue(uiStockSet, warehousePKSet.keySet().toArray(new String[]{}), stockBatchSet.keySet().toArray(new String[]{}));
-			
-			setData(uiStocks);
-		} catch (BusinessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		setButtonStatusEx();
-	}
-
 	
-
-	private void getCheckValue(Hashtable<String, AnalysisReportVO> uiStockSet, String[] warehouses, String[] stockbatchs) {
-		String[] checkitemids = getCheckItemId();
-		
-		Hashtable<String, Integer> checkItemidNo = new Hashtable<String, Integer>();
-		for(int i=0;i<checkitemids.length;i++)
-			checkItemidNo.put(checkitemids[i], i);
-		
-		StringBuffer sql = new StringBuffer();
-		sql.append("select ic_general_h_v.CWAREHOUSEID, ic_general_b_v.VBATCHCODE, qc_checkbill_b2_v.CCHECKITEMID, qc_checkbill_b2_v.CRESULT");
-		sql.append(" from qc_checkbill, qc_checkbill_b1, qc_checkbill_b2_v, ic_general_b_v, ic_general_h_v");
-		sql.append(" where qc_checkbill.ccheckbillid = qc_checkbill_b1.ccheckbillid");
-		sql.append(" and qc_checkbill.ccheckbillid = qc_checkbill_b2_v.ccheckbillid");
-		sql.append(" and qc_checkbill_b1.csourcebillrowid = ic_general_b_v.csourcebillbid(+)");
-		sql.append(" and ic_general_b_v.cgeneralhid = ic_general_h_v.cgeneralhid(+)");
-		sql.append(" and qc_checkbill_b1.csourcebilltypecode = '23' and qc_checkbill_b1.norder = 0");
-		sql.append(" and nvl(qc_checkbill.dr, 0) = 0 and nvl(qc_checkbill_b1.dr, 0) = 0");
-		sql.append(" and ic_general_b_v.VBATCHCODE in "+getInsqlClause(stockbatchs));
-		sql.append(" and ic_general_b_v.CINVENTORYID='"+invDocRef.getRefPK()+"' ");
-		sql.append(" and ic_general_h_v.CWAREHOUSEID in "+getInsqlClause(warehouses));
-		sql.append(" and qc_checkbill_b2_v.CCHECKITEMID in "+getInsqlClause(checkitemids));
-		sql.append(" order by qc_checkbill_b2_v.VSAMPLECODE");
-		
-		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
-		try {
-			@SuppressWarnings("unchecked")
-			Vector<Vector<Object>> checkValue = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
-			for(int i=0;i<checkValue.size();i++){
-				String cwarehouseid = checkValue.get(i).get(0).toString();
-				String vstockbatch = checkValue.get(i).get(1).toString();
-				String checkitemid = checkValue.get(i).get(2).toString();
-				UFDouble checkvalue = new UFDouble(checkValue.get(i).get(3).toString());
-				
-				String key=cwarehouseid+vstockbatch;
-			
-				if (uiStockSet.containsKey(key)){
-					AnalysisReportVO reportVO = uiStockSet.get(key);
-					if(!reportVO.haveKey("_CROSS"+checkItemidNo.get(checkitemid)))
-						reportVO.setAttributeValue("_CROSS"+checkItemidNo.get(checkitemid), checkvalue);
-				}
-			}
-			processTableLayout(getCheckItemName(), checkitemids);
-		} catch (BusinessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-	}
-	
-	private void processTableLayout(String[] checkitemnames, String[] checkitemids) {
+	public void processTableLayout(ReportPanel rp, ReportItem[] baseItems, String[] checkitemnames, String[] checkitemids) {
 		ReportItem[] reportItems = new ReportItem[checkitemnames.length];
 		for(int i=0;i<checkitemnames.length;i++){
 			ReportItem item = new ReportItem();
@@ -347,7 +425,7 @@ public class MixtureToolUI extends ReportUIEx{
 			reportItems[i] = item;
 		}
 		ArrayList<ReportItem> finalBodyItems = new ArrayList<ReportItem>();
-		finalBodyItems.addAll(Arrays.asList(getReportPanel().getBody_Items()));
+		finalBodyItems.addAll(Arrays.asList(baseItems));
 		finalBodyItems.addAll(Arrays.asList(reportItems));
 		
 		Vector<FldgroupVO> groupVOs = new Vector<FldgroupVO>();
@@ -372,34 +450,21 @@ public class MixtureToolUI extends ReportUIEx{
 			groupVOs.add(groupVO);
 		}
 		
-		getReportPanel().setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
-		getReportPanel().setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
+		rp.setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
+		rp.setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
 		
-		setReportPanelCellRender(checkitemnames, checkitemids);
-		setReportPanelHeader();
+		setReportPanelCellRender(rp, checkitemnames, checkitemids);
 	}
 	
-	private void setReportPanelCellRender(String[] checkitemnames, String[] checkitemids) {
+	private void setReportPanelCellRender(ReportPanel rp, String[] checkitemnames, String[] checkitemids) {
 		Hashtable<String, double[]> standardValue = getStandardValue();
 		for(int i=0;i<checkitemnames.length;i++) {
 			double[] itemStandardValue = standardValue.get(checkitemids[i]);
-			BillItem billItem = reportpanel.getBodyItem("_CROSS"+i);
+			BillItem billItem = rp.getBodyItem("_CROSS"+i);
 			BillTableValueRangeRender render = new BillTableValueRangeRender(billItem, itemStandardValue[0], itemStandardValue[1]);
-			reportpanel.getBillTable().getColumn(checkitemnames[i]).setCellRenderer(render);
+			rp.getBillTable().getColumn(checkitemnames[i]).setCellRenderer(render);
 		}
 	}
-
-	private String getInsqlClause(String[] pks){
-		StringBuffer sql = new StringBuffer();
-		sql.append("(");
-		for(int i=0;i<pks.length;i++)
-			sql.append("'"+pks[i]+"',");
-		sql.delete(sql.length()-1, sql.length());
-		sql.append(")");
-		
-		return sql.toString();
-	}
-	
 
 	private String[] getCheckItemId() {
 		ArrayList<String> checkItems = new ArrayList<String>();
@@ -450,9 +515,10 @@ public class MixtureToolUI extends ReportUIEx{
 			conditionPanel.setPreferredSize(null);
 			conditionPanel.setLayout(new BoxLayout(conditionPanel, BoxLayout.Y_AXIS));
 			UIPanel panel1 = new UIPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
+			//UIPanel panel2 = new UIPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
 			
 			invDocRef = new UIRefPane("存货档案");
-			panel1.add(new UILabel("存货档案"));
+			panel1.add(new UILabel("混料存货"));
 			panel1.add(invDocRef);
 			
 			invDocRef.addValueChangedListener(new ValueChangedListener() {	
@@ -467,6 +533,12 @@ public class MixtureToolUI extends ReportUIEx{
 			invSpec.setEditable(false);
 			invSpec.setColumns(10);
 			
+			invUnit = new UITextField();
+			panel1.add(new UILabel("单位"));
+			panel1.add(invUnit);
+			invUnit.setEditable(false);
+			invUnit.setColumns(10);
+			
 			checkStandardRef = new UIRefPane();
 			checkStandardRef.setRefModel(new CheckstandardDef(ClientEnvironment.getInstance().getCorporation().getPrimaryKey()));
 			panel1.add(new UILabel("检测标准"));
@@ -478,12 +550,22 @@ public class MixtureToolUI extends ReportUIEx{
 				}
 			});
 			
+			srcInvDocRef = new UIRefPane("存货档案");
+			panel1.add(new UILabel("原料存货"));
+			panel1.add(srcInvDocRef);
+			
+			mixtureUnitText = new UITextField(10);
+			mixtureUnitText.setAllowAlphabetic(false);
+			panel1.add(new UILabel("拌数"));
+			panel1.add(mixtureUnitText);
+			
 			mixtureAmountText = new UITextField(10);
 			mixtureAmountText.setAllowAlphabetic(false);
-			panel1.add(new UILabel("混料数量"));
+			panel1.add(new UILabel("单位数量"));
 			panel1.add(mixtureAmountText);
 			
 			conditionpanel.add(panel1);
+			//conditionpanel.add(panel2);
 		}
 		
 		return conditionpanel;
@@ -500,9 +582,9 @@ public class MixtureToolUI extends ReportUIEx{
 			
 			return;
 		}
-
+		srcInvDocRef.setPK(invDocRef.getRefPK());
 		StringBuffer sql = new StringBuffer();
-		sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
+		sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-'), nvl(bd_measdoc.measname,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc, bd_measdoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and bd_invbasdoc.pk_measdoc=bd_measdoc.pk_measdoc(+) and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
 		sql.append(invDocRef.getRefPK()+"'");
 		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
 		try {
@@ -510,6 +592,7 @@ public class MixtureToolUI extends ReportUIEx{
 			Vector<Vector<Object>> checkStandard = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
 			if (checkStandard!=null && checkStandard.size()>0) {
 				invSpec.setText(checkStandard.get(0).get(1).toString());
+				invUnit.setText(checkStandard.get(0).get(2).toString());
 				
 				checkStandardRef.setPK(checkStandard.get(0).get(0).toString());
 				updateCheckStandardGrid();
@@ -522,6 +605,7 @@ public class MixtureToolUI extends ReportUIEx{
 	
 	private void updateCheckStandardGrid() {
 		reportpanel.getBillModel().clearBodyData();
+		report = null;
 		setButtonStatusEx();
 		
 		String checkStandardid = checkStandardRef.getRefPK();
@@ -573,42 +657,13 @@ public class MixtureToolUI extends ReportUIEx{
 			m_billCardPanel.loadTemplet(getNodeCode(), getBusitype(), ClientEnvironment.getInstance().getUser().getPrimaryKey()
 					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
 			
-			checkItemheadChecker = new CheckBoxRenderer();
-			m_billCardPanel.getBillTable().getColumn("选择").setMaxWidth(20);
-			m_billCardPanel.getBillTable().getColumn("选择").setHeaderRenderer(checkItemheadChecker);
-			
-			m_billCardPanel.getBillTable().getTableHeader().addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e){
-					if(m_billCardPanel.getBillTable().getColumnModel().getColumnIndexAtX(e.getX())==0){//如果点击的是第0列，即checkbox这一列
-						boolean b = !checkItemheadChecker.isSelected();
-						checkItemheadChecker.setSelected(b);
-						m_billCardPanel.getBillTable().getTableHeader().repaint();
-						for(int i=0;i<m_billCardPanel.getBillTable().getRowCount();i++){
-							m_billCardPanel.getBillTable().getModel().setValueAt(b, i, 0);//把这一列都设成和表头一样
-						}
-					}
-				}
-			});
+			leftColHelper = new BillColumnHelper(m_billCardPanel, "bselect");
+			leftColHelper.setSelectColumnHeader();
 			
 			leftgridpanel.add(m_billCardPanel);
 		}
 		
 		return leftgridpanel;
-	}
-	
-	class CheckBoxRenderer extends JCheckBox implements TableCellRenderer {
-		private static final long serialVersionUID = 1L;
-
-		public CheckBoxRenderer() {
-			this.setBorderPainted(false);
-		}
-
-		public Component getTableCellRendererComponent(JTable arg0,
-				Object arg1, boolean arg2, boolean arg3, int arg4, int arg5) {
-			setHorizontalAlignment(JLabel.CENTER);
-			return this;
-		}
 	}
 	
 	private void setButtonStatusEx(){
@@ -637,29 +692,27 @@ public class MixtureToolUI extends ReportUIEx{
 	public ReportPanel getReportPanel() {
 		if (reportpanel ==null) {
 			super.getReportPanel();
-			stockChecker = new CheckBoxRenderer();
-			setReportPanelHeader();
+			reportColHelper = new BillColumnHelper(reportpanel, "bselect");
 			initBodyItems = reportpanel.getBody_Items();
+			((nc.ui.pub.bill.BillModel)getReportPanel().getBillTable().getModel()).setCellEditableController(new BillModelCellEditableController() {
+				public boolean isCellEditable(boolean value, int row, String itemkey) {
+					if (itemkey.equals("bselect") || itemkey.equals("nmaxusenum") || itemkey.equals("nunitusenum")) 
+						return true;
+					else
+						return false;
+				}
+			});
+			
+			reportpanel.getBillModel().getItemByKey("nmaxusenum").setDecimalDigits(2);
+			reportpanel.getBillModel().getItemByKey("nunitusenum").setDecimalDigits(2);
+			reportpanel.getBillModel().getItemByKey("nstocknum").setDecimalDigits(2);
+			reportpanel.getBillModel().getItemByKey("nusenum").setDecimalDigits(2);
+			reportpanel.getBillModel().getItemByKey("nremainnum").setDecimalDigits(2);
 		}
 		return reportpanel;
 	}
 
 	private void setReportPanelHeader() {
-		reportpanel.getBillTable().getColumn("选择").setMaxWidth(20);
-		reportpanel.getBillTable().getColumn("选择").setHeaderRenderer(stockChecker);
-		
-		reportpanel.getBillTable().getTableHeader().addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e){
-				if(reportpanel.getBillTable().getColumnModel().getColumnIndexAtX(e.getX())==0){//如果点击的是第0列，即checkbox这一列
-					boolean b = !stockChecker.isSelected();
-					stockChecker.setSelected(b);
-					reportpanel.getBillTable().getTableHeader().repaint();
-					for(int i=0;i<reportpanel.getBillTable().getRowCount();i++){
-						reportpanel.getBillTable().getModel().setValueAt(b, i, 0);//把这一列都设成和表头一样
-					}
-				}
-			}
-		});
+		reportColHelper.setSelectColumnHeader();
 	}
 }

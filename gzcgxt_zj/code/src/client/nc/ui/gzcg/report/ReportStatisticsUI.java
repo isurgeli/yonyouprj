@@ -1,5 +1,6 @@
 package nc.ui.gzcg.report;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +13,12 @@ import nc.itf.gzcg.pub.GZCGReportStatisticsConst;
 import nc.itf.gzcg.pub.ISQLSection;
 import nc.itf.uap.IUAPQueryBS;
 import nc.jdbc.framework.processor.VectorProcessor;
+import nc.ui.gzcg.pub.BillColumnHelper;
 import nc.ui.gzcg.pub.BillTableValueRangeRender;
 import nc.ui.gzcg.pub.ReportLinkQueryData;
 import nc.ui.gzcg.pub.ReportUIEx;
 import nc.ui.pub.ButtonObject;
+import nc.ui.pub.ClientEnvironment;
 import nc.ui.pub.beans.MessageDialog;
 import nc.ui.pub.beans.UICheckBox;
 import nc.ui.pub.beans.UILabel;
@@ -24,6 +27,7 @@ import nc.ui.pub.beans.UIRefPane;
 import nc.ui.pub.beans.UITextField;
 import nc.ui.pub.beans.ValueChangedEvent;
 import nc.ui.pub.beans.ValueChangedListener;
+import nc.ui.pub.bill.BillCardPanel;
 import nc.ui.pub.bill.BillItem;
 import nc.ui.pub.bill.IBillItem;
 import nc.ui.pub.linkoperate.ILinkQuery;
@@ -33,24 +37,37 @@ import nc.ui.qc.standard.CheckstandardHelper;
 import nc.ui.scm.pub.report.ReportPanel;
 import nc.vo.gzcg.report.AnalysisReportVO;
 import nc.vo.pub.BusinessException;
+import nc.vo.pub.CircularlyAccessibleValueObject;
 import nc.vo.pub.cquery.FldgroupVO;
+import nc.vo.pub.lang.UFDouble;
 import nc.vo.pub.query.ConditionVO;
 import nc.vo.qc.query.CheckstandardItemVO;
 
 @SuppressWarnings("restriction")
 public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuery{
 	protected Hashtable<ISQLSection, UICheckBox> sqlCtrls;
-	private Hashtable<String, UICheckBox> checkItemCtrls;
+	private Hashtable<String, String> checkItemNames;
 	private Hashtable<String, String> checkItemStandards;
-	private ArrayList<String> allCheckItems;
 	private ReportItem[] initBodyItems;
 	protected ReportConigParam reportConfig;
 	protected IAdditionSQLProcess sqlProcesser;
 	
 	private UIRefPane invDocRef;
-	private UIPanel panelCheckItem;
 	private UITextField invSpec;
+	private UITextField invUnit;
 	private ConditionVO[] linkConditions;
+	
+	private UIPanel leftgridpanel;
+	private BillCardPanel m_leftBillCard;
+	private BillCardPanel m_topBillCard;
+	private BillColumnHelper leftColHelper;
+	private UIPanel panelSumGrid;
+	
+	private ArrayList<AnalysisReportVO> reportDataCache;
+	
+	protected ButtonObject bnfilter;
+	private ConditionVO[] conditionCache;
+	private BillColumnHelper reportColHelper; 
 	/**
 	 * 
 	 */
@@ -59,8 +76,12 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 
 	@Override
 	public ButtonObject[] getButtons() {
+		if (bnfilter==null) {
+			bnfilter = new ButtonObject("标准过滤", "标准过滤", 2, "标准过滤"); 
+		}
+		
 		return new ButtonObject[]{bnQuery, bnPrint, bnModelPrint, bnPreview, bnOut, bnShow,
-				bnFilter, bnSubtotal, bnMultSort, bnLocate, bnRefresh};
+				bnFilter, bnSubtotal, bnMultSort, bnLocate, bnRefresh, bnfilter};
 	}
 	
 	private ArrayList<String> getSelectColsForIndex(int start, int end){
@@ -71,10 +92,47 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		}
 		return cols;
 	}
+	
+	@Override
+	protected void initialize() {
+		super.initialize();
+		add(getLefrGridPanel(), "West");
+	}
+
+	private UIPanel getLefrGridPanel() {
+		if (leftgridpanel==null){
+			leftgridpanel = new UIPanel();
+			leftgridpanel.setName("UIPanel");
+			leftgridpanel.setLayout(new java.awt.BorderLayout(5, 5));
+			leftgridpanel.setMaximumSize(new Dimension(300, 400));
+			leftgridpanel.setPreferredSize(new Dimension(300, 400));
+			
+			m_leftBillCard = new BillCardPanel();
+			m_leftBillCard.setName("标准过滤");
+			m_leftBillCard.setEnabled(true);
+			m_leftBillCard.loadTemplet(GZCGConstant.MIXTURETOOLFUNCODE.getValue(), getBusitype(), ClientEnvironment.getInstance().getUser().getPrimaryKey()
+					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+			
+			m_leftBillCard.getBillTable().getColumnModel().getColumn(3).setHeaderValue("筛选标准");
+			m_leftBillCard.getBillTable().getColumnModel().getColumn(4).setMinWidth(0);
+			m_leftBillCard.getBillTable().getColumnModel().getColumn(4).setMaxWidth(0);
+			m_leftBillCard.getBillTable().getColumnModel().getColumn(4).setPreferredWidth(0);
+			
+			leftColHelper = new BillColumnHelper(m_leftBillCard, "bselect");
+			leftColHelper.setSelectColumnHeader();
+			
+			leftgridpanel.add(m_leftBillCard);
+		}
+		
+		return leftgridpanel;
+	}
 
 	@Override
 	public void setReportData(ConditionVO[] voCondition) {
+		conditionCache = voCondition;
+		
 		getReportPanel().setBody_Items(initBodyItems);
+		reportDataCache = null;
 		
 		ArrayList<String> allshowcols = new ArrayList<String>();
 		allshowcols.addAll(getSelectColsForIndex(reportConfig.dimentionStart, reportConfig.dimentionEnd));
@@ -100,6 +158,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 							key.append(data.get(rowIdx).get(colIdx).toString());
 					if (!reportSet.containsKey(key.toString())){
 						AnalysisReportVO reportData = new AnalysisReportVO();
+						reportData.setAttributeValue("bselect", true);
 						for(int colIdx=0;colIdx<dimensionCount;colIdx++){
 							if (data.get(rowIdx).get(colIdx)!=null)
 								reportData.setAttributeValue(allshowcols.get(colIdx), data.get(rowIdx).get(colIdx));
@@ -110,8 +169,12 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 				}
 
 				processCrossData(reportSet, data);
-
-				setData(reportArray.toArray(new AnalysisReportVO[]{}));
+				
+				getStockNum(reportArray);
+				
+				reportDataCache = reportArray;
+				
+				onFilterCheckValue();
 			}
 		} catch (BusinessException e) {
 			// TODO Auto-generated catch block
@@ -119,6 +182,159 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		}
 	}
 	
+	private void getStockNum(ArrayList<AnalysisReportVO> reportArray) {
+		ArrayList<String> vstockBatchNo = new ArrayList<String>();
+		Hashtable<String, AnalysisReportVO> voMap = new Hashtable<String, AnalysisReportVO>();
+		for(int i=0;i<reportArray.size();i++){
+			if (reportArray.get(i).getAttributeValue("vstockbatch") != null){
+				vstockBatchNo.add(reportArray.get(i).getAttributeValue("vstockbatch").toString());
+				voMap.put(reportArray.get(i).getAttributeValue("vstockbatch").toString(), reportArray.get(i));
+			}
+			reportArray.get(i).setAttributeValue("nstocknum", 0);
+		}
+		
+		StringBuffer sql = new StringBuffer();
+		sql.append("select ic_onhandnum.vlot, sum(ic_onhandnum.nonhandnum) from ic_onhandnum where ic_onhandnum.cinventoryid='");
+		sql.append(invDocRef.getRefPK());
+		sql.append("' and ic_onhandnum.pk_corp='");
+		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+		sql.append("' and ic_onhandnum.vlot in ");
+		sql.append(getInSql(vstockBatchNo.toArray(new String[]{})));
+		sql.append(" group by ic_onhandnum.vlot");
+		
+		IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
+		try {
+			@SuppressWarnings("unchecked")
+			Vector<Vector<Object>> data = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
+			for (int i=0;i<data.size();i++){
+				voMap.get(data.get(i).get(0).toString()).setAttributeValue("nstocknum", data.get(i).get(1));
+			}
+		}catch (BusinessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
+	}
+	
+	private String getInSql(String[] pks){
+		StringBuffer sql = new StringBuffer();
+		sql.append("(");
+		for(String key : pks){
+			sql.append("'"+key+"',");
+		}
+		sql.replace(sql.length()-1, sql.length(), ")");
+		
+		return sql.toString();
+	}
+
+	private ArrayList<AnalysisReportVO> filterByCheckStandard() {
+		if (reportDataCache==null) 
+			return null;
+		
+		ArrayList<Double[]> conditionValues = new ArrayList<Double[]>();
+		for(int i=0;i<m_leftBillCard.getBillTable().getRowCount();i++){
+			conditionValues.add(parseCheckStandard(m_leftBillCard.getBillModel().getValueAt(i, "vrequirevalue").toString()));
+		}
+		ArrayList<AnalysisReportVO> ret = new ArrayList<AnalysisReportVO>();
+		for(int i=0;i<reportDataCache.size();i++){
+			boolean ok = true;
+			for(int j=0;j<conditionValues.size();j++){
+				Object objValue = reportDataCache.get(i).getAttributeValue("_CHECKTITEM"+j);
+				if (objValue==null) continue;
+				UFDouble value = new UFDouble(objValue.toString());
+				if (value.doubleValue()<conditionValues.get(j)[0] || value.doubleValue()>conditionValues.get(j)[1]){
+					ok = false;
+					break;
+				}
+			}
+			if (ok) 
+				ret.add(reportDataCache.get(i));
+		}
+		return ret;
+	}
+	
+	private ArrayList<AnalysisReportVO> computeSumData(ArrayList<AnalysisReportVO> showData) {
+		
+		String starttime = "";
+		String endtime = "";
+		String cust = "";
+		String custclass = "";
+		UFDouble inNum = new UFDouble(0);
+		UFDouble stockNum = new UFDouble(0);
+		
+		for(int i=0;i<conditionCache.length;i++){
+			if (conditionCache[i].getFieldName().indexOf("时间")>-1){
+				if (conditionCache[i].getOperaCode().equals(">") || conditionCache[i].getOperaCode().equals(">="))
+					starttime = conditionCache[i].getValue();
+				else if (conditionCache[i].getOperaCode().equals("<") || conditionCache[i].getOperaCode().equals("<="))
+					endtime = conditionCache[i].getValue();
+				else if (conditionCache[i].getOperaCode().equals("="))
+					starttime = endtime = conditionCache[i].getValue();
+			}else if (conditionCache[i].getFieldName().equals("供应商")){
+				cust = conditionCache[i].getValue();
+			}else if (conditionCache[i].getFieldName().equals("供应商分类")){
+				custclass = conditionCache[i].getValue();
+			}
+		}
+		
+		Hashtable<String, String> computed = new Hashtable<String, String>();
+		for(int i=0;i<showData.size();i++){
+			Object batchCode = showData.get(i).getAttributeValue("vstockbatch");
+			if (batchCode==null) continue;
+			if (!computed.containsKey(batchCode.toString())){
+				inNum = inNum.add(new UFDouble(showData.get(i).getAttributeValue("ninnum").toString()));
+				stockNum = stockNum.add(new UFDouble(showData.get(i).getAttributeValue("nstocknum").toString()));
+				computed.put(batchCode.toString(), batchCode.toString());
+			}
+		}
+		
+		AnalysisReportVO vo = new AnalysisReportVO();
+		if (starttime.equals(endtime))
+			vo.setAttributeValue("vtimesec", starttime);
+		else
+			vo.setAttributeValue("vtimesec", starttime+"至"+endtime);
+		
+		if (cust.length()>0){
+			String sql = "select bd_cubasdoc.custname from bd_cumandoc, bd_cubasdoc where bd_cumandoc.pk_cubasdoc=bd_cubasdoc.pk_cubasdoc and bd_cumandoc.pk_cumandoc='";
+			sql+=cust;
+			sql+="' ";
+			IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
+			try {
+				@SuppressWarnings("unchecked")
+				Vector<Vector<Object>> data = (Vector<Vector<Object>>)dao.executeQuery(sql, new VectorProcessor());
+				vo.setAttributeValue("vcustdesc", data.get(0).get(0));
+			}catch (BusinessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if (custclass.length()>0){
+			String sql = "select bd_areacl.areaclname from bd_areacl where bd_areacl.pk_areacl='";
+			sql+=custclass;
+			sql+="' ";
+			IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
+			try {
+				@SuppressWarnings("unchecked")
+				Vector<Vector<Object>> data = (Vector<Vector<Object>>)dao.executeQuery(sql, new VectorProcessor());
+				vo.setAttributeValue("vcustdesc", data.get(0).get(0));
+			}catch (BusinessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else
+			vo.setAttributeValue("vcustdesc", "全部供应商");
+		
+		vo.setAttributeValue("vinvname", invDocRef.getRefName());
+		vo.setAttributeValue("ninnum", inNum);
+		vo.setAttributeValue("nstocknum", stockNum);
+		
+		ArrayList<AnalysisReportVO> ret = new ArrayList<AnalysisReportVO>();
+		ret.add(vo);
+		
+		return ret;
+	}
+
 	private void processCrossData(Hashtable<String, AnalysisReportVO> reportSet, Vector<Vector<Object>> data){
 		int crossColIdx = getDimensionCount();
 		String[] checkItems = getSelectedCheckItem();
@@ -136,16 +352,16 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 					, data.get(i).get(crossColIdx+1).toString());
 		}
 		
-		processTableLayout(checkItems);
+		processTableLayout(getReportPanel(), checkItems);
 	}
 
-	private void processTableLayout(String[] checkItems) {
+	private void processTableLayout(ReportPanel rp, String[] checkItems) {
 		ReportItem[] reportItems = new ReportItem[checkItems.length];
 		for(int i=0;i<checkItems.length;i++){
 			ReportItem item = new ReportItem();
 			item.setWidth(80);
 			item.setKey("_CHECKTITEM"+i);
-			item.setName(checkItemCtrls.get(checkItems[i]).getText());//(checkItemStandards.get(checkItems[i]))
+			item.setName(checkItemNames.get(checkItems[i]));//(checkItemStandards.get(checkItems[i]))
 			item.setDataType(IBillItem.STRING);
 			//item.setDecimalDigits(4);
 			reportItems[i] = item;
@@ -182,32 +398,37 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 //			groupVOs.add(groupVO2);
 //		}
 		
-		getReportPanel().setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
-		getReportPanel().setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
+		rp.setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
+		rp.setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
 		
-		setReportPanelCellRender(checkItems);
+		setReportPanelCellRender(rp, checkItems);
 	}
 	
-	private void setReportPanelCellRender(String[] checkitemids) {
+	private void setReportPanelCellRender(ReportPanel rp, String[] checkitemids) {
 		for(int i=0;i<checkitemids.length;i++) {
 			String standard = checkItemStandards.get(checkitemids[i]);
-			double[] itemStandardValue = new double[]{0,100};
-			String[] sec = standard.trim().split(",");
-			if (sec.length==2){
-				try {
-					itemStandardValue[0]=Double.parseDouble(sec[0].substring(1));
-					itemStandardValue[1]=Double.parseDouble(sec[1].substring(0,sec[1].length()-1));
-				} catch (NumberFormatException ex) {
-					ex.toString();
-				}
-				if (sec[0].charAt(0) == '(') itemStandardValue[0]+=epsilon;
-				if (sec[1].charAt(sec[1].length()-1) == ')') itemStandardValue[0]-=epsilon;
-			}
+			Double[] itemStandardValue = parseCheckStandard(standard);
 
-			BillItem billItem = reportpanel.getBodyItem("_CHECKTITEM"+i);
+			BillItem billItem = rp.getBodyItem("_CHECKTITEM"+i);
 			BillTableValueRangeRender render = new BillTableValueRangeRender(billItem, itemStandardValue[0], itemStandardValue[1]);
-			reportpanel.getBillTable().getColumn(checkItemCtrls.get(checkitemids[i]).getText()).setCellRenderer(render);
+			rp.getBillTable().getColumn(checkItemNames.get(checkitemids[i])).setCellRenderer(render);
 		}
+	}
+
+	private Double[] parseCheckStandard(String standard) {
+		Double[] itemStandardValue = new Double[]{new Double(0),new Double(100)};
+		String[] sec = standard.trim().split(",");
+		if (sec.length==2){
+			try {
+				itemStandardValue[0]=Double.parseDouble(sec[0].substring(1));
+				itemStandardValue[1]=Double.parseDouble(sec[1].substring(0,sec[1].length()-1));
+			} catch (NumberFormatException ex) {
+				ex.toString();
+			}
+			if (sec[0].charAt(0) == '(') itemStandardValue[0]+=epsilon;
+			if (sec[1].charAt(sec[1].length()-1) == ')') itemStandardValue[0]-=epsilon;
+		}
+		return itemStandardValue;
 	}
 
 	private int getDimensionCount() {
@@ -238,9 +459,9 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	
 	private String[] getSelectedCheckItem(){
 		ArrayList<String> checkItems = new ArrayList<String>();
-		for(String checkItem : allCheckItems){
-			if (checkItemCtrls.get(checkItem).isSelected())
-				checkItems.add(checkItem);
+		for(int i=0;i<m_leftBillCard.getBillTable().getRowCount();i++){
+			if (m_leftBillCard.getBillModel().getValueAt(i, "bselect").equals(true))
+				checkItems.add(m_leftBillCard.getBillModel().getValueAt(i, "ccheckitemid").toString());
 		}
 		
 		return checkItems.toArray(new String[]{});
@@ -260,17 +481,24 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		if (reportpanel == null) {
 			super.getReportPanel();
 			hideReportPanel(reportpanel);
+			reportColHelper = new BillColumnHelper(reportpanel, "bselect");
+			setReportPanelHeader();
+			reportpanel.getBillModel().getItemByKey("ninnum").setDecimalDigits(2);
+			reportpanel.getBillModel().getItemByKey("nstocknum").setDecimalDigits(2);
 			initBodyItems = reportpanel.getBody_Items();
 		}
 		return reportpanel;
+	}
+	
+	private void setReportPanelHeader() {
+		reportColHelper.setSelectColumnHeader();
+		reportColHelper.setSelectColumnMultiSelect();
 	}
 	
 	@Override
 	protected UIPanel getConditionPanel() {
 		if (conditionpanel==null){
 			setReportStatisticsConfig();
-			checkItemCtrls = new Hashtable<String, UICheckBox>();
-			allCheckItems = new ArrayList<String>();
 			checkItemStandards = new Hashtable<String, String>();
 			
 			UIPanel conditionPanel = super.getConditionPanel();
@@ -278,7 +506,19 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			conditionPanel.setPreferredSize(null);
 			conditionPanel.setLayout(new BoxLayout(conditionPanel, BoxLayout.Y_AXIS));
 			UIPanel panel1 = new UIPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-			panelCheckItem = new UIPanel(new java.awt.GridLayout(2, 12, 5, 2));
+			panelSumGrid = new UIPanel();
+			panelSumGrid.setLayout(new java.awt.BorderLayout(2, 2));
+			
+			m_topBillCard = new BillCardPanel();
+			m_topBillCard.setName("汇总");
+			m_topBillCard.setEnabled(true);
+			m_topBillCard.loadTemplet(getNodeCode(), getBusitype(), ClientEnvironment.getInstance().getUser().getPrimaryKey()
+					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+			m_topBillCard.setMaximumSize(new Dimension(600, 70));
+			m_topBillCard.setPreferredSize(new Dimension(600, 70));
+			//m_topBillCard.getBillModel().getItemByKey("ninnum").setDecimalDigits(2);
+			//m_topBillCard.getBillModel().getItemByKey("nstocknum").setDecimalDigits(2);
+			panelSumGrid.add(m_topBillCard);
 			
 			invDocRef = new UIRefPane("存货档案");
 			panel1.add(new UILabel("存货档案"));
@@ -296,52 +536,70 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			invSpec.setEditable(false);
 			invSpec.setColumns(10);
 			
+			invUnit = new UITextField();
+			panel1.add(new UILabel("单位"));
+			panel1.add(invUnit);
+			invUnit.setEditable(false);
+			invUnit.setColumns(10);
+			
 			conditionPanel.add(panel1);
-			conditionPanel.add(panelCheckItem);			
+			conditionPanel.add(panelSumGrid);			
 		}
 		
 		return conditionpanel;
 	}
 	
 	private void updateCheckItemCtrl() {
-		panelCheckItem.removeAll();
-		checkItemCtrls.clear();
-		allCheckItems.clear();
+		reportpanel.getBillModel().clearBodyData();
+		String checkStandardid = null;
 		
 		StringBuffer sql = new StringBuffer();
-		sql.append("select qc_checkitem.ccheckitemid, qc_checkitem.ccheckitemname, qc_checkstandard_b.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-') from qc_invrelate, qc_checkstandard_b, qc_checkitem, bd_invmandoc, bd_invbasdoc");
-		sql.append(" where qc_invrelate.ccheckstandardid=qc_checkstandard_b.ccheckstandardid and qc_checkitem.ccheckitemid = qc_checkstandard_b.ccheckitemid ");
-		sql.append(" and bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
+		sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-'), nvl(bd_measdoc.measname,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc, bd_measdoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and bd_invbasdoc.pk_measdoc=bd_measdoc.pk_measdoc(+) and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
 		sql.append(invDocRef.getRefPK()+"'");
-		
 		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
 		try {
 			@SuppressWarnings("unchecked")
-			Vector<Vector<Object>> checkItems = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
-			if (checkItems!=null && checkItems.size()>0){
-				invSpec.setText(checkItems.get(0).get(3).toString());
+			Vector<Vector<Object>> checkStandard = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
+			if (checkStandard!=null && checkStandard.size()>0) {
+				invSpec.setText(checkStandard.get(0).get(1).toString());
+				invUnit.setText(checkStandard.get(0).get(2).toString());
 				
-				String ccheckstandardid=null;
-				for(int i=0;i<checkItems.size();i++){
-					UICheckBox ctrl = new UICheckBox(checkItems.get(i).get(1).toString());
-					ctrl.setSelected(true);
-					checkItemCtrls.put(checkItems.get(i).get(0).toString(), ctrl);
-					panelCheckItem.add(ctrl); 
-					allCheckItems.add(checkItems.get(i).get(0).toString());
-					ccheckstandardid = checkItems.get(i).get(2).toString();
-				}
-				CheckstandardItemVO[] standardItems = CheckstandardHelper.queryCheckstandardItems(ccheckstandardid);
-				for(CheckstandardItemVO standardItem : standardItems){
-					String standardValue = standardItem.getCstandardvalue();
-					int start = standardValue.indexOf("合格:")+3;
-					int end = standardValue.indexOf("}", start);
-					standardValue = standardValue.substring(start, end);
-					checkItemStandards.put(standardItem.getCcheckitemid(), standardValue);
-				}
+				checkStandardid=checkStandard.get(0).get(0).toString();
 			}
 		} catch (BusinessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} 
+		
+		if (checkStandardid==null || checkStandardid.length()!=20) {
+			m_leftBillCard.getBillModel().clearBodyData();
+			return;
+		}
+		
+		try {
+			CheckstandardItemVO[] standardItems = CheckstandardHelper.queryCheckstandardItems(checkStandardid);
+			AnalysisReportVO[] uiCheckItems = new AnalysisReportVO[standardItems.length];
+			checkItemNames = new Hashtable<String, String>();
+
+			for(int i=0;i<standardItems.length;i++){
+				uiCheckItems[i] = new AnalysisReportVO();
+				uiCheckItems[i].setAttributeValue("bselect", true);
+				uiCheckItems[i].setAttributeValue("ccheckitemid", standardItems[i].getCcheckitemid());
+				String standardValue = standardItems[i].getCstandardvalue();
+				int start = standardValue.indexOf("合格:")+3;
+				int end = standardValue.indexOf("}", start);		
+				standardValue = standardValue.substring(start, end);
+				checkItemStandards.put(standardItems[i].getCcheckitemid(), standardValue);
+				uiCheckItems[i].setAttributeValue("vstandardvalue", standardValue);
+				uiCheckItems[i].setAttributeValue("vrequirevalue", "[0,100]");
+			}
+			m_leftBillCard.getBillModel().setBodyDataVO(uiCheckItems);
+			m_leftBillCard.getBillModel().execLoadFormula();
+			
+			for(int i=0;i<m_leftBillCard.getBillTable().getRowCount();i++){
+				checkItemNames.put(m_leftBillCard.getBillModel().getValueAt(i, "ccheckitemid").toString()
+						, m_leftBillCard.getBillModel().getValueAt(i, "vcheckitem").toString());
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -400,6 +658,57 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 				setButtonStatus("INIT");
 			updateUI();
 		}
+	}
+	
+	@Override
+	public void onButtonClicked(ButtonObject bo) {
+		super.onButtonClicked(bo);
+		
+		if (bo == bnfilter)
+			onFilterCheckValue();
+	}
+
+	private void onFilterCheckValue() {
+		ArrayList<AnalysisReportVO> showData = filterByCheckStandard();
+		
+		ArrayList<AnalysisReportVO> sumData = computeSumData(showData);
+
+		if (showData!=null) setData(showData.toArray(new AnalysisReportVO[]{}));
+		if (sumData!=null) m_topBillCard.getBillModel().setBodyDataVO(sumData.toArray(new AnalysisReportVO[]{}));
+		
+		setReportPanelHeader();
+	}
+	
+	@Override
+	public void onOut() {
+		//super.onOut();
+		//return;
+		
+		ArrayList<CircularlyAccessibleValueObject> data = new ArrayList<CircularlyAccessibleValueObject>();
+		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
+			if (reportpanel.getBillModel().getValueAt(row, "bselect").equals(true)){
+				data.add(report[row]);
+			}
+		}
+		ReportPanel rp = new ReportPanel();
+		rp.setName(nc.ui.ml.NCLangRes.getInstance().getStrByID("scmpub", "UPPscmpub-000778")/* @res "报表基类" */);
+		try {
+			rp.setTempletID(getCorpPrimaryKey(), getNodeCode(),
+					getClientEnvironment().getUser().getPrimaryKey(),
+					getBusitype());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		String[] checkItems = getSelectedCheckItem();
+		processTableLayout(rp, checkItems);
+		rp.setTatolRowShow(false);
+		rp.setBodyDataVO(data.toArray(new CircularlyAccessibleValueObject[]{}));
+		rp.getBillModel().execLoadFormula();
+		rp.updateValue();
+		
+		rp.exportExcelFile();
 	}
 }
 

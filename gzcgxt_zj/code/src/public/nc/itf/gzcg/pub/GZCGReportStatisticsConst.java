@@ -3,15 +3,16 @@ package nc.itf.gzcg.pub;
 public enum GZCGReportStatisticsConst implements ISQLSection{
 	PUBLIC ("PUBLIC",
 			"公共",
-			new String[]{"vstockbatch", "vinvdoccode", "vinvdocname", "dcheck", "vsamplecode", "vchargepsn"},
+			new String[]{"vstockbatch", "vinvdoccode", "vinvdocname", "ninnum", "vprocessname", "dcheck", "vsamplecode", "vchargepsn"},
 			new String[]{"gzcg_qcrp_checkbill_v.vbatchcode", "bd_invbasdoc.invcode", 
-			"bd_invbasdoc.invname", "gzcg_qcrp_checkbill_v.dpraydate", "qc_checkbill_b2.vsamplecode", 
+			"bd_invbasdoc.invname", "gzcg_qcrp_checkbill_v.nchecknum", "nvl(qc_defectprocess.cdefectprocessname, '其它')", "gzcg_qcrp_checkbill_v.dpraydate", "qc_checkbill_b2.vsamplecode", 
 			"sm_user.user_name"},
-			new String[]{"qc_checkbill_b2", "bd_invmandoc", "bd_invbasdoc", "sm_user"},
+			new String[]{"qc_checkbill_b2", "bd_invmandoc", "bd_invbasdoc", "sm_user", "qc_defectprocess"},
 			new String[]{" and gzcg_qcrp_checkbill_v.ccheckbillid = qc_checkbill_b2.ccheckbillid "
 			+"and gzcg_qcrp_checkbill_v.cmangid = bd_invmandoc.pk_invmandoc "
 			+"and bd_invmandoc.pk_invbasdoc = bd_invbasdoc.pk_invbasdoc "
 			+"and gzcg_qcrp_checkbill_v.creporterid = sm_user.cuserid "
+			+"and gzcg_qcrp_checkbill_v.cdefectprocessid = qc_defectprocess.cdefectprocessid(+)"
 			+"and nvl(qc_checkbill_b2.dr, 0)=0 and qc_checkbill_b2.cresult is not null "}),
 	MATERIAL("MATERIAL",
 			"原料",

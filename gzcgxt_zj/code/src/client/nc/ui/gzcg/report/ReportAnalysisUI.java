@@ -120,6 +120,8 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 				}
 				if (isCrossSelected()){
 					String crossSql = new SQLBuildUtil(GZCGReportAnalysisConst.values(), reportConfig, sqlProcesser).getSQLForReportAnalysisCross(conditionCtrls, voCondition);
+					if (!getMainViewName().equals(GZCGConstant.MATERIALMAINVIEW.getValue()))
+						crossSql = crossSql.replaceAll(GZCGConstant.MATERIALMAINVIEW.getValue(), getMainViewName());
 					@SuppressWarnings("unchecked")
 					Vector<Vector<Object>> crossData = (Vector<Vector<Object>>)dao.executeQuery(crossSql, new VectorProcessor());
 					if (crossData!=null && crossData.size()>0){
