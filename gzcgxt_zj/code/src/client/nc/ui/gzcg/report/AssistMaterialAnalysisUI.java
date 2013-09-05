@@ -63,4 +63,9 @@ public class AssistMaterialAnalysisUI extends ReportAnalysisUI{
 	protected String getMainViewName() {
 		return GZCGConstant.MATERIALMAINVIEW.getValue();
 	}
+	
+	@Override
+	protected void afterHideReportPanel(ReportPanel reportpanel) {
+		reportpanel.hideColumn(new String[]{"vinvdoccode"});
+	}
 }

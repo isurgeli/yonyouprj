@@ -184,14 +184,23 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	
 	private void getStockNum(ArrayList<AnalysisReportVO> reportArray) {
 		ArrayList<String> vstockBatchNo = new ArrayList<String>();
-		Hashtable<String, AnalysisReportVO> voMap = new Hashtable<String, AnalysisReportVO>();
+		Hashtable<String, ArrayList<AnalysisReportVO>> voMap = new Hashtable<String, ArrayList<AnalysisReportVO>>();
 		for(int i=0;i<reportArray.size();i++){
+			
 			if (reportArray.get(i).getAttributeValue("vstockbatch") != null){
-				vstockBatchNo.add(reportArray.get(i).getAttributeValue("vstockbatch").toString());
-				voMap.put(reportArray.get(i).getAttributeValue("vstockbatch").toString(), reportArray.get(i));
+				String batch = reportArray.get(i).getAttributeValue("vstockbatch").toString();
+				vstockBatchNo.add(batch);
+				if (voMap.containsKey(batch)){
+					voMap.get(batch).add(reportArray.get(i));
+				}else{
+					voMap.put(batch, new ArrayList<AnalysisReportVO>());
+					voMap.get(batch).add(reportArray.get(i));
+				}
 			}
 			reportArray.get(i).setAttributeValue("nstocknum", 0);
 		}
+		
+		if (vstockBatchNo.size()==0) return;
 		
 		StringBuffer sql = new StringBuffer();
 		sql.append("select ic_onhandnum.vlot, sum(ic_onhandnum.nonhandnum) from ic_onhandnum where ic_onhandnum.cinventoryid='");
@@ -207,7 +216,8 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			@SuppressWarnings("unchecked")
 			Vector<Vector<Object>> data = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
 			for (int i=0;i<data.size();i++){
-				voMap.get(data.get(i).get(0).toString()).setAttributeValue("nstocknum", data.get(i).get(1));
+				for(int j=0;j<voMap.get(data.get(i).get(0).toString()).size();j++)
+					voMap.get(data.get(i).get(0).toString()).get(j).setAttributeValue("nstocknum", data.get(i).get(1));
 			}
 		}catch (BusinessException e) {
 			// TODO Auto-generated catch block
@@ -241,10 +251,15 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			for(int j=0;j<conditionValues.size();j++){
 				Object objValue = reportDataCache.get(i).getAttributeValue("_CHECKTITEM"+j);
 				if (objValue==null) continue;
-				UFDouble value = new UFDouble(objValue.toString());
-				if (value.doubleValue()<conditionValues.get(j)[0] || value.doubleValue()>conditionValues.get(j)[1]){
-					ok = false;
-					break;
+				UFDouble value = null;
+				try{
+					value = new UFDouble(objValue.toString());
+					if (value.doubleValue()<conditionValues.get(j)[0] || value.doubleValue()>conditionValues.get(j)[1]){
+						ok = false;
+						break;
+					}
+				}catch(NumberFormatException nex){
+					value = new UFDouble(0);
 				}
 			}
 			if (ok) 
@@ -643,6 +658,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			}
 			if (((ReportLinkQueryData) querydata).getCvendormangid()!=null){
 				ConditionVO cvo = new ConditionVO();
+				cvo.setFieldName("π©”¶…Ã");
 				cvo.setFieldCode("gzcg_qcrp_checkbill_v.cvendormangid");
 				cvo.setOperaCode("=");
 				cvo.setValue(((ReportLinkQueryData) querydata).getCvendormangid());
@@ -650,6 +666,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			}
 			//getQueryPanel().setShowConditionVOs(newCondition.toArray(new ConditionVO[]{}));
 			linkConditions = newCondition.toArray(new ConditionVO[]{});
+			conditionCache = linkConditions;
 			setReportData(linkConditions);
 			
 			if (reportpanel.getBillModel().getRowCount()!=0)

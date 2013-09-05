@@ -99,4 +99,9 @@ public class CustomerAnalysisUI extends ReportAnalysisUI{
 		
 		return targetFunCode;
 	}
+
+	@Override
+	protected void afterHideReportPanel(ReportPanel reportpanel) {
+		reportpanel.hideColumn(new String[]{"vcustcode", "vinvdoccode"});
+	}
 }

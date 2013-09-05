@@ -63,5 +63,10 @@ public class SemiProductAnalysisUI extends ReportAnalysisUI{
 	protected String getMainViewName() {
 		return GZCGConstant.PRODUCTMAINVIEW.getValue();
 	}
+
+	@Override
+	protected void afterHideReportPanel(ReportPanel reportpanel) {
+		reportpanel.hideColumn(new String[]{"vinvdoccode"});
+	}
 }
 

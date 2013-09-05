@@ -64,6 +64,8 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 	
 	protected abstract void hideReportPanel(ReportPanel reportpanel);
 	
+	protected abstract void afterHideReportPanel(ReportPanel reportpanel);
+	
 	private ArrayList<String> getColsForIndex(int start, int end){
 		ArrayList<String> cols = new ArrayList<String>();
 		for (int idx=start;idx<=end;idx++){
@@ -223,6 +225,8 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 		
 		getReportPanel().setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
 		getReportPanel().setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
+		
+		afterHideReportPanel(getReportPanel());
 	}
 
 	private int getDimensionCount() {
