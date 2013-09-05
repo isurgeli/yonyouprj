@@ -23,6 +23,7 @@ import nc.itf.uap.IUAPQueryBS;
 import nc.jdbc.framework.processor.VectorProcessor;
 import nc.ui.gzcg.pub.BillTableValueRangeRender;
 import nc.ui.gzcg.pub.BillColumnHelper;
+import nc.ui.gzcg.pub.PrintDataSource;
 import nc.ui.gzcg.pub.ReportUIEx;
 import nc.ui.pub.ButtonObject;
 import nc.ui.pub.ClientEnvironment;
@@ -38,6 +39,8 @@ import nc.ui.pub.bill.BillCardPanel;
 import nc.ui.pub.bill.BillItem;
 import nc.ui.pub.bill.BillModelCellEditableController;
 import nc.ui.pub.bill.IBillItem;
+import nc.ui.pub.print.IDataSource;
+import nc.ui.pub.print.PrintEntry;
 import nc.ui.pub.report.ReportItem;
 import nc.ui.qc.standard.CheckstandardDef;
 import nc.ui.qc.standard.CheckstandardHelper;
@@ -714,5 +717,87 @@ public class MixtureToolUI extends ReportUIEx{
 
 	private void setReportPanelHeader() {
 		reportColHelper.setSelectColumnHeader();
+	}
+	
+	@Override
+	public void onOut() {
+		PrintEntry pe = new PrintEntry(this);
+		// 设置打印模板ID的查询条件
+		pe.setTemplateID(getCorpPrimaryKey(), getNodeCode(),
+				getClientEnvironment().getUser().getPrimaryKey(),
+				getBusitype());
+		// 如果分配了多个打印模板，可选择一个模板
+		pe.selectTemplate();
+		// 添加打印数据，只有一个数据源
+		pe. setDataSource(getPrintDataSource());
+		//导出到Excel
+		pe.exportExcelFile();
+	}	
+	
+	private IDataSource getPrintDataSource(){
+		PrintDataSource dataSrc = new PrintDataSource();
+		
+		ArrayList<String> custNames = new ArrayList<String>();
+		ArrayList<String> stockBatchs = new ArrayList<String>();
+		ArrayList<String> unitNumbers = new ArrayList<String>();
+		String mainWarehouse = null;
+		
+		Hashtable<String, Integer> wareHouseCountHash = new Hashtable<String, Integer>();
+		
+		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
+			if (reportpanel.getBillModel().getValueAt(row, "bselect").equals(true) 
+					&& new UFDouble(reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString()).doubleValue()>0){
+				String warehouse = reportpanel.getBillModel().getValueAt(row, "vstock").toString();
+				if (!wareHouseCountHash.containsKey(warehouse))
+					wareHouseCountHash.put(warehouse, 1);
+				else
+					wareHouseCountHash.put(warehouse, wareHouseCountHash.get(warehouse)+1);
+			}
+		}		
+		
+		for (String curWarehouse : wareHouseCountHash.keySet()){
+			if (mainWarehouse==null || wareHouseCountHash.get(curWarehouse) > wareHouseCountHash.get(mainWarehouse))
+				mainWarehouse = curWarehouse;
+		}
+		
+		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
+			if (reportpanel.getBillModel().getValueAt(row, "bselect").equals(true) 
+					&& new UFDouble(reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString()).doubleValue()>0){
+				String warehouse = reportpanel.getBillModel().getValueAt(row, "vstock").toString();
+				String invname = reportpanel.getBillModel().getValueAt(row, "vinvdocname").toString();
+				String batchNo = reportpanel.getBillModel().getValueAt(row, "vbatchcode").toString();
+				String unitNum = reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString();
+				
+				String custname = reportpanel.getBillModel().getValueAt(row, "vcustname").toString();
+				if (!warehouse.equals(mainWarehouse))
+					custname = warehouse+"-"+custname;
+				
+				if (!invname.equals(invDocRef.getRefName()))
+					custname = custname+"-"+invname;
+				
+				custNames.add(custname);
+				stockBatchs.add(batchNo);
+				unitNumbers.add(unitNum);
+			}
+		}
+		
+		dataSrc.addItemValue("vmaininvl", new String[]{"现将（"+invDocRef.getRefName()});
+		dataSrc.addItemValue("vmainware", new String[]{mainWarehouse});
+		dataSrc.addItemValue("vbatchno", stockBatchs.toArray(new String[]{}));
+		dataSrc.addItemValue("vcustname", custNames.toArray(new String[]{}));
+		dataSrc.addItemValue("nusernum", unitNumbers.toArray(new String[]{}));
+		
+		return dataSrc;
+	}
+	
+	public void onModelPrint() {
+		nc.ui.pub.print.PrintEntry print = new nc.ui.pub.print.PrintEntry(null,
+				null);
+		print.setTemplateID(getCorpPrimaryKey(), getNodeCode(),
+				getClientEnvironment().getUser().getPrimaryKey(), null);
+		print.setDataSource(getPrintDataSource());
+		if (print.selectTemplate() < 0)
+			return;
+		print.print(true);
 	}
 }
