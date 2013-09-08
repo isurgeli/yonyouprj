@@ -7,12 +7,15 @@ import nc.ui.trade.businessaction.IBusinessActionType;
 import nc.ui.trade.button.IBillButton;
 import nc.vo.gzcg.bd.samplevo;
 import nc.vo.trade.pub.HYBillVO;
+import nc.vo.trade.pub.IBillStatus;
 
 public class SampleManController implements ICardController,ISingleController {
 	private String bodyCondition = "";
 	
 	public SampleManController(String _bodyCondition){
 		bodyCondition = _bodyCondition;
+		bodyCondition += "and vdef1||vsampleno not in (select distinct QC_CGHZBG_B.Ypname||QC_CGHZBG_B.Jcpici from QC_CGHZBG_H, QC_CGHZBG_B where QC_CGHZBG_H.Pk_Cghzbg_h=QC_CGHZBG_B.Pk_Cghzbg_h and QC_CGHZBG_H.VBILLSTATUS=";
+		bodyCondition += IBillStatus.CHECKPASS+")";
 	}
 	
 	/* £¨·Ç Javadoc£©

@@ -29,6 +29,7 @@ import nc.ui.pub.beans.ValueChangedEvent;
 import nc.ui.pub.beans.ValueChangedListener;
 import nc.ui.pub.bill.BillCardPanel;
 import nc.ui.pub.bill.BillItem;
+import nc.ui.pub.bill.BillModelCellEditableController;
 import nc.ui.pub.bill.IBillItem;
 import nc.ui.pub.linkoperate.ILinkQuery;
 import nc.ui.pub.linkoperate.ILinkQueryData;
@@ -497,10 +498,19 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			super.getReportPanel();
 			hideReportPanel(reportpanel);
 			reportColHelper = new BillColumnHelper(reportpanel, "bselect");
-			setReportPanelHeader();
+			//setReportPanelHeader();
 			reportpanel.getBillModel().getItemByKey("ninnum").setDecimalDigits(2);
 			reportpanel.getBillModel().getItemByKey("nstocknum").setDecimalDigits(2);
 			initBodyItems = reportpanel.getBody_Items();
+			
+			((nc.ui.pub.bill.BillModel)getReportPanel().getBillTable().getModel()).setCellEditableController(new BillModelCellEditableController() {
+				public boolean isCellEditable(boolean value, int row, String itemkey) {
+					if (itemkey.equals("bselect")) 
+						return true;
+					else
+						return false;
+				}
+			});
 		}
 		return reportpanel;
 	}

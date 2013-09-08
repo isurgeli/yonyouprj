@@ -112,7 +112,7 @@ public class MixtureToolUI extends ReportUIEx{
 	private void onClearStock() {
 		ArrayList<CircularlyAccessibleValueObject> retList = new ArrayList<CircularlyAccessibleValueObject>();
 		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
-			if (!reportpanel.getBillModel().getValueAt(row, "bselect").equals(true)){
+			if (reportpanel.getBillModel().getValueAt(row, "bselect").equals(true)){
 				retList.add(report[row]);
 			}
 		}
@@ -142,7 +142,7 @@ public class MixtureToolUI extends ReportUIEx{
     		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
 			ret[i]=unitUse.doubleValue()/totalUnitUse;
 		}
-    	
+    	mixtureAmountText.setText(String.valueOf(totalUnitUse));
     	setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
 	}
 

@@ -79,7 +79,7 @@ public class SampleManCheckRules implements ICheckRules,IUniqueRules {
 	 */
 	public IUniqueRule[] getItemUniqueRules(String tablecode) {
 		return new IUniqueRule[]{
-			new UniqueRule("检验批次重复",new String[]{samplevo.VSAMPLENO})
+			new UniqueRule("存货+检验批次重复",new String[]{samplevo.VDEF1, samplevo.VSAMPLENO})
 		};
 	}
 }

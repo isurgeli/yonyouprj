@@ -24,6 +24,15 @@ public class SampleManEventHandler extends DefaultBDBillCardEventHandle
 
 	protected void onBoSave() throws Exception {
 		super.onBoSave();
+		
+		String strWhere = "1=1";
+
+		strWhere = "(" + strWhere + ") and (isnull(dr,0)=0)";
+
+		if (getUIController().getBodyCondition() != null)
+			strWhere = strWhere + " and " + getUIController().getBodyCondition();
+		
+		doBodyQuery(strWhere);
 	}
 
 	protected void processCopyedBodyVOsBeforePaste(CircularlyAccessibleValueObject[] vos) {

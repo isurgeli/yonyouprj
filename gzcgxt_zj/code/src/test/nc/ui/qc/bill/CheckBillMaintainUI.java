@@ -126,6 +126,7 @@ import nc.vo.scm.qc.bill.CheckbillHeaderVO;
 import nc.vo.scm.qc.bill.CheckbillItemVO;
 import nc.vo.scm.qc.bill.CheckbillVO;
 import nc.vo.scm.qc.bill.InfoVO;
+import nc.vo.trade.pub.IBillStatus;
 import nc.vo.uap.rbac.IOrgType;
 import nc.vo.uap.rbac.power.UserPowerQueryVO;
 
@@ -6888,7 +6889,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 		// TODO 获取检测数据
 		StringBuffer sql = new StringBuffer();
 		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b, qc_cghzbg_h where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
-		sql.append(" and qc_cghzbg_b.pk_cghzbg_h=qc_cghzbg_h.pk_cghzbg_h and (gzcg_bd_sampledoc.vsampleno='");
+		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.pk_cghzbg_h=qc_cghzbg_h.pk_cghzbg_h and (gzcg_bd_sampledoc.vsampleno='");
 		sql.append(vsmplecode);
 		sql.append("' or gzcg_bd_sampledoc.vsamplenofar='");
 		sql.append(vsmplecode);
@@ -6896,6 +6897,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
 		sql.append("' and qc_cghzbg_h.pk_corp='");
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+		sql.append("' and qc_cghzbg_h.VBILLSTATUS="+IBillStatus.CHECKPASS);
 		sql.append("' and nvl(qc_cghzbg_h.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
 		
 		ArrayList<String> vsamplecodes = new ArrayList<String>();

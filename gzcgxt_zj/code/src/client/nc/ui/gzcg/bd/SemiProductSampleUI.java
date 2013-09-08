@@ -14,6 +14,8 @@ public class SemiProductSampleUI extends SampleManUI{
 		super();
 		getBillCardPanel().getBodyItem(samplevo.VQCTYPE).setEdit(false);
 		getBillCardPanel().getBodyItem(samplevo.VORDERBILL).setEdit(false);
+		getBillCardPanel().getBodyItem(samplevo.VDEF1).setEdit(true);
+		getBillCardPanel().getBodyItem("vinvmancode").setEdit(false);
 	}
 	
 	protected ICardController createController() {
