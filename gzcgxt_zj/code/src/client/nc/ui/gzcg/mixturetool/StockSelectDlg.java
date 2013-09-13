@@ -42,6 +42,7 @@ public class StockSelectDlg extends UIDialog {
 	private String invpk;
 	private String[] checkIds;
 	private String[] checkNames;
+	Hashtable<String, Integer> checkItemidNo;
 	private ReportItem[] initBodyItems;
 	private MixtureToolUI parentUI;
 
@@ -50,13 +51,14 @@ public class StockSelectDlg extends UIDialog {
 	private CircularlyAccessibleValueObject[] reportData;
 	public CircularlyAccessibleValueObject[] retData;
 	
-	public StockSelectDlg(Container parent, String _invpk, String[] _checkIds, String[] _checkNames) {
+	public StockSelectDlg(Container parent, String _invpk, String[] _checkIds, String[] _checkNames, Hashtable<String, Integer> _checkItemidNo) {
 		super(parent, "ªÏ¡œø‚¥Ê—°‘Ò");
 		
 		parentUI = (MixtureToolUI)parent;
 		invpk = _invpk;
 		checkIds = _checkIds;
 		checkNames = _checkNames;
+		checkItemidNo = _checkItemidNo;
 		
 		initUI();
 		initData();
@@ -109,10 +111,6 @@ public class StockSelectDlg extends UIDialog {
 
 	private void getCheckValue(Hashtable<String, AnalysisReportVO> uiStockSet, String[] warehouses, String[] stockbatchs) {
 		String[] checkitemids = checkIds;
-		
-		Hashtable<String, Integer> checkItemidNo = new Hashtable<String, Integer>();
-		for(int i=0;i<checkitemids.length;i++)
-			checkItemidNo.put(checkitemids[i], i);
 		
 		StringBuffer sql = new StringBuffer();
 		sql.append("select ic_general_h_v.CWAREHOUSEID, ic_general_b_v.VBATCHCODE, qc_checkbill_b2_v.CCHECKITEMID, qc_checkbill_b2_v.CRESULT, ic_general_h_v.daccountdate, bd_cubasdoc.custname");

@@ -15,7 +15,7 @@ public class SampleManCheckBack extends AbstractBDBackCheck {
 	 */
 	public ArrayList getFieldArray() {
 		ArrayList<String[]> list = new ArrayList<String[]>();
-		list.add(new String[]{samplevo.VDEF1, samplevo.VSAMPLENO});
+		list.add(new String[]{samplevo.PK_CORP, samplevo.VDEF1, samplevo.VSAMPLENO});
 		return list;
 	}
 /*
@@ -37,7 +37,7 @@ public class SampleManCheckBack extends AbstractBDBackCheck {
 	 */
 	public ArrayList getNameArray() {
 		ArrayList<String[]> list = new ArrayList<String[]>();
-		list.add(new String[]{"存货", "检验批次"});
+		list.add(new String[]{"公司", "存货", "检验批次"});
 		return list;
 	}
 
@@ -61,7 +61,7 @@ public class SampleManCheckBack extends AbstractBDBackCheck {
 	 * @see nc.bs.bd.pub.AbstractBDBackCheck#getKey()
 	 */
 	public String[] getKey() {
-		return new String[] {samplevo.VDEF1, samplevo.VSAMPLENO};
+		return new String[] {samplevo.PK_CORP, samplevo.VDEF1, samplevo.VSAMPLENO};
 	}
 	/* （非 Javadoc）
 	 * @see nc.bs.bd.pub.AbstractBDBackCheck#getFun_code()

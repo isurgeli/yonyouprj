@@ -135,6 +135,32 @@ select distinct qc_checkbill.pk_corp,
    and nvl(qc_checkbill.dr, 0) = 0
    and nvl(qc_checkbill_b1.dr, 0) = 0
 );
+--删除模板
+delete from sm_funcregister where (sm_funcregister.fun_code >= 'C0020410' and sm_funcregister.fun_code < 'C0020439') or (sm_funcregister.fun_code >= 'C0010115' and sm_funcregister.fun_code < 'C0010120');
+delete from sm_butnregister where sm_butnregister.fun_code in ('C002010190', 'C002010191');
+
+delete from pub_billtemplet_t where pub_billtemplet_t.pk_billtemplet in (select pub_billtemplet.pk_billtemplet from pub_billtemplet where pub_billtemplet.pk_billtypecode in ('C0010115'));
+delete from pub_billtemplet_b where pub_billtemplet_b.pk_billtemplet in (select pub_billtemplet.pk_billtemplet from pub_billtemplet where pub_billtemplet.pk_billtypecode in ('C0010115'));
+delete from pub_billtemplet where pub_billtemplet.pk_billtypecode in ('C0010115');
+
+delete from pub_billtemplet_t where pub_billtemplet_t.pk_billtemplet in (select pub_billtemplet.pk_billtemplet from pub_billtemplet where pub_billtemplet.pk_billtypecode in ('C0020410','C0020420','C0020430'));
+delete from pub_billtemplet_b where pub_billtemplet_b.pk_billtemplet in (select pub_billtemplet.pk_billtemplet from pub_billtemplet where pub_billtemplet.pk_billtypecode in ('C0020410','C0020420','C0020430'));
+delete from pub_billtemplet where pub_billtemplet.pk_billtypecode in ('C0020410','C0020420','C0020430');
+
+delete from pub_report_model where pub_report_model.pk_templet in (select pub_report_templet.pk_templet from pub_report_templet where pub_report_templet.node_code in ('C002041000','C00201010100','C002042000','C002043000'));
+delete from pub_report_templet where pub_report_templet.node_code in ('C002041000','C00201010100','C002042000','C002043000');
+
+delete from pub_query_condition where pub_query_condition.pk_templet in (select pub_query_templet.id from pub_query_templet where pub_query_templet.node_code in ('C0020410','C0020420','C0020430'));
+delete from pub_query_templet where pub_query_templet.node_code in ('C0020410','C0020420','C0020430');
+
+delete from pub_query_condition where pub_query_condition.pk_templet in (select pub_query_templet.id from pub_query_templet where pub_query_templet.node_code in ('C0010115','C0010116','C0010117'));
+delete from pub_query_templet where pub_query_templet.node_code in ('C0010115','C0010116','C0010117');
+
+delete from pub_print_dataitem where vnodecode='C0020430';
+delete from pub_print_cell where pub_print_cell.ctemplateid in (select pub_print_template.ctemplateid from pub_print_template where pub_print_template.vnodecode='C0020430');
+delete from pub_print_template where vnodecode='C0020430';
+
+delete from pub_systemplate where funnode in ('C0010115', 'C0010116','C0010117', 'C0020410','C0020420','C0020430');
 
 --功能节点注册
 insert into sm_funcregister (CFUNID, CLASS_NAME, DISP_CODE, DR, DS_NAME, FORBID_FLAG, FUN_CODE, FUN_DESC, FUN_LEVEL, FUN_NAME, FUN_PROPERTY, GROUP_FLAG, HELP_NAME, ISBUTTONPOWER, ISHASPARA, ISNEEDBUTTONLOG, MODULETYPE, ORGTYPECODE, PARENT_ID, PK_CORP, RESID, SHORTCUTCODE, SUBSYSTEM_ID, SYSTEM_FLAG, TS, KEYFUNC)
@@ -803,3 +829,12 @@ values (0, 'C0020430', null, null, null, null, null, null, '@@@@', null, '@@@@ZF
 insert into pub_systemplate (DR, FUNNODE, ISCOMM, NODEKEY, OPERATOR, OPERATOR_TYPE, ORGTYPECODE, PK_BUSITYPE, PK_CORP, PK_ORG, PK_SYSTEMPLATE, SYSFLAG, TEMPLATEFLAG, TEMPLATEID, TEMPSTYLE, TS)
 values (0, 'C0020430', null, null, null, null, null, null, '@@@@', null, '@@@@ZF10000000000HQY', null, 'Y', '0001ZF1000000001O3HR', 3, '2013-09-05 13:28:25');
 
+--单据号规则
+insert into pub_billcode_rule (BILLCODESHORTNAME, CONTROLPARA, DAY, DR, ISAUTOFILL, ISCHECK, ISHAVESHORTNAME, ISPRESERVE, LASTSN, MONTH, OBJECT1, OBJECT2, PK_BILLCODERULE, PK_BILLTYPECODE, PK_CORP, SNNUM, SNRESETFLAG, TS, YEAR)
+values (null, 'N', null, 0, 'Y', 'Y', 'N', 'N', '0000', null, null, null, '0001AB1000000001NKAJ', '36LL', '0001', 7, 0, '2013-09-11 18:33:45', null);
+
+insert into pub_billcode_rule (BILLCODESHORTNAME, CONTROLPARA, DAY, DR, ISAUTOFILL, ISCHECK, ISHAVESHORTNAME, ISPRESERVE, LASTSN, MONTH, OBJECT1, OBJECT2, PK_BILLCODERULE, PK_BILLTYPECODE, PK_CORP, SNNUM, SNRESETFLAG, TS, YEAR)
+values (null, 'N', null, 0, 'Y', 'Y', 'N', 'N', '0000', null, null, null, '0001AB1000000001NKAK', '36LM', '0001', 7, 0, '2013-09-11 18:33:51', null);
+
+insert into pub_billcode_rule (BILLCODESHORTNAME, CONTROLPARA, DAY, DR, ISAUTOFILL, ISCHECK, ISHAVESHORTNAME, ISPRESERVE, LASTSN, MONTH, OBJECT1, OBJECT2, PK_BILLCODERULE, PK_BILLTYPECODE, PK_CORP, SNNUM, SNRESETFLAG, TS, YEAR)
+values (null, 'N', null, 0, 'Y', 'Y', 'N', 'N', '0000', null, null, null, '0001AB1000000001NKAL', '36ZA', '0001', 7, 0, '2013-09-11 18:33:48', null);

@@ -2,6 +2,7 @@ package nc.ui.gzcg.bd;
 
 import java.util.List;
 
+import nc.bs.pub.billcodemanage.BillcodeGenerater;
 import nc.itf.gzcg.bd.SampleManGetCheck;
 import nc.itf.trade.excelimport.IImportableEditor;
 import nc.itf.trade.excelimport.ImportableInfo;
@@ -16,7 +17,9 @@ import nc.ui.trade.card.CardEventHandler;
 import nc.ui.trade.excelimport.InputItem;
 import nc.ui.trade.excelimport.InputItemCreator;
 import nc.vo.gzcg.bd.samplevo;
+import nc.vo.pub.BusinessException;
 import nc.vo.pub.ExtendedAggregatedValueObject;
+import nc.vo.pub.ValidationException;
 
 public abstract class SampleManUI extends AbstractBdBillCardUI implements IImportableEditor, BillEditListener {
 
@@ -46,9 +49,10 @@ public abstract class SampleManUI extends AbstractBdBillCardUI implements IImpor
 	}
 
 	public void setDefaultData() throws Exception {
-		
 	}
 	
+	abstract protected String getBillType();
+
 	public Object getUserObject() {
 		return new SampleManGetCheck(getUIControl().getBodyCondition());
 	}
@@ -140,5 +144,12 @@ public abstract class SampleManUI extends AbstractBdBillCardUI implements IImpor
 		}
 	}
 	
-	public abstract void setLineDefaultData(int rowNo);
+	protected String getBillCode() throws ValidationException, BusinessException{
+		BillcodeGenerater gen = new BillcodeGenerater();
+		String code = gen.getBillCode(getBillType(), _getCorp().getPrimaryKey(), null, null);
+		
+		return code;
+	}
+	
+	public abstract void setLineDefaultData(int rowNo) throws ValidationException, BusinessException;
 }

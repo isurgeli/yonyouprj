@@ -2,6 +2,8 @@ package nc.ui.gzcg.bd;
 
 import nc.ui.trade.bill.ICardController;
 import nc.vo.gzcg.bd.samplevo;
+import nc.vo.pub.BusinessException;
+import nc.vo.pub.ValidationException;
 
 public class ProductSampleUI extends SampleManUI{
 
@@ -21,8 +23,15 @@ public class ProductSampleUI extends SampleManUI{
 	}
 	
 	@Override
-	public void setLineDefaultData(int rowNo) {
+	public void setLineDefaultData(int rowNo) throws ValidationException, BusinessException {
 		getBillCardPanel().setBodyValueAt("P", rowNo, samplevo.VQCTYPE);
+		
+		String code = getBillCode();
+		getBillCardPanel().setBodyValueAt(code, rowNo, samplevo.VDEF2);
 	}
 
+	@Override
+	protected String getBillType() {
+		return "36LM";
+	}
 }

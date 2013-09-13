@@ -4,6 +4,7 @@ package nc.ui.gzcg.bd;
 import nc.ui.bd.pub.DefaultBDBillCardEventHandle;
 import nc.ui.pub.ButtonObject;
 import nc.ui.pub.ClientEnvironment;
+import nc.ui.pub.bill.BillItem;
 import nc.ui.trade.bill.ICardController;
 import nc.ui.trade.businessaction.BdBusinessAction;
 import nc.ui.trade.businessaction.IBusinessController;
@@ -69,5 +70,39 @@ public class SampleManEventHandler extends DefaultBDBillCardEventHandle
 		getBillCardPanelWrapper().getBillCardPanel().setBodyValueAt(new UFBoolean(false), rowNo, samplevo.BURGENT);
 		
 		((SampleManUI)getBillUI()).setLineDefaultData(rowNo);
+	}
+	
+	@Override
+	protected void onBoLinePaste() throws Exception {
+		processCopyedBodyVOsBeforePaste(getBillCardPanelWrapper()
+				.getCopyedBodyVOs());
+		
+		if (getBillCardPanelWrapper().getCopyedBodyVOs() != null)
+			for (int i = 0; i < getBillCardPanelWrapper().getCopyedBodyVOs().length; i++) {
+				getBillCardPanelWrapper().getBillCardPanel().stopEditing();
+				getBillCardPanelWrapper().getBillCardPanel().insertLine();
+				int selectedRow = getBillCardPanelWrapper().getBillCardPanel().getBillTable().getSelectedRow();
+				getBillCardPanelWrapper().getBillCardPanel().getBillModel().setBodyRowVO(getBillCardPanelWrapper().getCopyedBodyVOs()[i], selectedRow);
+				((SampleManUI)getBillUI()).setLineDefaultData(selectedRow);
+				
+				getBillCardPanelWrapper().getBillCardPanel().getBillModel().execLoadFormulaByRow(selectedRow);
+			}
+	}
+	
+	@Override
+	protected void onBoLinePasteToTail() throws Exception {
+		processCopyedBodyVOsBeforePaste(getBillCardPanelWrapper()
+				.getCopyedBodyVOs());
+		
+		if (getBillCardPanelWrapper().getCopyedBodyVOs() != null)
+			for (int i = 0; i < getBillCardPanelWrapper().getCopyedBodyVOs().length; i++) {
+				getBillCardPanelWrapper().getBillCardPanel().stopEditing();
+				getBillCardPanelWrapper().getBillCardPanel().addLine();
+				int lastrow = getBillCardPanelWrapper().getBillCardPanel().getBillTable().getRowCount()-1;
+				getBillCardPanelWrapper().getBillCardPanel().getBillModel().setBodyRowVO(getBillCardPanelWrapper().getCopyedBodyVOs()[i], lastrow);
+				((SampleManUI)getBillUI()).setLineDefaultData(lastrow);
+				
+				getBillCardPanelWrapper().getBillCardPanel().getBillModel().execLoadFormulaByRow(lastrow);
+			}
 	}
 }
