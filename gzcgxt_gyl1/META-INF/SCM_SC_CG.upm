@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="gb2312"?>
+<module name="SCM_SC_ScBillEJB">
+  <public>
+      <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.order.ISCForCGOrderService</interface>
+      <implementation>nc.bs.sc.order.OrderDMOForCG</implementation>
+    </component>
+  </public>
+</module>
+
