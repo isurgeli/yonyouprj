@@ -78,8 +78,9 @@ public class SampleManCheckRules implements ICheckRules,IUniqueRules {
 	 * @see nc.vo.trade.checkrule.IUniqueRules#getItemUniqueRules(java.lang.String)
 	 */
 	public IUniqueRule[] getItemUniqueRules(String tablecode) {
-		return new IUniqueRule[]{
-			new UniqueRule("存货+检验批次重复",new String[]{samplevo.VDEF1, samplevo.VSAMPLENO})
-		};
+		//return new IUniqueRule[]{
+		//	new UniqueRule("存货+检验批次重复",new String[]{samplevo.VDEF1, samplevo.VSAMPLENO})
+		//};
+		return null;
 	}
 }

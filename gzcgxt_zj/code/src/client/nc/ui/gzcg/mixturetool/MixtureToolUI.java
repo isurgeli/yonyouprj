@@ -153,7 +153,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
     	for (int i=0;i<joinStockRowNo.size();i++){
     		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
     		UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
-			reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(unitUse)), joinStockRowNo.get(i), "nremainnum");
+			reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(unitUse)).intValue(), joinStockRowNo.get(i), "nremainnum");
 			ret[i]=unitUse.doubleValue()/totalUnitUse;
 		}
     	mixtureAmountText.setText(String.valueOf(totalUnitUse));
@@ -251,7 +251,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 			setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
 			
 			if (computeMax){
-				mixtureAmountText.setText(String.valueOf(retAmount));
+				mixtureAmountText.setText(String.valueOf(retAmount.doubleValue()));
 			}
 		}
 	}
@@ -306,6 +306,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 				m_billCardPanel.getBillModel().setValueAt(new UFDouble(finalCheckValue), i, "vcomputevalue");
 			}
 		}
+		m_billCardPanel.getBillTable().repaint();
 	}
 	
 	private UFDouble doComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
@@ -736,6 +737,8 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		
 		leftGridCellRender.setMin(min);
 		leftGridCellRender.setMax(max);
+		
+		m_billCardPanel.getBillTable().repaint();
 	}
 
 	@Override

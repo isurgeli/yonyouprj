@@ -5,7 +5,7 @@ create table GZCG_BD_SAMPLEDOC
   burgent      CHAR(1),
   ddate        CHAR(10),
   dr           NUMBER(10) default 0,
-  pk_corp      CHAR(20),
+  pk_corp      CHAR(4),
   pk_invmandoc CHAR(20),
   pk_sample    CHAR(20) not null,
   pk_user      CHAR(20),

@@ -2,6 +2,8 @@ package nc.ui.gzcg.bd;
 
 import java.util.List;
 
+import javax.swing.ListSelectionModel;
+
 import nc.bs.pub.billcodemanage.BillcodeGenerater;
 import nc.itf.gzcg.bd.SampleManGetCheck;
 import nc.itf.trade.excelimport.IImportableEditor;
@@ -34,6 +36,8 @@ public abstract class SampleManUI extends AbstractBdBillCardUI implements IImpor
 	public SampleManUI() {
 		super();
 		getBillCardPanel().addBillEditListenerHeadTail(this);
+		getBillCardPanel().getBillTable().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		getBillCardPanel().getBillTable().setCellSelectionEnabled(true);
 	}
 	
 	protected ICardController createController() {
