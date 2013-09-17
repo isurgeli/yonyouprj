@@ -152,6 +152,8 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
     	Double[] ret = new Double[joinStockRowNo.size()];
     	for (int i=0;i<joinStockRowNo.size();i++){
     		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
+    		if (reportpanel.getBillModel().getItemByKey("nusenum")!=null)
+    			reportpanel.getBillModel().setValueAt(unitCount.multiply(unitUse).intValue(), joinStockRowNo.get(i), "nusenum");
     		UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
 			reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(unitUse)).intValue(), joinStockRowNo.get(i), "nremainnum");
 			ret[i]=unitUse.doubleValue()/totalUnitUse;
@@ -348,7 +350,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 				totalStock+=stockAmount.doubleValue();
 			}
         	int maxAmountNum = (int)Math.floor(totalStock/unitCount.doubleValue());
-        	for(;maxAmountNum>0;maxAmountNum-=10){
+        	for(;maxAmountNum>0;maxAmountNum-=1){///unitCount.doubleValue()){
         		chgConstraints = getStockNumConstraints(joinStockRowNo, unitCount.multiply(maxAmountNum));
         		
                 try{
