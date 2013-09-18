@@ -2,6 +2,7 @@ package nc.ui.gzcg.mixturetool;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -143,22 +144,22 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 				joinStockRowNo.add(row);
 			}
 		}
-		double totalUnitUse = 0;
+		UFDouble totalUnitUse = UFDouble.ZERO_DBL;
     	for (int i=0;i<joinStockRowNo.size();i++){
 			UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
-			totalUnitUse+=unitUse.doubleValue();
+			totalUnitUse = totalUnitUse.add(unitUse);
 		}
     	UFDouble unitCount = getUnitCount();
-    	Double[] ret = new Double[joinStockRowNo.size()];
+    	UFDouble[] ret = new UFDouble[joinStockRowNo.size()];
     	for (int i=0;i<joinStockRowNo.size();i++){
     		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
     		if (reportpanel.getBillModel().getItemByKey("nusenum")!=null)
-    			reportpanel.getBillModel().setValueAt(unitCount.multiply(unitUse).intValue(), joinStockRowNo.get(i), "nusenum");
+    			reportpanel.getBillModel().setValueAt(unitCount.multiply(unitUse).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nusenum");
     		UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
-			reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(unitUse)).intValue(), joinStockRowNo.get(i), "nremainnum");
-			ret[i]=unitUse.doubleValue()/totalUnitUse;
+			reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(unitUse)).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nremainnum");
+			ret[i]=unitUse.div(totalUnitUse);
 		}
-    	mixtureAmountText.setText(String.valueOf(totalUnitUse));
+    	mixtureAmountText.setText(totalUnitUse.setScale(-2, UFDouble.ROUND_UP).toString());
     	setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
 	}
 	
@@ -236,24 +237,24 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 				}
 			}
 		}
-		ArrayList<Double> retList = new ArrayList<Double>();
+		ArrayList<UFDouble> retList = new ArrayList<UFDouble>();
 		UFDouble retAmount = doComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList);
 		if (retAmount.doubleValue() == 0){
 			MessageDialog.showWarningDlg(this, "警告", "无法根据设定条件进行混料。");
 		}else{
-			Double[] ret = retList.toArray(new Double[]{});
+			UFDouble[] ret = retList.toArray(new UFDouble[]{});
 			
 			for (int i=0;i<joinStockRowNo.size();i++){
-				reportpanel.getBillModel().setValueAt(retAmount.multiply(ret[i]).intValue(), joinStockRowNo.get(i), "nunitusenum");
-				reportpanel.getBillModel().setValueAt(unitCount.multiply(retAmount.multiply(ret[i]).intValue()), joinStockRowNo.get(i), "nusenum");
+				reportpanel.getBillModel().setValueAt(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nunitusenum");
+				reportpanel.getBillModel().setValueAt(unitCount.multiply(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN)), joinStockRowNo.get(i), "nusenum");
 				UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
-				reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(retAmount.multiply(ret[i]).intValue())), joinStockRowNo.get(i), "nremainnum");
+				reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN))), joinStockRowNo.get(i), "nremainnum");
 			}
 			
 			setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
 			
 			if (computeMax){
-				mixtureAmountText.setText(String.valueOf(retAmount.doubleValue()));
+				mixtureAmountText.setText(retAmount.setScale(-2, UFDouble.ROUND_UP).toString());
 			}
 		}
 	}
@@ -295,17 +296,17 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		return unitAmount;
 	}
 	
-	private void setComputeCheckValue(Double[] ret, ArrayList<Integer> joinStockRowNo, Hashtable<String, Integer> checkItemidNo){
+	private void setComputeCheckValue(UFDouble[] ret, ArrayList<Integer> joinStockRowNo, Hashtable<String, Integer> checkItemidNo){
 		for (int i=0;i<m_billCardPanel.getBillModel().getRowCount();i++){
 			String checkItemid = m_billCardPanel.getBillModel().getValueAt(i, "ccheckitemid").toString();
 			if (checkItemidNo.containsKey(checkItemid)){	
-				double finalCheckValue = 0;
+				UFDouble finalCheckValue = UFDouble.ZERO_DBL;
 				for(int j=0;j<ret.length;j++){
 					double realCheckValue=Double.parseDouble(reportpanel.getBillModel().getValueAt
 							(joinStockRowNo.get(j), "_CROSS"+checkItemidNo.get(checkItemid)).toString());
-					finalCheckValue+=ret[j]*realCheckValue;
+					finalCheckValue = finalCheckValue.add(ret[j].multiply(realCheckValue));
 				}
-				m_billCardPanel.getBillModel().setValueAt(new UFDouble(finalCheckValue), i, "vcomputevalue");
+				m_billCardPanel.getBillModel().setValueAt(finalCheckValue, i, "vcomputevalue");
 			}
 		}
 		m_billCardPanel.getBillTable().repaint();
@@ -313,7 +314,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 	
 	private UFDouble doComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
 			Hashtable<String, double[]> standardValue, Hashtable<String, Integer> checkItemidNo, UFDouble unitCount, 
-			UFDouble unitAmount, int firstRowNoIdx, ArrayList<Double> retList){
+			UFDouble unitAmount, int firstRowNoIdx, ArrayList<UFDouble> retList){
 		boolean countMax = false;
 		if (unitAmount.doubleValue()==0){
 			unitAmount = new UFDouble(1);
@@ -341,7 +342,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
         if (!countMax){
         	retList.clear();
         	for(int i=0;i<solution.getPoint().length;i++) 
-        		retList.add(solution.getPoint()[i]);
+        		retList.add(new UFDouble(solution.getPoint()[i]));
         	return unitAmount;
         }else{
         	double totalStock = 0;
@@ -365,7 +366,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
                 
                 retList.clear();
             	for(int i=0;i<solution.getPoint().length;i++) 
-            		retList.add(solution.getPoint()[i]);
+            		retList.add(new UFDouble(solution.getPoint()[i]));
             	return new UFDouble(maxAmountNum);
         	}
         	
@@ -769,6 +770,15 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
 			
 			m_billCardPanel.addEditListener(this);
+			
+			MouseListener[] listeners = m_billCardPanel.getBillTable().getTableHeader().getMouseListeners();
+			for(MouseListener listener : listeners)
+				m_billCardPanel.getBillTable().getTableHeader().removeMouseListener(listener);
+			
+			m_billCardPanel.getBillModel().getItemByKey("vcomputevalue").setDecimalDigits(4);
+			//m_billCardPanel.getBillTable().getColumnModel().getColumn(4).setMinWidth(100);
+			//m_billCardPanel.getBillTable().getColumnModel().getColumn(4).setMaxWidth(100);
+			//m_billCardPanel.getBillTable().getColumnModel().getColumn(4).setPreferredWidth(100);
 			
 			leftColHelper = new BillColumnHelper(m_billCardPanel, "bselect");
 			leftColHelper.setSelectColumnHeader();
