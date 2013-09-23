@@ -18,16 +18,13 @@ import nc.ui.sc.settle.SettleUI;
 import nc.ui.sc.settle.btnmgr.SettleBtnObject;
 import nc.ui.scm.ic.freeitem.FreeItemRefPane;
 import nc.vo.ic.pub.bill.GeneralBillItemVO;
-import nc.vo.mm.pub.FreeItemVO;
 import nc.vo.mm.pub.pub1020.DisConditionVO;
 import nc.vo.mm.pub.pub1020.DisassembleVO;
 import nc.vo.pub.BusinessException;
-import nc.vo.pub.lang.UFBoolean;
 import nc.vo.pub.lang.UFDouble;
 import nc.vo.sc.order.CGDisassembleVO;
 import nc.vo.sc.order.OrderDdlbVO;
 import nc.vo.sc.order.OrderItemVO;
-import nc.vo.sc.order.OrderReportVO;
 import nc.vo.sc.order.OrderVO;
 import nc.vo.sc.pub.ScConstants;
 import nc.vo.sc.settle.MaterialledgerVO;
@@ -43,6 +40,7 @@ public class VerifyBtnAction implements IBtnAction {
   private SettleUI clientUI;
 
   private HashMap<String, OrderVO> order_map = new HashMap<String, OrderVO>();
+  HashMap<String,MaterialledgerVO[]> mater_map = null;//订单对应的历史已核销到货信息
   /**
    *  Created on 2009-8-25 
    * <p>Discription:[处理“取消”按钮的点击]</p>
@@ -52,6 +50,7 @@ public class VerifyBtnAction implements IBtnAction {
    */
 	public Object doButtonAction(SettleUI clientUI) {
 		order_map = new HashMap<String, OrderVO>();
+		mater_map = new HashMap<String, MaterialledgerVO[]>();
 		this.clientUI = clientUI;
 
 		// 正在核销
@@ -102,24 +101,30 @@ public class VerifyBtnAction implements IBtnAction {
 			List<DisassembleVO[]> bomList = BillEdit.getBomVOBatch(conditions);
 			String generalid = clientUI.getBillCardPanel().getHeadItem("cbillid").getValue();
 			
-			UFDouble[] intotal = new UFDouble[rowcount];
+			UFDouble[] intotal = new UFDouble[rowcount];//本次每个到货产品金额
+			UFDouble insum = new UFDouble();//本次到货产品金额总金额
 			for(int i=0;i<rowcount;i++) intotal[i]=UFDouble.ZERO_DBL;
 			
-			HashMap<String,UFDouble> orderitem_map = new HashMap<String, UFDouble>();
-			HashMap<String,UFDouble> orderitem_no_map = new HashMap<String, UFDouble>();
+			HashMap<String,UFDouble> orderitem_map = new HashMap<String, UFDouble>();//本次到货产品金额
+			HashMap<String,UFDouble> orderitem_no_map = new HashMap<String, UFDouble>();//本次未到货产品金额
+			
 			List<String> itemidALL  = new ArrayList<String>();//用来记录委外订单行ID
+			UFDouble ordertotalnum = new UFDouble();//本次到货产品的订单金额合计，用来算比例
 			for (int i = rowcount - 1; i >= 0; i--) {
 				UFDouble nnum = (UFDouble) clientUI.getBillCardPanel().getBodyValueAt(i, "nnum");
 				UFDouble nprice = (UFDouble) clientUI.getBillCardPanel().getBodyValueAt(i, "nprocessmny");
 				nnum = nnum == null ? UFDouble.ZERO_DBL : nnum;
 				nprice = nprice == null ? UFDouble.ZERO_DBL : nprice;
 				intotal[i] = nnum.multiply(nprice);
-				
+				insum = insum.add(intotal[i]);
 				//////////////////////////////
 				String corderid = (String) clientUI.getBillCardPanel()
 						.getBodyValueAt(i, "corderid");
 				String corder_bid = (String) clientUI.getBillCardPanel()
 						.getBodyValueAt(i, "corder_bid");
+				
+				UFDouble nshouldinnum = (UFDouble) clientUI.getBillCardPanel()
+						.getBodyValueAt(i, "nshouldinnum");
 				if (corderid != null) {
 					if( order_map.get(corderid) == null){
 						IOrder service = NCLocator.getInstance().lookup(
@@ -131,6 +136,7 @@ public class VerifyBtnAction implements IBtnAction {
 					if (srcbillvo != null) {
 						OrderItemVO[] itemvos = (OrderItemVO[]) srcbillvo.getChildrenVO();
 						UFDouble num = UFDouble.ZERO_DBL;
+						MaterialledgerVO[] materialledgervo = queryMaterialledger(corderid);
 						//得到价格和数量
 						for (int j2 = 0; j2 < itemvos.length; j2++) {
 							if(!itemidALL.contains(itemvos[j2].getPrimaryKey())){
@@ -141,14 +147,22 @@ public class VerifyBtnAction implements IBtnAction {
 							UFDouble naccumstorenum = itemvos[j2].getNaccumstorenum();
 							naccumstorenum = naccumstorenum == null ? UFDouble.ZERO_DBL : naccumstorenum;
 							if(corder_bid.equals(itemvos[j2].getPrimaryKey())){
-								orderitem_map.put(itemvos[j2].getPrimaryKey(),num.sub(naccumstorenum).add(nnum).multiply(nprice));//使用剩余的量
+								ordertotalnum = ordertotalnum.add(itemvos[j2].getNoriginalsummny());
+//								orderitem_map.put(itemvos[j2].getPrimaryKey(),num.sub(naccumstorenum).add(nnum).multiply(nprice));//使用剩余的量
+								orderitem_map.put(itemvos[j2].getPrimaryKey(),nshouldinnum.multiply(nprice));//使用剩余的量
 							}else{
-								UFDouble order_price = itemvos[j2].getNoriginalcurprice() == null ? UFDouble.ZERO_DBL : itemvos[j2].getNoriginalcurprice();
+								UFDouble order_price = itemvos[j2].getNoriginalnetprice() == null ? UFDouble.ZERO_DBL : itemvos[j2].getNoriginalnetprice();
 								if(orderitem_no_map.get(itemvos[j2].getPrimaryKey())==null){
-									orderitem_no_map.put(itemvos[j2].getPrimaryKey(), num.sub(naccumstorenum).multiply(order_price));
+									UFDouble naccum = UFDouble.ZERO_DBL;
+									for (int j = 0;materialledgervo !=null && j < materialledgervo.length; j++) {
+										if(materialledgervo[j].getCorder_bid().equals(itemvos[j2].getPrimaryKey())){
+											naccum = naccum.add(materialledgervo[j].getNnum());
+										}
+									}
+								orderitem_no_map.put(itemvos[j2].getPrimaryKey(), num.sub(naccum).multiply(order_price));//此处不对，可以用已核销
 								}
-								
 							}
+							
 						}
 					}
 				}
@@ -165,8 +179,10 @@ public class VerifyBtnAction implements IBtnAction {
 					}
 				}
 			}
-			UFDouble[] xs = new UFDouble[rowcount];
-			for(int i=0;i<rowcount;i++) xs[i] = intotal[i].div(ordertotal);
+			UFDouble xs_total = new UFDouble();
+			xs_total = insum.div(ordertotal);
+//			UFDouble[] xs = new UFDouble[rowcount];
+//			for(int i=0;i<rowcount;i++) xs[i] = intotal[i].div(ordertotal);
 			// 向界面中插入加工品对应的材料行
 			for (int i = rowcount - 1; i >= 0; i--) {
 				// gc
@@ -204,7 +220,7 @@ public class VerifyBtnAction implements IBtnAction {
 						map = queryGeneralItemVO(list_ids);
 						//gc 需要根据材料出库明细来生成表体材料行
 						// 转换为BOMVO
-						CGDisassembleVO[] disassembleVOs = getDisassembleVOs(list_ids, map, xs[i], corder_bid, ddlbvos,money.div(totalmoney));
+						CGDisassembleVO[] disassembleVOs = getDisassembleVOs(list_ids, map, xs_total, corder_bid, ddlbvos,money.div(ordertotalnum));
 						if(disassembleVOs == null || disassembleVOs.length <=0){
 							clientUI.showHintMessage("核销失败,加工品对应原料不足");
 							return null;
@@ -305,7 +321,8 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 //		}
 		// ////////////////////////////////
 		
-		hxnum[j] = ddlbvos[j].getNnum().sub(totalnum).multiply(xs);//.multiply(bl);
+//		hxnum[j] = ddlbvos[j].getNnum().sub(totalnum).multiply(xs);//.multiply(bl);
+		hxnum[j] = ddlbvos[j].getNnum().sub(totalnum).multiply(xs).multiply(bl);
 				
 	}
 	
@@ -589,6 +606,14 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 	  List<CGDisassembleVO> list_return = new ArrayList<CGDisassembleVO>();
 	  for (int i = 0; i < totalnum.length; i++) {
 		UFDouble num = totalnum[i];
+		
+		//先判断是否满足核销数量。不单是从材料出库看。还要从已核销查找
+		UFDouble accum = ddlbvos[i].getNaccumwastnum() == null ? UFDouble.ZERO_DBL :  ddlbvos[i].getNaccumwastnum();
+		UFDouble accsent = ddlbvos[i].getNaccumsendnum() == null ? UFDouble.ZERO_DBL :  ddlbvos[i].getNaccumsendnum();
+		if(accsent.sub(accum).doubleValue() < num.doubleValue()){//出库数据减已核销数量小于本次需要核销数量
+			//错
+			return null;
+		}
 		String srcid = csourcebillbids.get(i);
 		ArrayList<GeneralBillItemVO> list = map.get(srcid); 
 		if(list !=null && list.size() > 0){
@@ -608,6 +633,7 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 					list_return.add(tempvo);
 					num = num.sub(outnum);
 				}
+				//TODO 需要减去已占用核销
 			}
 			if(num.doubleValue() >0 ){
 				//错
@@ -618,7 +644,7 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 			return null;
 		}
 	}
-	  return list_return.toArray(new CGDisassembleVO[0]);
+	return list_return.toArray(new CGDisassembleVO[0]);
   }
 
   	/**
@@ -644,16 +670,65 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 		return disassemblevo;
 
 	}
-/**
- * gc
- * @param csourcebillbids
- * @return
- * @throws BusinessException
- */
-private HashMap<String, ArrayList<GeneralBillItemVO>> queryGeneralItemVO(
-		ArrayList<String> csourcebillbids) throws BusinessException {
-	IICToSO service = NCLocator.getInstance().lookup(IICToSO.class);
-	  HashMap<String, ArrayList<GeneralBillItemVO>> map = service.getGeneralBillItemVOsByCSBids(csourcebillbids);
-	return map;
-}
+	/**
+	 * gc
+	 * @param csourcebillbids
+	 * @return
+	 * @throws BusinessException
+	 */
+	private HashMap<String, ArrayList<GeneralBillItemVO>> queryGeneralItemVO(
+			ArrayList<String> csourcebillbids) throws BusinessException {
+		IICToSO service = NCLocator.getInstance().lookup(IICToSO.class);
+		  HashMap<String, ArrayList<GeneralBillItemVO>> map = service.getGeneralBillItemVOsByCSBids(csourcebillbids);
+		  //TODO 需要减去已占用核销
+		return map;
+	}
+	/////////////查已核销//////////////
+	private MaterialledgerVO[] queryMaterialledger(String corderid) throws BusinessException{
+		if (mater_map == null || mater_map.get(corderid) == null) {
+			// 先查已核销信息,找到核销对应的入库单信息
+			List<String> cgeneralhid = new ArrayList<String>();
+			MaterialledgerVO paramvo = new MaterialledgerVO();
+			paramvo.setPk_corp(ClientEnvironment.getInstance().getCorporation()
+					.getPrimaryKey());
+			// paramvo.setCorder_bid(corder_bid);
+			paramvo.setCorderid(corderid);
+			// paramvo.setCmaterialmangid(ddlbvos[j]
+			// .getCmangid());
+			Vector all_mater;
+			try {
+				all_mater = MaterialledgerHelper.queryByVOs(
+						new MaterialledgerVO[] { paramvo }, new Boolean[] { true });
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new BusinessException(e);
+			}
+			if (all_mater != null) {
+				MaterialledgerVO[] materivos = (MaterialledgerVO[]) all_mater
+						.get(0);
+
+				for (int ii = 0; ii < materivos.length; ii++) {
+					if (materivos[ii].getCbillid() != null
+							&& !cgeneralhid
+									.contains(materivos[ii].getCbillid())) {
+						cgeneralhid.add(materivos[ii].getCbillid());
+					}
+				}
+			}
+			
+			if(cgeneralhid != null && cgeneralhid.size()>0){
+				Vector<MaterialledgerVO> all_icbill = new Vector<MaterialledgerVO>();
+				for (int i = 0; i < cgeneralhid.size(); i++) {
+					MaterialledgerVO[] itemsVO = MaterialledgerHelper
+							.findLightGeneralItem(cgeneralhid.get(i));
+					for (int j = 0; itemsVO != null && j < itemsVO.length; j++) {
+						all_icbill.add(itemsVO[j]);
+					}
+				}
+				mater_map.put(corderid,all_icbill.toArray(new MaterialledgerVO[all_icbill.size()]));
+			}
+		}
+		return mater_map.get(corderid);
+	}
 }

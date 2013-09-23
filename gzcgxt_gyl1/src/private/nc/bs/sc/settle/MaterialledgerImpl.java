@@ -792,6 +792,8 @@ public class MaterialledgerImpl implements IMateriallledger {
 				VOs[i].setNinassistnum(itemVOs[i].getNinassistnum());
 				// 备注
 				VOs[i].setVmemo(itemVOs[i].getVnotebody());
+				//gc放上应入库数量，其实就是上次的未到货数量
+				VOs[i].setNshouldinnum(itemVOs[i].getNshouldinnum());
 			}
 		} catch (Exception e) {
 			PublicDMO.throwBusinessException(e);
