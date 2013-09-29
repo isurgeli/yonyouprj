@@ -135,6 +135,32 @@ select distinct qc_checkbill.pk_corp,
    and nvl(qc_checkbill.dr, 0) = 0
    and nvl(qc_checkbill_b1.dr, 0) = 0
 );
+
+drop view gzcg_qcrp_checkbill_v3;
+create view gzcg_qcrp_checkbill_v3 as (
+select distinct gzcg_bd_sampledoc.pk_corp,
+                '-' vcheckbillcode,
+                '-' cchecktypeid,
+                '-' ccheckbillid,
+                '-' cvendormangid,
+                gzcg_bd_sampledoc.vdef1 cmangid,
+                '-' pk_invcl,
+                1 nchecknum,
+                'Y' bqualified,
+                1 nsamplecount,
+                '-' cdefectprocessid,
+                '-' creporterid,
+                gzcg_bd_sampledoc.ddate dpraydate,
+                gzcg_bd_sampledoc.ddate daccountdate, 
+                gzcg_bd_sampledoc.ddate dreportdate,
+                '-' vbatchcode,
+                '-' vordercode,
+                '-' csourcebilltypecode
+  from gzcg_bd_sampledoc
+ where gzcg_bd_sampledoc.vqctype = 'S'
+   and nvl(gzcg_bd_sampledoc.dr, 0) = 0
+);
+
 --É¾³ıÄ£°å
 delete from sm_funcregister where (sm_funcregister.fun_code >= 'C0020410' and sm_funcregister.fun_code < 'C0020439') or (sm_funcregister.fun_code >= 'C0010115' and sm_funcregister.fun_code < 'C0010120');
 delete from sm_butnregister where sm_butnregister.fun_code in ('C002010190', 'C002010191');

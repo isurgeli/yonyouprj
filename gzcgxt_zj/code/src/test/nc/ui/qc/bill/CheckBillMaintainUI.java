@@ -6898,7 +6898,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 		sql.append("' and qc_cghzbg_h.pk_corp='");
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
 		sql.append("' and qc_cghzbg_h.VBILLSTATUS="+IBillStatus.CHECKPASS);
-		sql.append("' and nvl(qc_cghzbg_h.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
+		sql.append(" and nvl(qc_cghzbg_h.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
 		
 		ArrayList<String> vsamplecodes = new ArrayList<String>();
 		

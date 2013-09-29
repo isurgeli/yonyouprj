@@ -18,6 +18,7 @@ public enum GZCGConstant {
 	DEFDOCPODUCTPK("0001ZF1000000001O92U"),
 	MATERIALMAINVIEW("gzcg_qcrp_checkbill_v"),
 	PRODUCTMAINVIEW("gzcg_qcrp_checkbill_v2"),
+	SEMIPRODUCTMAINVIEW("gzcg_qcrp_checkbill_v3"),
 	CHECKTYPEPURCHASE("C0010101000000000002");
 		
 	private final String value;

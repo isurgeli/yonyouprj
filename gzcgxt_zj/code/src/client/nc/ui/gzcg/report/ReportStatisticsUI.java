@@ -85,9 +85,9 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 				bnFilter, bnSubtotal, bnMultSort, bnLocate, bnRefresh, bnfilter};
 	}
 	
-	private ArrayList<String> getSelectColsForIndex(int start, int end){
+	private ArrayList<String> getSelectColsForIndex(int[] idxs){
 		ArrayList<String> cols = new ArrayList<String>();
-		for (int idx=start;idx<=end;idx++){
+		for (int idx : idxs){
 			if (sqlCtrls.get(GZCGReportStatisticsConst.values()[idx]).isSelected())
 				cols.addAll(Arrays.asList(GZCGReportStatisticsConst.values()[idx].getCols()));
 		}
@@ -136,7 +136,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		reportDataCache = null;
 		
 		ArrayList<String> allshowcols = new ArrayList<String>();
-		allshowcols.addAll(getSelectColsForIndex(reportConfig.dimentionStart, reportConfig.dimentionEnd));
+		allshowcols.addAll(getSelectColsForIndex(reportConfig.dimention));
 		
 		String sql = new SQLBuildUtil(GZCGReportStatisticsConst.values(), reportConfig, sqlProcesser).
 				getSQLForReportStatistics(sqlCtrls, voCondition, getInvCheckItemWhere());
@@ -449,7 +449,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 
 	private int getDimensionCount() {
 		int ret = 0;
-		for (int idx=reportConfig.dimentionStart;idx<=reportConfig.dimentionEnd;idx++){
+		for (int idx : reportConfig.dimention){
 			if (sqlCtrls.get(GZCGReportStatisticsConst.values()[idx]).isSelected())
 				ret+=GZCGReportStatisticsConst.values()[idx].getCols().length;
 		}

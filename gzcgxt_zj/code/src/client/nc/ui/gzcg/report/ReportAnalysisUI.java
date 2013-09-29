@@ -66,17 +66,17 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 	
 	protected abstract void afterHideReportPanel(ReportPanel reportpanel);
 	
-	private ArrayList<String> getColsForIndex(int start, int end){
+	private ArrayList<String> getColsForIndex(int[] idxs){
 		ArrayList<String> cols = new ArrayList<String>();
-		for (int idx=start;idx<=end;idx++){
+		for (int idx : idxs){
 			cols.addAll(Arrays.asList(GZCGReportAnalysisConst.values()[idx].getCols()));
 		}
 		return cols;
 	}
 	
-	private ArrayList<String> getSelectColsForIndex(int start, int end){
+	private ArrayList<String> getSelectColsForIndex(int[] idxs){
 		ArrayList<String> cols = new ArrayList<String>();
-		for (int idx=start;idx<=end;idx++){
+		for (int idx : idxs){
 			if (conditionCtrls.get(GZCGReportAnalysisConst.values()[idx]).isSelected())
 				cols.addAll(Arrays.asList(GZCGReportAnalysisConst.values()[idx].getCols()));
 		}
@@ -87,13 +87,13 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 	public void setReportData(ConditionVO[] voCondition) {
 		getReportPanel().setBody_Items(initBodyItems);
 		ArrayList<String> allcols = new ArrayList<String>();
-		allcols.addAll(getColsForIndex(reportConfig.dimentionStart, reportConfig.dimentionEnd));
-		allcols.addAll(getColsForIndex(reportConfig.measureStart,reportConfig.measureEnd));
+		allcols.addAll(getColsForIndex(reportConfig.dimention));
+		allcols.addAll(getColsForIndex(reportConfig.measure));
 		getReportPanel().hideColumn(allcols.toArray(new String[]{}));
 		
 		ArrayList<String> allshowcols = new ArrayList<String>();
-		allshowcols.addAll(getSelectColsForIndex(reportConfig.dimentionStart, reportConfig.dimentionEnd));
-		allshowcols.addAll(getSelectColsForIndex(reportConfig.measureStart, reportConfig.measureEnd));
+		allshowcols.addAll(getSelectColsForIndex(reportConfig.dimention));
+		allshowcols.addAll(getSelectColsForIndex(reportConfig.measure));
 		getReportPanel().showHiddenColumn(allshowcols.toArray(new String[]{}));
 		
 		String sql = new SQLBuildUtil(GZCGReportAnalysisConst.values(), reportConfig, sqlProcesser).getSQLForReportAnalysis(conditionCtrls, voCondition);
@@ -130,6 +130,7 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 						processCrossData(reportSet, crossData);
 					}
 				}
+				afterHideReportPanel(getReportPanel());
 				setData(reportData);
 			}
 		} catch (BusinessException e) {
@@ -139,7 +140,7 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 	}
 	
 	private boolean isCrossSelected()	{
-		for(int i=reportConfig.crossStart;i<=reportConfig.crossEnd;i++){
+		for(int i : reportConfig.cross){
 			if (conditionCtrls.get(GZCGReportAnalysisConst.values()[i]).isSelected())
 				return true;
 		}
@@ -225,13 +226,11 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 		
 		getReportPanel().setFieldGroup(groupVOs.toArray(new FldgroupVO[]{}));
 		getReportPanel().setBody_Items(finalBodyItems.toArray(new ReportItem[]{}));
-		
-		afterHideReportPanel(getReportPanel());
 	}
 
 	private int getDimensionCount() {
 		int ret = 0;
-		for (int idx=reportConfig.dimentionStart;idx<=reportConfig.dimentionEnd;idx++){
+		for (int idx : reportConfig.dimention){
 			if (conditionCtrls.get(GZCGReportAnalysisConst.values()[idx]).isSelected())
 				ret+=GZCGReportAnalysisConst.values()[idx].getCols().length;
 		}
@@ -257,9 +256,9 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 			UIPanel panel1 = new UIPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
 			UIPanel panel2 = new UIPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
 			
-			initCheckboxCtrl(panel1, panel2, reportConfig.dimentionStart, reportConfig.dimentionEnd, true);
-			initCheckboxCtrl(panel1, panel2, reportConfig.measureStart, reportConfig.measureEnd, false);
-			initCheckboxCtrl(panel1, panel2, reportConfig.crossStart, reportConfig.crossEnd, false);
+			initCheckboxCtrl(panel1, panel2, reportConfig.dimention, true);
+			initCheckboxCtrl(panel1, panel2, reportConfig.measure, false);
+			initCheckboxCtrl(panel1, panel2, reportConfig.cross, false);
 			
 			conditionPanel.add(panel1);
 			conditionPanel.add(panel2);
@@ -268,13 +267,17 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 				conditionCtrls.get(GZCGReportAnalysisConst.values()[reportConfig.mustSelect[i]]).setEnabled(false);
 				conditionCtrls.get(GZCGReportAnalysisConst.values()[reportConfig.mustSelect[i]]).setSelected(true);
 			}
+			
+			afterConditionPanelInit();
 		}
 		
 		return conditionpanel;
 	}
+	
+	protected abstract void afterConditionPanelInit();
 
-	private void initCheckboxCtrl(UIPanel panel1, UIPanel panel2, int start, int end, boolean first) {
-		for (int idx=start;idx<=end;idx++){
+	private void initCheckboxCtrl(UIPanel panel1, UIPanel panel2, int[] idxs, boolean first) {
+		for (int idx : idxs){
 			UICheckBox ctrl = new UICheckBox(GZCGReportAnalysisConst.values()[idx].getValue());
 			conditionCtrls.put(GZCGReportAnalysisConst.values()[idx], ctrl);
 			if (first){

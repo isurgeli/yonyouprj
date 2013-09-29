@@ -29,12 +29,9 @@ public class CustomerAnalysisUI extends ReportAnalysisUI{
 	protected void setReportAnalysisConfig() {
 		if (reportConfig==null){
 			reportConfig = new ReportConigParam();
-			reportConfig.dimentionStart = GZCGReportAnalysisConst.customerDimentionStart;
-			reportConfig.dimentionEnd = GZCGReportAnalysisConst.customerDimentionEnd;
-			reportConfig.measureStart = GZCGReportAnalysisConst.customerMeasureStart;
-			reportConfig.measureEnd = GZCGReportAnalysisConst.customerMeasureEnd;
-			reportConfig.crossStart = GZCGReportAnalysisConst.customerCrossStart;
-			reportConfig.crossEnd = GZCGReportAnalysisConst.customerCrossEnd;
+			reportConfig.dimention = new int[]{0, 1, 2, 3};
+			reportConfig.measure = new int[]{4, 5, 6, 7, 8, 9, 10, 11, 12};
+			reportConfig.cross = new int[]{13};
 			reportConfig.mustSelect = new int[]{0};
 			reportConfig.crossMeasure = new int[]{4,5};
 		}
@@ -103,5 +100,9 @@ public class CustomerAnalysisUI extends ReportAnalysisUI{
 	@Override
 	protected void afterHideReportPanel(ReportPanel reportpanel) {
 		reportpanel.hideColumn(new String[]{"vcustcode", "vinvdoccode"});
+	}
+
+	@Override
+	protected void afterConditionPanelInit() {
 	}
 }

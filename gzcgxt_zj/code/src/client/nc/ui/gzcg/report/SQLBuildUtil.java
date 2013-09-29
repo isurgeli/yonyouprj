@@ -61,8 +61,8 @@ public class SQLBuildUtil {
 		return getAssembleSQL(sqlQuery, sqlFrom, sqlWhere, sqlGroup);
 	}
 
-	private void queryItemClauseHelper(Hashtable<ISQLSection, UICheckBox> conditionCtrls, StringBuffer sql, int start, int end) {
-		for (int idx=start;idx<=end;idx++){
+	private void queryItemClauseHelper(Hashtable<ISQLSection, UICheckBox> conditionCtrls, StringBuffer sql, int[] idxs) {
+		for (int idx : idxs){
 			if (conditionCtrls.get(sqlSections[idx]).isSelected()){
 				for(String queryItem : sqlSections[idx].getQueryItems()){
 					sql.append(queryItem);
@@ -75,7 +75,7 @@ public class SQLBuildUtil {
 	private StringBuffer getSQLGroupClause(Hashtable<ISQLSection, UICheckBox> conditionCtrls){
 		StringBuffer sqlGroup = new StringBuffer();
 		sqlGroup.append("group by ");
-		queryItemClauseHelper(conditionCtrls, sqlGroup, reportConfig.dimentionStart, reportConfig.dimentionEnd);
+		queryItemClauseHelper(conditionCtrls, sqlGroup, reportConfig.dimention);
 		sqlGroup.delete(sqlGroup.length()-2, sqlGroup.length()-1);
 		return sqlGroup;
 	}
@@ -83,14 +83,14 @@ public class SQLBuildUtil {
 	private StringBuffer getSQLGroupClauseCross(Hashtable<ISQLSection, UICheckBox> conditionCtrls){
 		StringBuffer sqlGroup = new StringBuffer();
 		sqlGroup.append("group by ");
-		queryItemClauseHelper(conditionCtrls, sqlGroup, reportConfig.dimentionStart, reportConfig.dimentionEnd);
-		queryItemClauseHelper(conditionCtrls, sqlGroup, reportConfig.crossStart, reportConfig.crossEnd);
+		queryItemClauseHelper(conditionCtrls, sqlGroup, reportConfig.dimention);
+		queryItemClauseHelper(conditionCtrls, sqlGroup, reportConfig.cross);
 		sqlGroup.delete(sqlGroup.length()-2, sqlGroup.length()-1);
 		return sqlGroup; 
 	}
 	
-	private void joinClauseHelper(Hashtable<ISQLSection, UICheckBox> conditionCtrls, StringBuffer sqlGroup, int start, int end) {
-		for (int idx=start;idx<=end;idx++){
+	private void joinClauseHelper(Hashtable<ISQLSection, UICheckBox> conditionCtrls, StringBuffer sqlGroup, int[] idxs) {
+		for (int idx : idxs){
 			if (conditionCtrls.get(sqlSections[idx]).isSelected()){
 				for(String join : sqlSections[idx].getJoins()){
 					sqlGroup.append(join);
@@ -102,7 +102,7 @@ public class SQLBuildUtil {
 	private StringBuffer getSQLWhereClause(Hashtable<ISQLSection, UICheckBox> conditionCtrls, ConditionVO[] voCondition){
 		StringBuffer sqlWhere = new StringBuffer();
 		sqlWhere.append(" where 1=1");
-		joinClauseHelper(conditionCtrls, sqlWhere, reportConfig.dimentionStart, reportConfig.dimentionEnd);
+		joinClauseHelper(conditionCtrls, sqlWhere, reportConfig.dimention);
 		
 		sqlWhere.append(" and gzcg_qcrp_checkbill_v.pk_corp='"+ClientEnvironment.getInstance().getCorporation().getPrimaryKey()+"' ");
 		if(voCondition!=null && voCondition.length>0)
@@ -113,12 +113,12 @@ public class SQLBuildUtil {
 	
 	private StringBuffer getSQLWhereClauseCross(Hashtable<ISQLSection, UICheckBox> conditionCtrls, ConditionVO[] voCondition){
 		StringBuffer sqlWhere = getSQLWhereClause(conditionCtrls, voCondition);
-		joinClauseHelper(conditionCtrls, sqlWhere, reportConfig.crossStart, reportConfig.crossEnd);
+		joinClauseHelper(conditionCtrls, sqlWhere, reportConfig.cross);
 		return sqlWhere; 
 	}
 	
-	private void fromClauseHelper(Hashtable<ISQLSection, UICheckBox> conditionCtrls, StringBuffer sqlGroup, int start, int end) {
-		for (int idx=start;idx<=end;idx++){
+	private void fromClauseHelper(Hashtable<ISQLSection, UICheckBox> conditionCtrls, StringBuffer sqlGroup, int[] idxs) {
+		for (int idx : idxs){
 			if (conditionCtrls.get(sqlSections[idx]).isSelected()){
 				for(String table : sqlSections[idx].getTables()){
 					sqlGroup.append(", ");
@@ -131,21 +131,21 @@ public class SQLBuildUtil {
 	private StringBuffer getSQLFromClause(Hashtable<ISQLSection, UICheckBox> conditionCtrls){
 		StringBuffer sqlFrom = new StringBuffer();
 		sqlFrom.append(" from gzcg_qcrp_checkbill_v");
-		fromClauseHelper(conditionCtrls, sqlFrom, reportConfig.dimentionStart, reportConfig.dimentionEnd);
+		fromClauseHelper(conditionCtrls, sqlFrom, reportConfig.dimention);
 		return sqlFrom;
 	}
 	
 	private StringBuffer getSQLFromClauseCross(Hashtable<ISQLSection, UICheckBox> conditionCtrls){
 		StringBuffer sqlFrom = getSQLFromClause(conditionCtrls);
-		fromClauseHelper(conditionCtrls, sqlFrom, reportConfig.crossStart, reportConfig.crossEnd);
+		fromClauseHelper(conditionCtrls, sqlFrom, reportConfig.cross);
 		return sqlFrom;
 	}
 
 	private StringBuffer getSQLQueryClause(Hashtable<ISQLSection, UICheckBox> conditionCtrls) {
 		StringBuffer sqlQuery = new StringBuffer();
 		sqlQuery.append("select ");
-		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.dimentionStart, reportConfig.dimentionEnd);
-		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.measureStart, reportConfig.measureEnd);
+		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.dimention);
+		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.measure);
 		
 		String placehold = "";
 		if (conditionCtrls.containsKey(sqlSections[reportConfig.idxINVCL]) && conditionCtrls.get(sqlSections[reportConfig.idxINVCL]).isSelected()){
@@ -167,8 +167,8 @@ public class SQLBuildUtil {
 	private StringBuffer getSQLQueryClauseCross(Hashtable<ISQLSection, UICheckBox> conditionCtrls) {
 		StringBuffer sqlQuery = new StringBuffer();
 		sqlQuery.append("select ");
-		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.dimentionStart, reportConfig.dimentionEnd);
-		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.crossStart, reportConfig.crossEnd);
+		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.dimention);
+		queryItemClauseHelper(conditionCtrls, sqlQuery, reportConfig.cross);
 		
 		if (reportConfig.crossMeasure.length!=0 && conditionCtrls.get(sqlSections[reportConfig.crossMeasure[0]]).isSelected()){
 			for(String queryItem : sqlSections[reportConfig.crossMeasure[0]].getQueryItems()){

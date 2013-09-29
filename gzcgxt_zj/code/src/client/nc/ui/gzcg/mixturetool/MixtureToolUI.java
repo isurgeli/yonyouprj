@@ -98,11 +98,11 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 	public ButtonObject[] getButtons() {
 		if (bnStock==null && bnCompute==null && bnTry==null && bnClearStock==null) {
 			bnStock = new ButtonObject("获取库存", "获取库存", 2, "获取库存"); 
-			bnCompute = new ButtonObject("自动计算", "自动计算", 2, "自动计算");
-			bnTry = new ButtonObject("手工试算", "手工试算", 2, "手工试算");
+			bnCompute = new ButtonObject("标准约束计算", "标准约束计算", 2, "标准约束计算");
+			bnTry = new ButtonObject("全部使用计算", "全部使用计算", 2, "全部使用计算");
 			bnClearStock = new ButtonObject("清除库存", "清除库存", 2, "清除库存");
 		}
-		return new ButtonObject[]{bnPrint, bnModelPrint, bnPreview, bnOut, bnStock, bnClearStock, bnCompute, bnTry};
+		return new ButtonObject[]{bnPrint, bnModelPrint, bnPreview, bnOut, bnStock, bnClearStock, bnTry, bnCompute};
 	}
 	
 	@Override
@@ -152,11 +152,19 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
     	UFDouble unitCount = getUnitCount();
     	UFDouble[] ret = new UFDouble[joinStockRowNo.size()];
     	for (int i=0;i<joinStockRowNo.size();i++){
-    		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
-    		if (reportpanel.getBillModel().getItemByKey("nusenum")!=null)
-    			reportpanel.getBillModel().setValueAt(unitCount.multiply(unitUse).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nusenum");
     		UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
-			reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(unitUse)).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nremainnum");
+    		UFDouble unitUse = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nunitusenum").toString());
+    		UFDouble remainNum = stockAmount.sub(unitCount.multiply(unitUse)).setScale(-2, UFDouble.ROUND_DOWN);
+    		if (remainNum.abs().doubleValue() < 1){
+    			if (reportpanel.getBillModel().getItemByKey("nusenum")!=null)
+    				reportpanel.getBillModel().setValueAt(stockAmount, joinStockRowNo.get(i), "nusenum");
+    			reportpanel.getBillModel().setValueAt(UFDouble.ZERO_DBL, joinStockRowNo.get(i), "nremainnum");
+    		}else{
+    			if (reportpanel.getBillModel().getItemByKey("nusenum")!=null)
+    				reportpanel.getBillModel().setValueAt(unitCount.multiply(unitUse).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nusenum");
+    			reportpanel.getBillModel().setValueAt(remainNum, joinStockRowNo.get(i), "nremainnum");
+    		}
+    		
 			ret[i]=unitUse.div(totalUnitUse);
 		}
     	mixtureAmountText.setText(totalUnitUse.setScale(-2, UFDouble.ROUND_UP).toString());
@@ -238,17 +246,30 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 			}
 		}
 		ArrayList<UFDouble> retList = new ArrayList<UFDouble>();
-		UFDouble retAmount = doComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList);
+		UFDouble retAmount = UFDouble.ZERO_DBL;
+		if (computeMax){
+			retAmount = doMaxComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList);
+		}else{
+			retAmount = doConstComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList);
+		}
 		if (retAmount.doubleValue() == 0){
 			MessageDialog.showWarningDlg(this, "警告", "无法根据设定条件进行混料。");
 		}else{
 			UFDouble[] ret = retList.toArray(new UFDouble[]{});
 			
 			for (int i=0;i<joinStockRowNo.size();i++){
-				reportpanel.getBillModel().setValueAt(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nunitusenum");
-				reportpanel.getBillModel().setValueAt(unitCount.multiply(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN)), joinStockRowNo.get(i), "nusenum");
 				UFDouble stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(joinStockRowNo.get(i), "nstocknum").toString());
-				reportpanel.getBillModel().setValueAt(stockAmount.sub(unitCount.multiply(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN))), joinStockRowNo.get(i), "nremainnum");
+				UFDouble remainNum = stockAmount.sub(unitCount.multiply(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN)));
+				
+				if (remainNum.abs().doubleValue() < 1){
+					reportpanel.getBillModel().setValueAt(stockAmount.div(unitCount).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nunitusenum");
+					reportpanel.getBillModel().setValueAt(stockAmount, joinStockRowNo.get(i), "nusenum");
+					reportpanel.getBillModel().setValueAt(UFDouble.ZERO_DBL, joinStockRowNo.get(i), "nremainnum");
+				}else{
+					reportpanel.getBillModel().setValueAt(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN), joinStockRowNo.get(i), "nunitusenum");
+					reportpanel.getBillModel().setValueAt(unitCount.multiply(retAmount.multiply(ret[i]).setScale(-2, UFDouble.ROUND_DOWN)), joinStockRowNo.get(i), "nusenum");
+					reportpanel.getBillModel().setValueAt(remainNum, joinStockRowNo.get(i), "nremainnum");
+				}
 			}
 			
 			setComputeCheckValue(ret, joinStockRowNo, checkItemidNo);
@@ -312,117 +333,171 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		m_billCardPanel.getBillTable().repaint();
 	}
 	
-	private UFDouble doComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
+	private UFDouble doConstComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
 			Hashtable<String, double[]> standardValue, Hashtable<String, Integer> checkItemidNo, UFDouble unitCount, 
 			UFDouble unitAmount, int firstRowNoIdx, ArrayList<UFDouble> retList){
-		boolean countMax = false;
-		if (unitAmount.doubleValue()==0){
-			unitAmount = new UFDouble(1);
-			countMax = true;
-		}
+		return doComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList, false);
+	}
+	
+	private void prepareComputeWork(ArrayList<Integer> joinStockRowNo,
+			Hashtable<String, String> needComputeCheckItemId,
+			Hashtable<String, double[]> standardValue,
+			Hashtable<String, Integer> checkItemidNo,
+			ArrayList<UFDouble> stockAmounts,
+			ArrayList<LinearConstraint> constraints) {
+		for (int i=0;i<joinStockRowNo.size();i++)
+	      	stockAmounts.add(getMaxUseStockNum(joinStockRowNo.get(i)));
 		
-		double[] objectiveFunctionCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
-		objectiveFunctionCoefficients[firstRowNoIdx] = 1.0;
-		LinearObjectiveFunction f = new LinearObjectiveFunction(objectiveFunctionCoefficients, 0.0);
-        
-        ArrayList<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
-		ArrayList<LinearConstraint> regConstraints = getRegConstraints(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo);
-		ArrayList<LinearConstraint> chgConstraints = getStockNumConstraints(joinStockRowNo, unitCount.multiply(unitAmount));
-        
+		ArrayList<LinearConstraint> checkConstraints = getCheckValueConstraints(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, stockAmounts);
+		ArrayList<LinearConstraint> stockConstraints = getStockNumConstraints(joinStockRowNo);
+		
+		constraints.addAll(checkConstraints);
+    	constraints.addAll(stockConstraints);
+	}
+	
+	private UFDouble doComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
+			Hashtable<String, double[]> standardValue, Hashtable<String, Integer> checkItemidNo, UFDouble unitCount, 
+			UFDouble unitAmount, int firstRowNoIdx, ArrayList<UFDouble> retList, boolean max){
+		
+		ArrayList<UFDouble> stockAmounts = new ArrayList<UFDouble>();
+		ArrayList<LinearConstraint> constraints = new ArrayList<LinearConstraint>();
+		LinearObjectiveFunction f = null;
+		
+		prepareComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, stockAmounts, constraints);
+		if (!max){
+			double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 1.0);
+			for (int i=0;i<joinStockRowNo.size();i++)
+				constraintCoefficients[i] = stockAmounts.get(i).div(unitCount).div(unitAmount).doubleValue();
+			
+			constraints.add(new LinearConstraint(constraintCoefficients, Relationship.EQ, 1));
+			
+			double[] objectiveFunctionCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+			objectiveFunctionCoefficients[firstRowNoIdx] = 1.0;
+			f = new LinearObjectiveFunction(objectiveFunctionCoefficients, 0.0);
+		}else{
+			double[] objectiveFunctionCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+			for (int i=0;i<joinStockRowNo.size();i++)
+				objectiveFunctionCoefficients[i] = stockAmounts.get(i).doubleValue();
+			f = new LinearObjectiveFunction(objectiveFunctionCoefficients, 0.0);
+		}
+                
 	    PointValuePair solution = null;
         try{
-        	constraints.addAll(regConstraints);
-        	constraints.addAll(chgConstraints);
         	solution = new SimplexSolver().optimize(f, constraints, GoalType.MAXIMIZE, true);
         }
         catch(NoFeasibleSolutionException ex){
         	return UFDouble.ZERO_DBL;
         }
-        
-        if (!countMax){
-        	retList.clear();
-        	for(int i=0;i<solution.getPoint().length;i++) 
-        		retList.add(new UFDouble(solution.getPoint()[i]));
-        	return unitAmount;
-        }else{
-        	double totalStock = 0;
-        	for (int i=0;i<joinStockRowNo.size();i++){
-				UFDouble stockAmount = new UFDouble(getMaxUseStockNum(joinStockRowNo.get(i)));
-				totalStock+=stockAmount.doubleValue();
-			}
-        	int maxAmountNum = (int)Math.floor(totalStock/unitCount.doubleValue());
-        	for(;maxAmountNum>0;maxAmountNum-=1){///unitCount.doubleValue()){
-        		chgConstraints = getStockNumConstraints(joinStockRowNo, unitCount.multiply(maxAmountNum));
-        		
-                try{
-                	constraints.clear();
-                	constraints.addAll(regConstraints);
-                	constraints.addAll(chgConstraints);
-                	solution = new SimplexSolver().optimize(f, constraints, GoalType.MAXIMIZE, true);
-                }
-                catch(NoFeasibleSolutionException ex){
-                	continue;
-                }
-                
-                retList.clear();
-            	for(int i=0;i<solution.getPoint().length;i++) 
-            		retList.add(new UFDouble(solution.getPoint()[i]));
-            	return new UFDouble(maxAmountNum);
-        	}
-        	
-        	return UFDouble.ZERO_DBL;
-        }
+
+		if (max){
+			unitAmount = UFDouble.ZERO_DBL;
+			for (int i = 0; i < solution.getPoint().length; i++)
+				unitAmount = unitAmount.add(stockAmounts.get(i).multiply(solution.getPoint()[i]));
+			unitAmount = unitAmount.div(unitCount);
+		}
+		
+		retList.clear();
+		for (int i = 0; i < solution.getPoint().length; i++)
+			retList.add(stockAmounts.get(i).multiply(solution.getPoint()[i]).div(unitAmount.multiply(unitCount)));
+		return unitAmount;
+	}
+	
+	private UFDouble doMaxComputeWork(ArrayList<Integer> joinStockRowNo, Hashtable<String, String> needComputeCheckItemId,
+			Hashtable<String, double[]> standardValue, Hashtable<String, Integer> checkItemidNo, UFDouble unitCount, 
+			UFDouble unitAmount, int firstRowNoIdx, ArrayList<UFDouble> retList){
+		
+		return doComputeWork(joinStockRowNo, needComputeCheckItemId, standardValue, checkItemidNo, unitCount, unitAmount, firstRowNoIdx, retList, true);
 	}
 
-	private ArrayList<LinearConstraint> getRegConstraints(ArrayList<Integer> joinStockRowNo,
+	private ArrayList<LinearConstraint> getCheckValueConstraints(ArrayList<Integer> joinStockRowNo,
 			Hashtable<String, String> needComputeCheckItemId,
 			Hashtable<String, double[]> standardValue,
-			Hashtable<String, Integer> checkItemidNo) {
+			Hashtable<String, Integer> checkItemidNo,
+			ArrayList<UFDouble> stockAmounts) {
 		ArrayList<LinearConstraint> regConstraints = new ArrayList<LinearConstraint>();
 		
 		for(String checkItemId : needComputeCheckItemId.keySet()){
         	double[] itemStandardValue = standardValue.get(checkItemId);
-        	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+        	double[] downConstraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+        	double[] upConstraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
     		for (int i=0;i<joinStockRowNo.size();i++){
-    			constraintCoefficients[i]=Double.parseDouble(reportpanel.getBillModel().getValueAt
+    			UFDouble checkValue = new UFDouble(reportpanel.getBillModel().getValueAt
 						(joinStockRowNo.get(i), "_CROSS"+checkItemidNo.get(checkItemId)).toString());
+    			downConstraintCoefficients[i]=checkValue.sub(itemStandardValue[0]).multiply(stockAmounts.get(i)).toDouble();
+    			upConstraintCoefficients[i]=checkValue.sub(itemStandardValue[1]).multiply(stockAmounts.get(i)).toDouble();
     		}
         	if (itemStandardValue[0]>epsilon){
-        		regConstraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.GEQ, itemStandardValue[0]));
+        		regConstraints.add(new LinearConstraint(downConstraintCoefficients, Relationship.GEQ, 0));
         	}
         	if (itemStandardValue[0]<1-epsilon){
-        		regConstraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.LEQ, itemStandardValue[1]));
+        		regConstraints.add(new LinearConstraint(upConstraintCoefficients, Relationship.LEQ, 0));
         	}
         }
 	    
-	    {
-	       	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 1.0);
-	       	regConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.EQ, 1));
-	    }
-	    
 	    return regConstraints;
 	}
+	
+//	private ArrayList<LinearConstraint> getRegConstraints(ArrayList<Integer> joinStockRowNo,
+//			Hashtable<String, String> needComputeCheckItemId,
+//			Hashtable<String, double[]> standardValue,
+//			Hashtable<String, Integer> checkItemidNo) {
+//		ArrayList<LinearConstraint> regConstraints = new ArrayList<LinearConstraint>();
+//		
+//		for(String checkItemId : needComputeCheckItemId.keySet()){
+//        	double[] itemStandardValue = standardValue.get(checkItemId);
+//        	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+//    		for (int i=0;i<joinStockRowNo.size();i++){
+//    			constraintCoefficients[i]=Double.parseDouble(reportpanel.getBillModel().getValueAt
+//						(joinStockRowNo.get(i), "_CROSS"+checkItemidNo.get(checkItemId)).toString());
+//    		}
+//        	if (itemStandardValue[0]>epsilon){
+//        		regConstraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.GEQ, itemStandardValue[0]));
+//        	}
+//        	if (itemStandardValue[0]<1-epsilon){
+//        		regConstraints.add(new LinearConstraint(constraintCoefficients.clone(), Relationship.LEQ, itemStandardValue[1]));
+//        	}
+//        }
+//	    
+//	    {
+//	       	double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 1.0);
+//	       	regConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.EQ, 1));
+//	    }
+//	    
+//	    return regConstraints;
+//	}
 
-	private ArrayList<LinearConstraint> getStockNumConstraints(ArrayList<Integer> joinStockRowNo, UFDouble mixAmount) {
+//	private ArrayList<LinearConstraint> getStockNumConstraints(ArrayList<Integer> joinStockRowNo, UFDouble mixAmount) {
+//		ArrayList<LinearConstraint> chgConstraints = new ArrayList<LinearConstraint>();
+//		for (int i=0;i<joinStockRowNo.size();i++){
+//	      	UFDouble stockAmount = UFDouble.ZERO_DBL;
+//	      	stockAmount = getMaxUseStockNum(joinStockRowNo.get(i));
+//	       	if (stockAmount.compareTo(mixAmount) < 0){
+//	       		double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+//	       		constraintCoefficients[i] = 1.0;
+//	       		chgConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, stockAmount.div(mixAmount).doubleValue()));
+//	       	}
+//	    }
+//		return chgConstraints;
+//	}
+	
+	private ArrayList<LinearConstraint> getStockNumConstraints(ArrayList<Integer> joinStockRowNo) {
 		ArrayList<LinearConstraint> chgConstraints = new ArrayList<LinearConstraint>();
+		
 		for (int i=0;i<joinStockRowNo.size();i++){
-	      	double stockAmount = 0;
-	      	stockAmount = getMaxUseStockNum(joinStockRowNo.get(i));
-	       	if (stockAmount < mixAmount.doubleValue()){
-	       		double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
-	       		constraintCoefficients[i] = 1.0;
-	       		chgConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, stockAmount/mixAmount.doubleValue()));
-	       	}
-	    }
+    		double[] constraintCoefficients = getDoubleArray(joinStockRowNo.size(), 0.0);
+       		constraintCoefficients[i] = 1.0;
+       		chgConstraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, 1));
+		}
+		
 		return chgConstraints;
 	}
 
-	private double getMaxUseStockNum(int i) {
-		double stockAmount;
+	private UFDouble getMaxUseStockNum(int i) {
+		UFDouble stockAmount;
 		if (reportpanel.getBillModel().getItemByKey("nmaxusenum") != null)
-			stockAmount = Double.parseDouble(reportpanel.getBillModel().getValueAt(i, "nmaxusenum").toString());
+			stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(i, "nmaxusenum").toString());
 		else
-			stockAmount = Double.parseDouble(reportpanel.getBillModel().getValueAt(i, "nstocknum").toString());
+			stockAmount = new UFDouble(reportpanel.getBillModel().getValueAt(i, "nstocknum").toString());
 		
 		return stockAmount;
 	}
@@ -803,13 +878,18 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 			bnStock.setEnabled(false);
 		
 		if (checkStandardRef.getRefPK()!=null && checkStandardRef.getRefPK().length()==20 
-				&& getReportPanel().getBillModel().getRowCount()>0)
+				&& getReportPanel().getBillModel().getRowCount()>0){
 			bnCompute.setEnabled(true);
-		else
+			bnTry.setEnabled(true);
+		}
+		else{
 			bnCompute.setEnabled(false);
+			bnTry.setEnabled(false);
+		}
 		
 		updateButton(bnStock);
 		updateButton(bnCompute);
+		updateButton(bnTry);
 		
 		if (reportpanel.getBillModel().getRowCount()!=0){
 			setButtonStatus("QUERY");

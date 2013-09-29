@@ -42,12 +42,9 @@ public class AssistMaterialStatisticsUI extends ReportStatisticsUI{
 		
 		if (reportConfig==null){
 			reportConfig = new ReportConigParam();
-			reportConfig.dimentionStart = 0;
-			reportConfig.dimentionEnd = 1;
-			reportConfig.measureStart = -1;
-			reportConfig.measureEnd = -2;
-			reportConfig.crossStart = 2;
-			reportConfig.crossEnd = 2;
+			reportConfig.dimention = new int[]{0,1};
+			reportConfig.measure = new int[]{};
+			reportConfig.cross = new int[]{2};
 			reportConfig.mustSelect = new int[]{};
 			reportConfig.crossMeasure = new int[]{};
 		}

@@ -19,12 +19,9 @@ public class ProductAnalysisUI extends ReportAnalysisUI{
 	protected void setReportAnalysisConfig() {
 		if (reportConfig==null){
 			reportConfig = new ReportConigParam();
-			reportConfig.dimentionStart = 2;
-			reportConfig.dimentionEnd = 3;
-			reportConfig.measureStart = 4;
-			reportConfig.measureEnd = 10;
-			reportConfig.crossStart = 13;
-			reportConfig.crossEnd = 13;
+			reportConfig.dimention = new int[]{2,3};
+			reportConfig.measure = new int[]{4, 5, 6, 7, 8, 9, 10};
+			reportConfig.cross = new int[]{13};
 			reportConfig.mustSelect = new int[]{2};
 			reportConfig.crossMeasure = new int[]{4,5};
 		}
@@ -67,6 +64,10 @@ public class ProductAnalysisUI extends ReportAnalysisUI{
 	@Override
 	protected void afterHideReportPanel(ReportPanel reportpanel) {
 		reportpanel.hideColumn(new String[]{"vinvdoccode"});
+	}
+	
+	@Override
+	protected void afterConditionPanelInit() {	
 	}
 }
 

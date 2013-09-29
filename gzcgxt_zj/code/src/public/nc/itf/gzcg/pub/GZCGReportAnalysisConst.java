@@ -84,7 +84,13 @@ public enum GZCGReportAnalysisConst implements ISQLSection{
 					new String[]{},								
 					new String[]{"nvl(qc_defectprocess.cdefectprocessname, 'ÆäËü')"},
 					new String[]{"qc_defectprocess"},
-					new String[]{" and gzcg_qcrp_checkbill_v.cdefectprocessid=qc_defectprocess.cdefectprocessid(+) "});
+					new String[]{" and gzcg_qcrp_checkbill_v.cdefectprocessid=qc_defectprocess.cdefectprocessid(+) "}),
+	INVDOC1			("INVDOC",
+					"´æ»õ",
+					new String[]{"vinvdoccode", "vinvdocname", "vinvspec", "vinvunit"},
+					new String[]{"'-'", "gzcg_qcrp_checkbill_v.cmangid", "'-'", "'-'"},
+					new String[]{},
+					new String[]{""});
 	
 	public static final int customerDimentionStart = 0;
 	public static final int customerDimentionEnd = 3;
