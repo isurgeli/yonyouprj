@@ -19,5 +19,6 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>nc.uap.mde.ModuleProjectNature</nature>
+		<nature>nc.uap.mde.BizCompProjectNature</nature>
 	</natures>
 </projectDescription>

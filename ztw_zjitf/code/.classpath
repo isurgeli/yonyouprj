@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="out/public" path="src/public"/>
-	<classpathentry kind="src" output="out/private" path="src/private"/>
-	<classpathentry kind="src" output="out/client" path="src/client"/>
+	<classpathentry kind="src" output="cmp/classes" path="cmp/src/public"/>
+	<classpathentry kind="src" output="cmp/classes" path="cmp/src/client"/>
+	<classpathentry kind="src" output="cmp/classes" path="cmp/src/private"/>
+	<classpathentry kind="src" output="cmp/classes" path="cmp/resources"/>
+	<classpathentry kind="src" output="cmp/classes" path="cmp/src/test"/>
+	<classpathentry kind="src" output="uapbd/classes" path="uapbd/src/public"/>
+	<classpathentry kind="src" output="uapbd/classes" path="uapbd/src/client"/>
+	<classpathentry kind="src" output="uapbd/classes" path="uapbd/src/private"/>
+	<classpathentry kind="src" output="uapbd/classes" path="uapbd/resources"/>
+	<classpathentry kind="src" output="uapbd/classes" path="uapbd/src/test"/>
 	<classpathentry kind="src" output="out/resources" path="resources"/>
-	<classpathentry kind="src" output="out/test" path="src/test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="nc.uap.mde.library.container/Ant_Library"/>
 	<classpathentry kind="con" path="nc.uap.mde.library.container/Product_Common_Library"/>
