@@ -51,11 +51,40 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 		return new ButtonObject[]{bnQuery, bnPrint, bnModelPrint, bnPreview, bnOut, bnShow,
 				bnFilter, bnSubtotal, bnMultSort, bnLocate, bnRefresh, bnOrderQuery};
 	}
+	
+	public ReportPanel getSuperReportPanel() {
+		if (reportpanel == null) {
+			try {
+				reportpanel = new ReportPanel();
+				reportpanel
+						.setName(nc.ui.ml.NCLangRes.getInstance().getStrByID(
+								"scmpub", "UPPscmpub-000778")/* @res "报表基类" */);
+				reportpanel.setTempletID(getCorpPrimaryKey(), GZCGConstant.CUSTOMERANALYSISUIFUNCODE.getValue(),
+						getClientEnvironment().getUser().getPrimaryKey(),
+						getBusitype());
+				// reportpanel.setTempletID("40060906000000000000");
+				reportpanel.setBodyMenuShow(false);
+				reportpanel.setRowNOShow(true);
+				reportpanel.getBillTable().getTableHeader().addMouseListener(
+						reportpanel);
+				// 获取原始行高
+				// originalRowHeight=reportpanel.getBillTable().getRowHeight();
+				// 设置绘制器
+				// setCellRenderer();
+			} catch (java.lang.Throwable ivjExc) {
+				// user code begin {2}
+				// user code end
+				handleException(ivjExc);
+			}
+		}
+		return reportpanel;
+
+	}
 
 	@Override
 	public ReportPanel getReportPanel() {
 		if (reportpanel == null) {
-			super.getReportPanel();
+			getSuperReportPanel();
 			hideReportPanel(reportpanel);
 			initBodyItems = reportpanel.getBody_Items();
 		}
@@ -316,33 +345,36 @@ public abstract class ReportAnalysisUI extends ReportUIEx{
 			return null;
 		}
 		
-		IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
-		StringBuffer sql = new StringBuffer();
-		sql.append("select bd_invmandoc.pk_invmandoc, nvl(bd_invmandoc.def3,'-') from bd_invbasdoc, bd_invmandoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_corp='");
-		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
-		sql.append("' and bd_invbasdoc.invcode='");
-		sql.append(vmanagecode);
-		sql.append("'");
-		
-		try {
-			@SuppressWarnings("unchecked")
-			Vector<Vector<Object>> cmanagepkdata = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
-			if (cmanagepkdata!=null && cmanagepkdata.size()>0){
-				queryLinkData.setCmanageid(cmanagepkdata.get(0).get(0).toString());
-				if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCMATERAILPK.getValue()))
-					targetFunCode = GZCGConstant.MATERIALSTATISTICSUIFUNCODE.getValue();
-				else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCSUBMATERAILPK.getValue()))
-					targetFunCode = GZCGConstant.ASSISTMATERIALSTATISTICSUIFUNCODE.getValue();
-				else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCSEMIPRODUCTPK.getValue()))
-					targetFunCode = GZCGConstant.SEMIPRODUCTSTATISTICSUIFUNCODE.getValue();
-				else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCPODUCTPK.getValue()))
-					targetFunCode = GZCGConstant.PRODUCTSTATISTICSUIFUNCODE.getValue();
-			}
-		} catch (BusinessException e) {
-		}
+		if (getNodeCode().equals(GZCGConstant.SEMIPRODUCTANALYSISUIFUNCODE.getValue())){
+			targetFunCode = GZCGConstant.SEMIPRODUCTSTATISTICSUIFUNCODE.getValue();
+			queryLinkData.setCmanageid(getReportPanel().getBillModel().getValueAt(rows[0], "vinvdocname").toString());
+		}else{
+			IUAPQueryBS dao = NCLocator.getInstance().lookup(IUAPQueryBS.class);
+			StringBuffer sql = new StringBuffer();
+			sql.append("select bd_invmandoc.pk_invmandoc, nvl(bd_invmandoc.def3,'-') from bd_invbasdoc, bd_invmandoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_corp='");
+			sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+			sql.append("' and bd_invbasdoc.invcode='");
+			sql.append(vmanagecode);
+			sql.append("'");
 			
+			try {
+				@SuppressWarnings("unchecked")
+				Vector<Vector<Object>> cmanagepkdata = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
+				if (cmanagepkdata!=null && cmanagepkdata.size()>0){
+					queryLinkData.setCmanageid(cmanagepkdata.get(0).get(0).toString());
+					if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCMATERAILPK.getValue()))
+						targetFunCode = GZCGConstant.MATERIALSTATISTICSUIFUNCODE.getValue();
+					else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCSUBMATERAILPK.getValue()))
+						targetFunCode = GZCGConstant.ASSISTMATERIALSTATISTICSUIFUNCODE.getValue();
+					else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCSEMIPRODUCTPK.getValue()))
+						targetFunCode = GZCGConstant.SEMIPRODUCTSTATISTICSUIFUNCODE.getValue();
+					else if (cmanagepkdata.get(0).get(1).toString().equals(GZCGConstant.DEFDOCPODUCTPK.getValue()))
+						targetFunCode = GZCGConstant.PRODUCTSTATISTICSUIFUNCODE.getValue();
+				}
+			} catch (BusinessException e) {
+			}
+		}
 		queryLinkData.setVoCondition(getQueryPanel().getConditionVO());
-		
 		return targetFunCode;
 	}
 }

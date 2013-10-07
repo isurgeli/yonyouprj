@@ -49,6 +49,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	protected Hashtable<ISQLSection, UICheckBox> sqlCtrls;
 	private Hashtable<String, String> checkItemNames;
 	private Hashtable<String, String> checkItemStandards;
+	protected Hashtable<String, String> checkItemHaveData;
 	private ReportItem[] initBodyItems;
 	protected ReportConigParam reportConfig;
 	protected IAdditionSQLProcess sqlProcesser;
@@ -68,7 +69,8 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	
 	protected ButtonObject bnfilter;
 	private ConditionVO[] conditionCache;
-	private BillColumnHelper reportColHelper; 
+	private BillColumnHelper reportColHelper;
+	private UITextField invDoc; 
 	/**
 	 * 
 	 */
@@ -98,6 +100,9 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	protected void initialize() {
 		super.initialize();
 		add(getLefrGridPanel(), "West");
+		
+		if (isSemiProduct())
+			updateCheckItemCtrl();
 	}
 
 	private UIPanel getLefrGridPanel() {
@@ -171,7 +176,8 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 
 				processCrossData(reportSet, data);
 				
-				getStockNum(reportArray);
+				if (!isSemiProduct())
+					getStockNum(reportArray);
 				
 				reportDataCache = reportArray;
 				
@@ -353,6 +359,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 
 	private void processCrossData(Hashtable<String, AnalysisReportVO> reportSet, Vector<Vector<Object>> data){
 		int crossColIdx = getDimensionCount();
+		checkItemHaveData = new Hashtable<String, String>();
 		String[] checkItems = getSelectedCheckItem();
 		Hashtable<String, Integer> checkItemIdx = new Hashtable<String, Integer>();
 		for(int i=0;i<checkItems.length;i++)
@@ -366,6 +373,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			
 			reportSet.get(key.toString()).setAttributeValue("_CHECKTITEM"+checkItemIdx.get(data.get(i).get(crossColIdx).toString())
 					, data.get(i).get(crossColIdx+1).toString());
+			checkItemHaveData.put("_CHECKTITEM"+checkItemIdx.get(data.get(i).get(crossColIdx).toString()), "");
 		}
 		
 		processTableLayout(getReportPanel(), checkItems);
@@ -459,7 +467,10 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 
 	private String getInvCheckItemWhere() {
 		StringBuffer sql = new StringBuffer();
-		sql.append(" and gzcg_qcrp_checkbill_v.cmangid='"+invDocRef.getRefPK()+"' ");
+		if (!isSemiProduct())
+			sql.append(" and gzcg_qcrp_checkbill_v.cmangid='"+invDocRef.getRefPK()+"' ");
+		else
+			sql.append(" and qc_cghzbg_b.ypname='"+invDoc.getText()+"' ");
 		
 		StringBuffer checkItemsSql = new StringBuffer();
 		String[] checkItems = getSelectedCheckItem();
@@ -468,12 +479,15 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			checkItemsSql.append("'"+checkItems[i]+"', ");
 		checkItemsSql.delete(checkItemsSql.length()-2, checkItemsSql.length()-1);
 		
-		sql.append(" and qc_checkbill_b2.ccheckitemid in("+checkItemsSql.toString()+") ");
+		if (!isSemiProduct())
+			sql.append(" and qc_checkbill_b2.ccheckitemid in("+checkItemsSql.toString()+") ");
+		else
+			sql.append(" and qc_cghzbg_b.checkitem in("+checkItemsSql.toString()+") and qc_cghzbg_b.checkvalue is not null and qc_cghzbg_b.checkvalue<>'null'");
 		
 		return sql.toString();
 	}
 	
-	private String[] getSelectedCheckItem(){
+	protected String[] getSelectedCheckItem(){
 		ArrayList<String> checkItems = new ArrayList<String>();
 		for(int i=0;i<m_leftBillCard.getBillTable().getRowCount();i++){
 			if (m_leftBillCard.getBillModel().getValueAt(i, "bselect").equals(true))
@@ -492,10 +506,39 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		return true;
 	}
 	
+	public ReportPanel getSuperReportPanel() {
+		if (reportpanel == null) {
+			try {
+				reportpanel = new ReportPanel();
+				reportpanel
+						.setName(nc.ui.ml.NCLangRes.getInstance().getStrByID(
+								"scmpub", "UPPscmpub-000778")/* @res "报表基类" */);
+				reportpanel.setTempletID(getCorpPrimaryKey(), GZCGConstant.MATERIALSTATISTICSUIFUNCODE.getValue(),
+						getClientEnvironment().getUser().getPrimaryKey(),
+						getBusitype());
+				// reportpanel.setTempletID("40060906000000000000");
+				reportpanel.setBodyMenuShow(false);
+				reportpanel.setRowNOShow(true);
+				reportpanel.getBillTable().getTableHeader().addMouseListener(
+						reportpanel);
+				// 获取原始行高
+				// originalRowHeight=reportpanel.getBillTable().getRowHeight();
+				// 设置绘制器
+				// setCellRenderer();
+			} catch (java.lang.Throwable ivjExc) {
+				// user code begin {2}
+				// user code end
+				handleException(ivjExc);
+			}
+		}
+		return reportpanel;
+
+	}
+	
 	@Override
 	public ReportPanel getReportPanel() {
 		if (reportpanel == null) {
-			super.getReportPanel();
+			getSuperReportPanel();
 			hideReportPanel(reportpanel);
 			reportColHelper = new BillColumnHelper(reportpanel, "bselect");
 			//setReportPanelHeader();
@@ -531,44 +574,52 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			conditionPanel.setPreferredSize(null);
 			conditionPanel.setLayout(new BoxLayout(conditionPanel, BoxLayout.Y_AXIS));
 			UIPanel panel1 = new UIPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-			panelSumGrid = new UIPanel();
-			panelSumGrid.setLayout(new java.awt.BorderLayout(2, 2));
 			
-			m_topBillCard = new BillCardPanel();
-			m_topBillCard.setName("汇总");
-			m_topBillCard.setEnabled(true);
-			m_topBillCard.loadTemplet(getNodeCode(), getBusitype(), ClientEnvironment.getInstance().getUser().getPrimaryKey()
-					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
-			m_topBillCard.setMaximumSize(new Dimension(600, 70));
-			m_topBillCard.setPreferredSize(new Dimension(600, 70));
-			//m_topBillCard.getBillModel().getItemByKey("ninnum").setDecimalDigits(2);
-			//m_topBillCard.getBillModel().getItemByKey("nstocknum").setDecimalDigits(2);
-			panelSumGrid.add(m_topBillCard);
+			if (!isSemiProduct()){
+				invDocRef = new UIRefPane("存货档案");
+				panel1.add(new UILabel("存货档案"));
+				panel1.add(invDocRef);
 			
-			invDocRef = new UIRefPane("存货档案");
-			panel1.add(new UILabel("存货档案"));
-			panel1.add(invDocRef);
+				invDocRef.addValueChangedListener(new ValueChangedListener() {	
+						public void valueChanged(ValueChangedEvent event) {
+							updateCheckItemCtrl();
+						}
+				});
 			
-			invDocRef.addValueChangedListener(new ValueChangedListener() {	
-				public void valueChanged(ValueChangedEvent event) {
-					updateCheckItemCtrl();
-				}
-			});
+				invSpec = new UITextField();
+				panel1.add(new UILabel("规格"));
+				panel1.add(invSpec);
+				invSpec.setEditable(false);
+				invSpec.setColumns(10);
 			
-			invSpec = new UITextField();
-			panel1.add(new UILabel("规格"));
-			panel1.add(invSpec);
-			invSpec.setEditable(false);
-			invSpec.setColumns(10);
-			
-			invUnit = new UITextField();
-			panel1.add(new UILabel("单位"));
-			panel1.add(invUnit);
-			invUnit.setEditable(false);
-			invUnit.setColumns(10);
-			
+				invUnit = new UITextField();
+				panel1.add(new UILabel("单位"));
+				panel1.add(invUnit);
+				invUnit.setEditable(false);
+				invUnit.setColumns(10);
+			}else{
+				invDoc = new UITextField();
+				panel1.add(new UILabel("半产品名称"));
+				panel1.add(invDoc);
+				invDoc.setColumns(10);
+			}
 			conditionPanel.add(panel1);
-			conditionPanel.add(panelSumGrid);			
+			if (!isSemiProduct()){
+				panelSumGrid = new UIPanel();
+				panelSumGrid.setLayout(new java.awt.BorderLayout(2, 2));
+			
+				m_topBillCard = new BillCardPanel();
+				m_topBillCard.setName("汇总");
+				m_topBillCard.setEnabled(true);
+				m_topBillCard.loadTemplet(getNodeCode(), getBusitype(), ClientEnvironment.getInstance().getUser().getPrimaryKey()
+					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+				m_topBillCard.setMaximumSize(new Dimension(600, 70));
+				m_topBillCard.setPreferredSize(new Dimension(600, 70));
+				//m_topBillCard.getBillModel().getItemByKey("ninnum").setDecimalDigits(2);
+				//m_topBillCard.getBillModel().getItemByKey("nstocknum").setDecimalDigits(2);
+				panelSumGrid.add(m_topBillCard);
+				conditionPanel.add(panelSumGrid);
+			}
 		}
 		
 		return conditionpanel;
@@ -579,16 +630,21 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		String checkStandardid = null;
 		
 		StringBuffer sql = new StringBuffer();
-		sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-'), nvl(bd_measdoc.measname,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc, bd_measdoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and bd_invbasdoc.pk_measdoc=bd_measdoc.pk_measdoc(+) and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
-		sql.append(invDocRef.getRefPK()+"'");
+		if (!isSemiProduct()){
+			sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-'), nvl(bd_measdoc.measname,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc, bd_measdoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and bd_invbasdoc.pk_measdoc=bd_measdoc.pk_measdoc(+) and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
+			sql.append(invDocRef.getRefPK()+"'");
+		}else{
+			sql.append("select qc_checkstandard.ccheckstandardid from qc_checkstandard where qc_checkstandard.ccheckstandardcode = 'SYJS001'");
+		}
 		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
 		try {
 			@SuppressWarnings("unchecked")
 			Vector<Vector<Object>> checkStandard = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
 			if (checkStandard!=null && checkStandard.size()>0) {
-				invSpec.setText(checkStandard.get(0).get(1).toString());
-				invUnit.setText(checkStandard.get(0).get(2).toString());
-				
+				if (!isSemiProduct()){
+					invSpec.setText(checkStandard.get(0).get(1).toString());
+					invUnit.setText(checkStandard.get(0).get(2).toString());
+				}
 				checkStandardid=checkStandard.get(0).get(0).toString();
 			}
 		} catch (BusinessException e) {
@@ -611,9 +667,13 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 				uiCheckItems[i].setAttributeValue("bselect", true);
 				uiCheckItems[i].setAttributeValue("ccheckitemid", standardItems[i].getCcheckitemid());
 				String standardValue = standardItems[i].getCstandardvalue();
-				int start = standardValue.indexOf("合格:")+3;
-				int end = standardValue.indexOf("}", start);		
-				standardValue = standardValue.substring(start, end);
+				if (standardValue!=null){
+					int start = standardValue.indexOf("合格:")+3;
+					int end = standardValue.indexOf("}", start);		
+					standardValue = standardValue.substring(start, end);
+				}else{
+					standardValue = "[0,100]";
+				}
 				checkItemStandards.put(standardItems[i].getCcheckitemid(), standardValue);
 				uiCheckItems[i].setAttributeValue("vstandardvalue", standardValue);
 				uiCheckItems[i].setAttributeValue("vrequirevalue", "[0,100]");
@@ -633,9 +693,16 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	
 	@Override
 	public void onQuery() {
-		if (invDocRef==null || invDocRef.getRefPK()==null || invDocRef.getRefPK().length()==0){
-			MessageDialog.showWarningDlg(this, "错误", "请先设置存货。");
-			return;
+		if (!isSemiProduct()){
+			if (invDocRef==null || invDocRef.getRefPK()==null || invDocRef.getRefPK().length()==0){
+				MessageDialog.showWarningDlg(this, "错误", "请先设置存货。");
+				return;
+			}
+		}else{
+			if (invDoc==null || invDoc.getText()==null || invDoc.getText().length()==0){
+				MessageDialog.showWarningDlg(this, "错误", "请先设置品名。");
+				return;
+			}
 		}
 		super.onQuery();
 	}
@@ -655,31 +722,44 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	}
 	
 	public void doQueryAction(ILinkQueryData querydata) {
+		ArrayList<ConditionVO> newCondition = new ArrayList<ConditionVO>();
 		if (querydata instanceof ReportLinkQueryData){
-			invDocRef.setPK(((ReportLinkQueryData) querydata).getCmanageid());
-			updateCheckItemCtrl();
-			ConditionVO[] voCondition = ((ReportLinkQueryData) querydata).getVoCondition();
-			ArrayList<ConditionVO> newCondition = new ArrayList<ConditionVO>();
-			for(int i=0;i<voCondition.length;i++){
-				if (!voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.pk_invcl") &&
-						!voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.cmangid")){
-					newCondition.add(voCondition[i]);
+			if (getNodeCode().equals(GZCGConstant.SEMIPRODUCTSTATISTICSUIFUNCODE.getValue())){
+				invDoc.setText(((ReportLinkQueryData) querydata).getCmanageid());
+				ConditionVO[] voCondition = ((ReportLinkQueryData) querydata).getVoCondition();
+				
+				for(int i=0;i<voCondition.length;i++){
+					if (!voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.cmangid")){
+						newCondition.add(voCondition[i]);
+					}
+				}
+			}else{
+				invDocRef.setPK(((ReportLinkQueryData) querydata).getCmanageid());
+				updateCheckItemCtrl();
+				ConditionVO[] voCondition = ((ReportLinkQueryData) querydata).getVoCondition();
+				
+				for(int i=0;i<voCondition.length;i++){
+					if (!voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.pk_invcl") &&
+							!voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.cmangid")){
+						newCondition.add(voCondition[i]);
+					}
+				}
+				if (((ReportLinkQueryData) querydata).getCvendormangid()!=null){
+					ConditionVO cvo = new ConditionVO();
+					cvo.setFieldName("供应商");
+					cvo.setFieldCode("gzcg_qcrp_checkbill_v.cvendormangid");
+					cvo.setOperaCode("=");
+					cvo.setValue(((ReportLinkQueryData) querydata).getCvendormangid());
+					newCondition.add(cvo);
 				}
 			}
-			if (((ReportLinkQueryData) querydata).getCvendormangid()!=null){
-				ConditionVO cvo = new ConditionVO();
-				cvo.setFieldName("供应商");
-				cvo.setFieldCode("gzcg_qcrp_checkbill_v.cvendormangid");
-				cvo.setOperaCode("=");
-				cvo.setValue(((ReportLinkQueryData) querydata).getCvendormangid());
-				newCondition.add(cvo);
-			}
-			//getQueryPanel().setShowConditionVOs(newCondition.toArray(new ConditionVO[]{}));
-			linkConditions = newCondition.toArray(new ConditionVO[]{});
+			// getQueryPanel().setShowConditionVOs(newCondition.toArray(new
+			// ConditionVO[]{}));
+			linkConditions = newCondition.toArray(new ConditionVO[] {});
 			conditionCache = linkConditions;
 			setReportData(linkConditions);
-			
-			if (reportpanel.getBillModel().getRowCount()!=0)
+
+			if (reportpanel.getBillModel().getRowCount() != 0)
 				setButtonStatus("QUERY");
 			else
 				setButtonStatus("INIT");
@@ -698,14 +778,17 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 	private void onFilterCheckValue() {
 		ArrayList<AnalysisReportVO> showData = filterByCheckStandard();
 		
-		ArrayList<AnalysisReportVO> sumData = computeSumData(showData);
-
+		if (!isSemiProduct()){
+			ArrayList<AnalysisReportVO> sumData = computeSumData(showData);
+			if (sumData!=null) m_topBillCard.getBillModel().setBodyDataVO(sumData.toArray(new AnalysisReportVO[]{}));
+		}
+		afterHideReportPanel(getReportPanel());
 		if (showData!=null) setData(showData.toArray(new AnalysisReportVO[]{}));
-		if (sumData!=null) m_topBillCard.getBillModel().setBodyDataVO(sumData.toArray(new AnalysisReportVO[]{}));
-		
 		setReportPanelHeader();
 	}
 	
+	protected abstract void afterHideReportPanel(ReportPanel reportPanel);
+
 	@Override
 	public void onOut() {
 		//super.onOut();
@@ -737,5 +820,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		
 		rp.exportExcelFile();
 	}
+	
+	protected abstract boolean isSemiProduct();
 }
 

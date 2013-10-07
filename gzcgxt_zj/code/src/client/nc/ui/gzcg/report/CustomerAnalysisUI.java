@@ -5,7 +5,6 @@ import java.util.Vector;
 
 import nc.bs.framework.common.NCLocator;
 import nc.itf.gzcg.pub.GZCGConstant;
-import nc.itf.gzcg.pub.GZCGReportAnalysisConst;
 import nc.itf.uap.IUAPQueryBS;
 import nc.jdbc.framework.processor.VectorProcessor;
 import nc.ui.gzcg.pub.ReportLinkQueryData;

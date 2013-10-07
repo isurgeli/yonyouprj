@@ -138,27 +138,28 @@ select distinct qc_checkbill.pk_corp,
 
 drop view gzcg_qcrp_checkbill_v3;
 create view gzcg_qcrp_checkbill_v3 as (
-select distinct gzcg_bd_sampledoc.pk_corp,
+select distinct qc_cghzbg_h.pk_corp,
                 '-' vcheckbillcode,
                 '-' cchecktypeid,
-                '-' ccheckbillid,
+                qc_cghzbg_b.jcpici ccheckbillid,
                 '-' cvendormangid,
-                gzcg_bd_sampledoc.vdef1 cmangid,
+                qc_cghzbg_b.ypname cmangid,
                 '-' pk_invcl,
                 1 nchecknum,
                 'Y' bqualified,
                 1 nsamplecount,
                 '-' cdefectprocessid,
                 '-' creporterid,
-                gzcg_bd_sampledoc.ddate dpraydate,
-                gzcg_bd_sampledoc.ddate daccountdate, 
-                gzcg_bd_sampledoc.ddate dreportdate,
+                qc_cghzbg_h.approvedate dpraydate,
+                qc_cghzbg_h.approvedate daccountdate, 
+                qc_cghzbg_h.approvedate dreportdate,
                 '-' vbatchcode,
                 '-' vordercode,
                 '-' csourcebilltypecode
-  from gzcg_bd_sampledoc
- where gzcg_bd_sampledoc.vqctype = 'S'
-   and nvl(gzcg_bd_sampledoc.dr, 0) = 0
+  from qc_cghzbg_h, qc_cghzbg_b
+ where qc_cghzbg_h.pk_cghzbg_h=qc_cghzbg_b.pk_cghzbg_h
+   and nvl(qc_cghzbg_h.dr, 0) = 0
+   and qc_cghzbg_b.jcpici not in (select gzcg_bd_sampledoc.vsampleno from gzcg_bd_sampledoc where gzcg_bd_sampledoc.vqctype = 'M' or gzcg_bd_sampledoc.vqctype = 'P')
 );
 
 --删除模板
@@ -864,3 +865,29 @@ values (null, 'N', null, 0, 'Y', 'Y', 'N', 'N', '0000', null, null, null, '0001A
 
 insert into pub_billcode_rule (BILLCODESHORTNAME, CONTROLPARA, DAY, DR, ISAUTOFILL, ISCHECK, ISHAVESHORTNAME, ISPRESERVE, LASTSN, MONTH, OBJECT1, OBJECT2, PK_BILLCODERULE, PK_BILLTYPECODE, PK_CORP, SNNUM, SNRESETFLAG, TS, YEAR)
 values (null, 'N', null, 0, 'Y', 'Y', 'N', 'N', '0000', null, null, null, '0001AB1000000001NKAL', '36ZA', '0001', 7, 0, '2013-09-11 18:33:48', null);
+
+--新增中控查询模板
+insert into pub_query_templet (DESCRIBE, DR, FIXCONDITION, ID, MODEL_CODE, MODEL_NAME, NODE_CODE, PK_CORP, RESID, TS, METACLASS)
+values (null, null, null, '0001ZF1000000001PD4B', 'C0020413', '半产品分析查询', 'C0020413', '@@@@', null, '2013-09-29 09:40:28', null);
+
+insert into pub_query_templet (DESCRIBE, DR, FIXCONDITION, ID, MODEL_CODE, MODEL_NAME, NODE_CODE, PK_CORP, RESID, TS, METACLASS)
+values (null, null, null, '0001ZF1000000001PD57', 'C0020422', '半产品检验数据查询', 'C0020422', '@@@@', null, '2013-09-29 11:23:21', null);
+
+insert into pub_query_condition (CONSULT_CODE, DATA_TYPE, DISP_SEQUENCE, DISP_TYPE, DISP_VALUE, DR, FIELD_CODE, FIELD_NAME, ID, IF_AUTOCHECK, IF_DATAPOWER, IF_DEFAULT, IF_DESC, IF_GROUP, IF_IMMOBILITY, IF_MUST, IF_ORDER, IF_SUM, IF_USED, ISCONDITION, MAX_LENGTH, OPERA_CODE, OPERA_NAME, ORDER_SEQUENCE, PK_CORP, PK_TEMPLET, RESID, RETURN_TYPE, TABLE_CODE, TABLE_NAME, TS, USERDEFFLAG, VALUE, GUIDELINE, INSTRUMENTSQL, PRERESTRICT, ADDISNULL4POWER)
+values ('-99', 0, 0, 0, null, 0, 'gzcg_qcrp_checkbill_v.cmangid', '半产品名称', '0001ZF1000000001PD4C', 'Y', 'N', 'Y', null, 'N', 'N', 'N', 'N', 'N', 'Y', 'Y', null, '=@>@>=@<@<=@like@', '等于@大于@大于等于@小于@小于等于@相似@', 0, '@@@@', '0001ZF1000000001PD4B', null, 2, null, null, '2013-09-29 09:32:12', null, null, null, null, null, 'N');
+
+insert into pub_query_condition (CONSULT_CODE, DATA_TYPE, DISP_SEQUENCE, DISP_TYPE, DISP_VALUE, DR, FIELD_CODE, FIELD_NAME, ID, IF_AUTOCHECK, IF_DATAPOWER, IF_DEFAULT, IF_DESC, IF_GROUP, IF_IMMOBILITY, IF_MUST, IF_ORDER, IF_SUM, IF_USED, ISCONDITION, MAX_LENGTH, OPERA_CODE, OPERA_NAME, ORDER_SEQUENCE, PK_CORP, PK_TEMPLET, RESID, RETURN_TYPE, TABLE_CODE, TABLE_NAME, TS, USERDEFFLAG, VALUE, GUIDELINE, INSTRUMENTSQL, PRERESTRICT, ADDISNULL4POWER)
+values ('-99', 3, 1, 0, null, null, 'gzcg_qcrp_checkbill_v.dpraydate', '检测日期', '0001ZF1000000001PD4D', 'Y', 'N', 'Y', null, 'N', 'N', 'N', 'N', 'N', 'Y', 'Y', null, '=@>@>=@<@<=@like@', '等于@大于@大于等于@小于@小于等于@包含@', 0, '@@@@', '0001ZF1000000001PD4B', null, 2, null, null, '2013-09-29 09:40:28', null, null, null, null, null, 'N');
+
+insert into pub_query_condition (CONSULT_CODE, DATA_TYPE, DISP_SEQUENCE, DISP_TYPE, DISP_VALUE, DR, FIELD_CODE, FIELD_NAME, ID, IF_AUTOCHECK, IF_DATAPOWER, IF_DEFAULT, IF_DESC, IF_GROUP, IF_IMMOBILITY, IF_MUST, IF_ORDER, IF_SUM, IF_USED, ISCONDITION, MAX_LENGTH, OPERA_CODE, OPERA_NAME, ORDER_SEQUENCE, PK_CORP, PK_TEMPLET, RESID, RETURN_TYPE, TABLE_CODE, TABLE_NAME, TS, USERDEFFLAG, VALUE, GUIDELINE, INSTRUMENTSQL, PRERESTRICT, ADDISNULL4POWER)
+values ('-99', 3, 0, 0, null, null, 'gzcg_qcrp_checkbill_v.dpraydate', '检测日期', '0001ZF1000000001PD58', 'Y', 'N', 'Y', null, 'N', 'N', 'N', 'N', 'N', 'Y', 'Y', null, '=@>@>=@<@<=@like@', '等于@大于@大于等于@小于@小于等于@包含@', 0, '@@@@', '0001ZF1000000001PD57', null, 2, null, null, '2013-09-29 11:23:21', null, null, null, null, null, 'N');
+
+insert into pub_query_condition (CONSULT_CODE, DATA_TYPE, DISP_SEQUENCE, DISP_TYPE, DISP_VALUE, DR, FIELD_CODE, FIELD_NAME, ID, IF_AUTOCHECK, IF_DATAPOWER, IF_DEFAULT, IF_DESC, IF_GROUP, IF_IMMOBILITY, IF_MUST, IF_ORDER, IF_SUM, IF_USED, ISCONDITION, MAX_LENGTH, OPERA_CODE, OPERA_NAME, ORDER_SEQUENCE, PK_CORP, PK_TEMPLET, RESID, RETURN_TYPE, TABLE_CODE, TABLE_NAME, TS, USERDEFFLAG, VALUE, GUIDELINE, INSTRUMENTSQL, PRERESTRICT, ADDISNULL4POWER)
+values ('-99', 0, 1, 0, null, 0, 'qc_cghzbg_b.jcpici', '检测批次', '0001ZF1000000001PD59', 'Y', 'N', 'Y', null, 'N', 'N', 'N', 'N', 'N', 'Y', 'Y', null, '=@>@>=@<@<=@like@', '等于@大于@大于等于@小于@小于等于@相似@', 0, '@@@@', '0001ZF1000000001PD57', null, 2, null, null, '2013-09-29 11:20:35', null, null, null, null, null, 'N');
+
+insert into pub_systemplate (DR, FUNNODE, ISCOMM, NODEKEY, OPERATOR, OPERATOR_TYPE, ORGTYPECODE, PK_BUSITYPE, PK_CORP, PK_ORG, PK_SYSTEMPLATE, SYSFLAG, TEMPLATEFLAG, TEMPLATEID, TEMPSTYLE, TS)
+values (0, 'C0020413', null, null, null, null, null, null, '@@@@', null, '@@@@ZF10000000000HQZ', null, 'Y', '0001ZF1000000001PD4B', 1, '2013-09-29 09:34:09');
+
+insert into pub_systemplate (DR, FUNNODE, ISCOMM, NODEKEY, OPERATOR, OPERATOR_TYPE, ORGTYPECODE, PK_BUSITYPE, PK_CORP, PK_ORG, PK_SYSTEMPLATE, SYSFLAG, TEMPLATEFLAG, TEMPLATEID, TEMPSTYLE, TS)
+values (0, 'C0020422', null, null, null, null, null, null, '@@@@', null, '@@@@ZF10000000000HR0', null, 'Y', '0001ZF1000000001PD57', 1, '2013-09-29 11:21:11');
+

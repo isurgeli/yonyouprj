@@ -1,7 +1,6 @@
 package nc.ui.gzcg.report;
 
 import nc.itf.gzcg.pub.GZCGConstant;
-import nc.itf.gzcg.pub.GZCGReportAnalysisConst;
 import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
@@ -13,7 +12,7 @@ public class SemiProductAnalysisUI extends ReportAnalysisUI{
 
 	@Override
 	public String getNodeCode() {
-		return GZCGConstant.CUSTOMERANALYSISUIFUNCODE.getValue();
+		return GZCGConstant.SEMIPRODUCTANALYSISUIFUNCODE.getValue();
 	}
 
 	@Override

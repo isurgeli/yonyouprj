@@ -1,5 +1,7 @@
 package nc.ui.gzcg.report;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import nc.itf.gzcg.pub.GZCGConstant;
@@ -23,7 +25,7 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 
 	@Override
 	public String getNodeCode() {
-		return GZCGConstant.MATERIALSTATISTICSUIFUNCODE.getValue();
+		return GZCGConstant.SEMIPRODUCTSTATISTICSUIFUNCODE.getValue();
 	}
 
 	@Override
@@ -34,18 +36,16 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 	@Override
 	protected void setReportStatisticsConfig() {
 		sqlCtrls = new Hashtable<ISQLSection, UICheckBox>();
-		sqlCtrls.put(GZCGReportStatisticsConst.PUBLIC, new UICheckBox());
-		sqlCtrls.put(GZCGReportStatisticsConst.MATERIAL, new UICheckBox());
-		sqlCtrls.put(GZCGReportStatisticsConst.PROJECT, new UICheckBox());
-		sqlCtrls.get(GZCGReportStatisticsConst.PUBLIC).setSelected(true);
-		sqlCtrls.get(GZCGReportStatisticsConst.MATERIAL).setSelected(false);
-		sqlCtrls.get(GZCGReportStatisticsConst.PROJECT).setSelected(true);
+		sqlCtrls.put(GZCGReportStatisticsConst.SEMIPRODUCTPUBLIC, new UICheckBox());
+		sqlCtrls.put(GZCGReportStatisticsConst.SEMIPRODUCTPROJECT, new UICheckBox());
+		sqlCtrls.get(GZCGReportStatisticsConst.SEMIPRODUCTPUBLIC).setSelected(true);
+		sqlCtrls.get(GZCGReportStatisticsConst.SEMIPRODUCTPROJECT).setSelected(true);
 		
 		if (reportConfig==null){
 			reportConfig = new ReportConigParam();
-			reportConfig.dimention = new int[]{0,1};
+			reportConfig.dimention = new int[]{3};
 			reportConfig.measure = new int[]{};
-			reportConfig.cross = new int[]{2};
+			reportConfig.cross = new int[]{4};
 			reportConfig.mustSelect = new int[]{};
 			reportConfig.crossMeasure = new int[]{};
 		}
@@ -53,8 +53,6 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 		if (sqlProcesser==null){
 			sqlProcesser = new IAdditionSQLProcess() {	
 				public void additionSQLWhereClause(StringBuffer sql) {
-					sql.append(" and gzcg_qcrp_checkbill_v.cmangid in (select pk_invmandoc from bd_invmandoc where bd_invmandoc.def3='"+
-							GZCGConstant.DEFDOCSEMIPRODUCTPK.getValue()+"')");
 				}				
 				public void additionSQLQueryClause(StringBuffer sql) {
 				}				
@@ -68,7 +66,26 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 
 	@Override
 	protected String getMainViewName() {
-		return GZCGConstant.PRODUCTMAINVIEW.getValue();
+		return GZCGConstant.SEMIPRODUCTMAINVIEW.getValue();
+	}
+	
+	@Override
+	protected boolean isSemiProduct() {
+		return true;
+	}
+	
+	@Override
+	protected void afterHideReportPanel(ReportPanel reportPanel) {
+		ArrayList<String> hideCol = new ArrayList<String>();
+		hideCol.addAll(Arrays.asList(new String[]{"vorderbillcode", "vstockbatch", "vcustcode", "vcustname", "vinvdoccode", "vinvdocname", "vprocessname", "ninnum", "nstocknum"}));
+		
+		String[] checkItems = getSelectedCheckItem();
+		for(int i=0;i<checkItems.length;i++){
+			if (!checkItemHaveData.containsKey("_CHECKTITEM"+i))
+				hideCol.add("_CHECKTITEM"+i);
+		}
+		
+		reportpanel.hideColumn(hideCol.toArray(new String[]{}));
 	}
 }
 

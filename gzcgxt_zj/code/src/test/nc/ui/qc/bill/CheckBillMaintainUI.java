@@ -6859,7 +6859,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 	}
 
 	private void onInfoUpdateSample() {
-		// TODO 关联检测数据
+		// 关联检测数据
 		String vsmplecode = getBillCardPanelInfo().getHeadItem("vsamplecode").getValueObject().toString();
 		ArrayList<Hashtable<String, String>> data = new ArrayList<Hashtable<String,String>>();
 		String[] retsmplecodes = getAutoCheckData(vsmplecode, data);
@@ -6886,7 +6886,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 	}
 
 	private String[] getAutoCheckData(String vsmplecode, ArrayList<Hashtable<String, String>> data) {
-		// TODO 获取检测数据
+		// 获取检测数据
 		StringBuffer sql = new StringBuffer();
 		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b, qc_cghzbg_h where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
 		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.pk_cghzbg_h=qc_cghzbg_h.pk_cghzbg_h and (gzcg_bd_sampledoc.vsampleno='");

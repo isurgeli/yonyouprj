@@ -69,4 +69,13 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 	protected String getMainViewName() {
 		return GZCGConstant.MATERIALMAINVIEW.getValue();
 	}
+	
+	@Override
+	protected boolean isSemiProduct() {
+		return false;
+	}
+	
+	@Override
+	protected void afterHideReportPanel(ReportPanel reportPanel) {
+	}
 }

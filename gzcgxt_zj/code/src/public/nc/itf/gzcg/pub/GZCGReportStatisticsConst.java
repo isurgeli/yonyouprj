@@ -26,6 +26,18 @@ public enum GZCGReportStatisticsConst implements ISQLSection{
 			new String[]{},
 			new String[]{"qc_checkbill_b2.ccheckitemid", "qc_checkbill_b2.cresult"},
 			new String[]{},
+			new String[]{}),
+	SEMIPRODUCTPUBLIC ("PUBLIC",
+			"公共",
+			new String[]{"vinvdocname", "dcheck", "vsamplecode", "vchargepsn"},
+			new String[]{"qc_cghzbg_b.ypname", "gzcg_qcrp_checkbill_v.dpraydate", "qc_cghzbg_b.jcpici", "sm_user.user_name"},
+			new String[]{"qc_cghzbg_h", "qc_cghzbg_b", "sm_user"},
+			new String[]{" and gzcg_qcrp_checkbill_v.ccheckbillid = qc_cghzbg_b.jcpici and qc_cghzbg_h.pk_cghzbg_h=qc_cghzbg_b.pk_cghzbg_h and sm_user.cuserid=qc_cghzbg_h.noapproveid "}),
+	SEMIPRODUCTPROJECT	("PROJECT",
+			"投影",
+			new String[]{},
+			new String[]{"qc_cghzbg_b.checkitem", "qc_cghzbg_b.checkvalue"},
+			new String[]{},
 			new String[]{});
 	
 	private final String 	value;
