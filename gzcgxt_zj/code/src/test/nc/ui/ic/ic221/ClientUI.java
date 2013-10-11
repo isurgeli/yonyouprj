@@ -19,6 +19,7 @@ import nc.ui.pub.beans.UIDialog;
 import nc.ui.pub.beans.UIMenuItem;
 import nc.ui.pub.beans.UIRefPane;
 import nc.ui.pub.bill.BillCardPanel;
+import nc.ui.pub.bill.BillEditEvent;
 import nc.ui.pub.bill.BillItem;
 import nc.ui.pub.change.PfChangeBO_Client;
 import nc.ui.scm.pub.redunmulti.ISourceRedunUI;
@@ -32,6 +33,7 @@ import nc.vo.ic.pub.bill.GeneralBillItemVO;
 import nc.vo.ic.pub.bill.GeneralBillVO;
 import nc.vo.ic.pub.bill.IItemKey;
 import nc.vo.ic.pub.bill.QryConditionVO;
+import nc.vo.ic.pub.bill.QryInfoConst;
 import nc.vo.ic.pub.bill.SpecialBillHeaderVO;
 import nc.vo.ic.pub.bill.SpecialBillItemVO;
 import nc.vo.ic.pub.bill.SpecialBillVO;
@@ -565,7 +567,7 @@ public class ClientUI extends SpecialBillBaseUI {
 							"ClientUI-000002")/* 发货单 */,
 					(ISourceRedunUI) Class
 							.forName(
-									"nc.ui.so.soreceive.redun.ReceiveTo4CRedunSourceCtrl")
+									"nc.ui.so.soreceive.redun.ReceiveTo4KRedunSourceCtrl")
 							.newInstance(), null, "SO", null, null);
 
 			PubTransBillPaneVO[] curVO = new PubTransBillPaneVO[1];
@@ -600,8 +602,16 @@ public class ClientUI extends SpecialBillBaseUI {
 				setBillValueVO((SpecialBillVO)vos[0]);
 				((UIRefPane)getBillCardPanel().getHeadItem("vuserdef9").getComponent()).setPK(
 						((SpecialBillVO)vos[0]).getHeaderVO().getVuserdef9());
-				
-				getBillCardPanel().execHeadTailLoadFormulas();
+				for(int i=0;i<((SpecialBillVO)vos[0]).getChildrenVO().length;i++){
+					SpecialBillItemVO itemVO = (SpecialBillItemVO)((SpecialBillVO)vos[0]).getChildrenVO()[i];
+					String[] refPks = new String[]{itemVO.getCinventoryid()};
+					InvVO[] invVOs =getInvoInfoBYFormula().getBillQuryInvVOs(refPks,true,true);
+					invVOs[0].setFreeItemVOValue(itemVO.getFreeItemVO());
+					m_voBill.setItemInv(i, invVOs[0]);
+					//表体
+					setBodyInvValue(i, invVOs[0]);
+				}
+				//getBillCardPanel().execHeadTailLoadFormulas();
 			} 
 		} catch (Exception e) {
 			showErrorMessage(nc.ui.ml.NCLangRes.getInstance().getStrByID(

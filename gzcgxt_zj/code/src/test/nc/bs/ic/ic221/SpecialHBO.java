@@ -1320,7 +1320,7 @@ private void updateBillType4331Num(SpecialBillVO vo, boolean del) throws Busines
 	boLock.addBatchDynamicLock(updateDatas.keySet().toArray(new String[]{}));
 	{
 		StringBuffer sql = new StringBuffer();
-		sql.append("select csalereceiveid_bid, nnumber-nvl(ntotaloutinvnum,0) from so_salereceive_b ");
+		sql.append("select csalereceiveid_bid, nnumber-nvl(to_number(vdef20),0) from so_salereceive_b ");
 		sql.append(" where csalereceiveid_bid in (");
 		for(String rowid : updateDatas.keySet()){
 			sql.append("'"+rowid+"',");
@@ -1340,7 +1340,7 @@ private void updateBillType4331Num(SpecialBillVO vo, boolean del) throws Busines
 	
 	for(String rowid : updateDatas.keySet()){
 		StringBuffer sql = new StringBuffer();
-		sql.append("update so_salereceive_b set ntotaloutinvnum=nvl(ntotaloutinvnum,0)+(");
+		sql.append("update so_salereceive_b set vdef20=nvl(vdef20,0)+(");
 		sql.append(updateDatas.get(rowid).toString());
 		sql.append(") where csalereceiveid_bid='");
 		sql.append(rowid);

@@ -183,10 +183,10 @@ public class CHG4331TO4K extends nc.ui.pf.change.VOConversionUI {
 				"H_cbilltypecode->\"4K\"",
 				"H_iprintcount->0",
 				
-				"B_dshldtransnum->csalereceiveid_b.nnumber - iif(csalereceiveid_b.ntotaloutinvnum==null,0,csalereceiveid_b.ntotaloutinvnum) ",
+				"B_dshldtransnum->csalereceiveid_b.nnumber - iif(csalereceiveid_b.vdef20==null,0,tonumber(csalereceiveid_b.vdef20)) ",
 				"B_hsl->iif(csalereceiveid_b.scalefactor==null,csalereceiveid_b.nnumber/csalereceiveid_b.npacknumber,csalereceiveid_b.scalefactor)",
 				"B_csourcetype->\"4331\"",
-				"B_nshldtransastnum->csalereceiveid_b.nastnumber - iif(csalereceiveid_b.scalefactor==null || csalereceiveid_b.scalefactor==0,0,iif(csalereceiveid_b.ntotaloutinvnum==null,0,csalereceiveid_b.ntotaloutinvnum)/csalereceiveid_b.scalefactor) ",
+				"B_nshldtransastnum->csalereceiveid_b.nastnumber - iif(csalereceiveid_b.scalefactor==null || csalereceiveid_b.scalefactor==0,0,iif(csalereceiveid_b.vdef20==null,0,tonumber(csalereceiveid_b.vdef20))/csalereceiveid_b.scalefactor) ",
 				"B_nmny->getColValue(so_saleorder_b,nmny,corder_bid,csalereceiveid_b.csourcebillbodyid)",
 				"B_nprice->getColValue(so_saleorder_b,nnetprice,corder_bid,csalereceiveid_b.csourcebillbodyid)"
 		};
