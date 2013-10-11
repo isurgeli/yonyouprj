@@ -6852,6 +6852,7 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 		} /*lxt 2013-07 gzcg*/else if (bo == buttonManager.m_btnAddSample) {
 			showHintMessage("增加样本");
 			onInfoAddSample();
+			MessageDialog.showWarningDlg(this, "提示", "样本增加成功。");
 		} else if (bo == buttonManager.m_btnUpdateSample) {
 			showHintMessage("检测数据");
 			onInfoUpdateSample();
@@ -10875,8 +10876,8 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 		CheckbillB2VO newGrandVo = new CheckbillB2VO();
 		Vector<CheckbillB2ItemVO> lvec_AllBodyVO = new Vector<CheckbillB2ItemVO>();
 		Date now = new Date();
-		String samplecode = new UFDate(now).toString();
-		samplecode += String.valueOf(now.getHours()*60+now.getMinutes());
+		String samplecode = "";//new UFDate(now).toString();
+		samplecode += String.valueOf(now.getTime());
 		
 		for (int i = 0; i < lastGrandVo.getChildrenVO().length; i++) {
 			CheckbillB2ItemVO tempVO = new CheckbillB2ItemVO();
