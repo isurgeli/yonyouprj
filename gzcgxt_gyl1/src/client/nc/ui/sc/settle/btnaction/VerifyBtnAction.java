@@ -40,7 +40,8 @@ public class VerifyBtnAction implements IBtnAction {
   private SettleUI clientUI;
 
   private HashMap<String, OrderVO> order_map = new HashMap<String, OrderVO>();
-  HashMap<String,MaterialledgerVO[]> mater_map = null;//订单对应的历史已核销到货信息
+  HashMap<String,MaterialledgerVO[]> mater_map = null;//已经核销的产品信息
+  HashMap<String,MaterialledgerVO[]> order_mater_map = null;//订单对应的历史已核销
   /**
    *  Created on 2009-8-25 
    * <p>Discription:[处理“取消”按钮的点击]</p>
@@ -110,6 +111,7 @@ public class VerifyBtnAction implements IBtnAction {
 			
 			List<String> itemidALL  = new ArrayList<String>();//用来记录委外订单行ID
 			UFDouble ordertotalnum = new UFDouble();//本次到货产品的订单金额合计，用来算比例
+			
 			for (int i = rowcount - 1; i >= 0; i--) {
 				UFDouble nnum = (UFDouble) clientUI.getBillCardPanel().getBodyValueAt(i, "nnum");
 				UFDouble nprice = (UFDouble) clientUI.getBillCardPanel().getBodyValueAt(i, "nprocessmny");
@@ -633,7 +635,6 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 					list_return.add(tempvo);
 					num = num.sub(outnum);
 				}
-				//TODO 需要减去已占用核销
 			}
 			if(num.doubleValue() >0 ){
 				//错
@@ -644,7 +645,7 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 			return null;
 		}
 	}
-	return list_return.toArray(new CGDisassembleVO[0]);
+	  return list_return.toArray(new CGDisassembleVO[0]);
   }
 
   	/**
@@ -679,34 +680,72 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 	private HashMap<String, ArrayList<GeneralBillItemVO>> queryGeneralItemVO(
 			ArrayList<String> csourcebillbids) throws BusinessException {
 		IICToSO service = NCLocator.getInstance().lookup(IICToSO.class);
-		  HashMap<String, ArrayList<GeneralBillItemVO>> map = service.getGeneralBillItemVOsByCSBids(csourcebillbids);
-		  //TODO 需要减去已占用核销
+		HashMap<String, ArrayList<GeneralBillItemVO>> map = service
+				.getGeneralBillItemVOsByCSBids(csourcebillbids);
+		ArrayList<GeneralBillItemVO> list = map.get(csourcebillbids);
+		if (list != null && list.size() > 0) {
+			GeneralBillItemVO[] itemvos = list
+					.toArray(new GeneralBillItemVO[list.size()]);
+
+			// 减去已核销
+			if (order_mater_map != null
+					&& order_mater_map.get(csourcebillbids) != null) {
+				MaterialledgerVO[] materVOs = order_mater_map
+						.get(csourcebillbids);
+				for (int j = 0; j < itemvos.length; j++) {
+					GeneralBillItemVO generalBillItemVO = itemvos[j];
+
+					for (int i = 0; i < materVOs.length; i++) {
+						MaterialledgerVO materialledgerVO = materVOs[i];
+						if (materialledgerVO.getCbill_bid() != null
+								&& materialledgerVO.getCbill_bid().equals(
+										generalBillItemVO.getPrimaryKey())) {
+							UFDouble ninnum = generalBillItemVO.getNinnum();
+							UFDouble nhx = materialledgerVO.getNnum();
+							generalBillItemVO.setNinnum(ninnum.sub(nhx));
+						}
+					}
+				}
+			}
+		}
 		return map;
 	}
 	/////////////查已核销//////////////
 	private MaterialledgerVO[] queryMaterialledger(String corderid) throws BusinessException{
 		if (mater_map == null || mater_map.get(corderid) == null) {
 			// 先查已核销信息,找到核销对应的入库单信息
+			MaterialledgerVO[] materivos = null;
 			List<String> cgeneralhid = new ArrayList<String>();
-			MaterialledgerVO paramvo = new MaterialledgerVO();
-			paramvo.setPk_corp(ClientEnvironment.getInstance().getCorporation()
-					.getPrimaryKey());
-			// paramvo.setCorder_bid(corder_bid);
-			paramvo.setCorderid(corderid);
-			// paramvo.setCmaterialmangid(ddlbvos[j]
-			// .getCmangid());
-			Vector all_mater;
-			try {
-				all_mater = MaterialledgerHelper.queryByVOs(
-						new MaterialledgerVO[] { paramvo }, new Boolean[] { true });
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				throw new BusinessException(e);
+			if(order_mater_map == null || order_mater_map.get(corderid) == null){
+				
+				MaterialledgerVO paramvo = new MaterialledgerVO();
+				paramvo.setPk_corp(ClientEnvironment.getInstance().getCorporation()
+						.getPrimaryKey());
+				// paramvo.setCorder_bid(corder_bid);
+				paramvo.setCorderid(corderid);
+				// paramvo.setCmaterialmangid(ddlbvos[j]
+				// .getCmangid());
+				Vector all_mater;
+				try {
+					all_mater = MaterialledgerHelper.queryByVOs(
+							new MaterialledgerVO[] { paramvo }, new Boolean[] { true });
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					throw new BusinessException(e);
+				}
+				if(all_mater != null && all_mater.size() > 0){
+					if(order_mater_map == null)
+						order_mater_map = new HashMap<String, MaterialledgerVO[]>();
+//					MaterialledgerVO[] tempvos = new MaterialledgerVO[all_mater.size()];
+//					all_mater.copyInto(tempvos);
+					order_mater_map.put(corderid, (MaterialledgerVO[]) all_mater.get(0));
+				}
 			}
-			if (all_mater != null) {
-				MaterialledgerVO[] materivos = (MaterialledgerVO[]) all_mater
-						.get(0);
+			
+			materivos = order_mater_map.get(corderid);
+			
+			if (materivos != null) {
 
 				for (int ii = 0; ii < materivos.length; ii++) {
 					if (materivos[ii].getCbillid() != null
@@ -716,6 +755,7 @@ private CGDisassembleVO[] getDisassembleVOs(ArrayList<String> csourcebillbids,Ha
 					}
 				}
 			}
+			
 			
 			if(cgeneralhid != null && cgeneralhid.size()>0){
 				Vector<MaterialledgerVO> all_icbill = new Vector<MaterialledgerVO>();

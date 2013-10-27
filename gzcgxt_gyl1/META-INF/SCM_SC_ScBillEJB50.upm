@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="gb2312"?>
+<module name="SCM_SC_ScBillEJB">
+  <public>
+    <component priority="0" singleton="true" remote="true" tx="NONE" supportAlias="true">
+      <interface>nc.itf.sc.inter.IScToIa_Materialledger_QueryDMO</interface>
+      <implementation>nc.bs.pu.sc.MaterialledgerDMO</implementation>
+    </component>
+    <component priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IAdjustbill</interface>
+      <implementation>nc.bs.sc.adjust.AdjustbillImpl</implementation>
+    </component>
+    <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IMaterialledger</interface>
+      <implementation>nc.bs.sc.init.MaterialledgerImpl</implementation>
+    </component>
+    <component   priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IMateriallledger</interface>
+      <implementation>nc.bs.sc.settle.MaterialledgerImpl</implementation>
+    </component>
+    <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IOrder</interface>
+      <implementation>nc.bs.sc.order.OrderImpl</implementation>
+    </component>
+    <component priority="0" singleton="true" remote="true" tx="CMT"  supportAlias="true">
+      <interface>nc.itf.sc.IOrderB</interface>
+      <implementation>nc.bs.sc.order.OrderBImpl</implementation>
+    </component>
+    <component priority="0" singleton="true" remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IPublic</interface>
+      <implementation>nc.bs.sc.pub.PublicImpl</implementation>
+    </component>
+    <component priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IQuery</interface>
+      <implementation>nc.bs.sc.query.QueryImpl</implementation>
+    </component>
+    <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.IScFromCt</interface>
+      <implementation>nc.bs.sc.ct.ScFromCtImpl</implementation>
+    </component>
+    <component  priority="0" singleton="true" remote="true" tx="CMT"  supportAlias="true">
+      <interface>nc.itf.sc.IScToCt</interface>
+      <implementation>nc.bs.sc.ct.ScToCtImpl</implementation>
+    </component>
+    <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.inter.IScToIa_MaterialledgerDMO</interface>
+      <implementation>nc.bs.pu.sc.MaterialledgerDMO</implementation>
+    </component>
+    <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.inter.IScToPu_InterfaceDMO</interface>
+      <implementation>nc.bs.pu.sc.InterfaceDMO</implementation>
+    </component>
+    <component  priority="0" singleton="true"  remote="true" tx="CMT" supportAlias="true">
+      <interface>nc.itf.sc.inter.IScToPu_OrderDMO</interface>
+      <implementation>nc.bs.sc.order.OrderDMO</implementation>
+    </component>
+    </public>
+</module>
+

@@ -6889,17 +6889,29 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 	private String[] getAutoCheckData(String vsmplecode, ArrayList<Hashtable<String, String>> data) {
 		// 获取检测数据
 		StringBuffer sql = new StringBuffer();
-		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b, qc_cghzbg_h where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
-		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.pk_cghzbg_h=qc_cghzbg_h.pk_cghzbg_h and (gzcg_bd_sampledoc.vsampleno='");
+//		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b, qc_cghzbg_h where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
+//		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.pk_cghzbg_h=qc_cghzbg_h.pk_cghzbg_h and (gzcg_bd_sampledoc.vsampleno='");
+//		sql.append(vsmplecode);
+//		sql.append("' or gzcg_bd_sampledoc.vsamplenofar='");
+//		sql.append(vsmplecode);
+//		sql.append("') and gzcg_bd_sampledoc.pk_corp='");
+//		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+//		sql.append("' and qc_cghzbg_h.pk_corp='");
+//		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
+//		sql.append("' and qc_cghzbg_h.VBILLSTATUS="+IBillStatus.CHECKPASS);
+//		sql.append(" and nvl(qc_cghzbg_h.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
+		
+		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
+		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.zdy2='通过' and (gzcg_bd_sampledoc.vsampleno='");
 		sql.append(vsmplecode);
 		sql.append("' or gzcg_bd_sampledoc.vsamplenofar='");
 		sql.append(vsmplecode);
 		sql.append("') and gzcg_bd_sampledoc.pk_corp='");
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
-		sql.append("' and qc_cghzbg_h.pk_corp='");
+		sql.append("' and qc_cghzbg_b.zdy4='");
 		sql.append(ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
-		sql.append("' and qc_cghzbg_h.VBILLSTATUS="+IBillStatus.CHECKPASS);
-		sql.append(" and nvl(qc_cghzbg_h.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
+		sql.append("' and nvl(qc_cghzbg_b.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
+
 		
 		ArrayList<String> vsamplecodes = new ArrayList<String>();
 		
