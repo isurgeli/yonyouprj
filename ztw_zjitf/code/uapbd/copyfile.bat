@@ -7,3 +7,5 @@ xcopy /S /Y classes\nc\itf\* G:\NC\Projects\2013ztw\patch\客商接口\modules\uapbd
 xcopy /S /Y classes\nc\vo\* G:\NC\Projects\2013ztw\patch\客商接口\modules\uapbd\classes\nc\vo
 
 xcopy /S /Y META-INF\* G:\NC\Projects\2013ztw\patch\客商接口\modules\uapbd\META-INF
+
+xcopy /S /Y ..\ws\* G:\NC\Projects\2013ztw\patch\客商接口\temp\wsgen

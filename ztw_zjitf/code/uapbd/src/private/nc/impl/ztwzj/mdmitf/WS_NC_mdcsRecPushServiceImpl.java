@@ -1,5 +1,7 @@
 package nc.impl.ztwzj.mdmitf;
 
+import nc.bs.framework.common.InvocationInfoProxy;
+import nc.bs.framework.common.RuntimeEnv;
 import nc.bs.logging.Logger;
 import nc.bs.ztwzj.cust_supp.CustomerProcessor;
 import nc.bs.ztwzj.cust_supp.SupplierProcessor;
@@ -18,6 +20,8 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 		String retmsg = null;
 		String billcode = null;
 		UFBoolean correct = null;
+		InvocationInfoProxy.getInstance().setUserDataSource("nc63cmp");
+		InvocationInfoProxy.getInstance().setGroupId(NCDataConstant.PK_GROUP.getValue());
 		try	{
 			if (mdtype.equals("Customer")){
 				String code = getXMLValue(data, "custNo");
@@ -40,7 +44,7 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 				SupplierProcessor suppP = new SupplierProcessor();
 				suppP.processSupplier(code, name, isFinancial);
 			} else {
-				throw new BusinessException("C01", "未知的客商类型");
+				throw new BusinessException("未知的客商类型", "C01");
 			}
 			
 			retmsg = ZtwBusinessException.getCustSuppSuccessXMLString();
@@ -63,9 +67,9 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 	private void checkCodeName(String code, String name)
 			throws BusinessException {
 		if (code == null || code.length()==0)
-			throw new BusinessException("C02", "编码为空");
+			throw new BusinessException("编码为空", "C02");
 		if (name == null || name.length()==0)
-			throw new BusinessException("C03", "名称为空");
+			throw new BusinessException("名称为空", "C03");
 	}
 
 	private String getXMLValue(String xml, String sec){
