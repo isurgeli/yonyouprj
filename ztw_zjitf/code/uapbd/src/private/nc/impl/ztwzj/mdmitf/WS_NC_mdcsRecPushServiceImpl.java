@@ -1,7 +1,6 @@
 package nc.impl.ztwzj.mdmitf;
 
 import nc.bs.framework.common.InvocationInfoProxy;
-import nc.bs.framework.common.RuntimeEnv;
 import nc.bs.logging.Logger;
 import nc.bs.ztwzj.cust_supp.CustomerProcessor;
 import nc.bs.ztwzj.cust_supp.SupplierProcessor;
@@ -24,7 +23,7 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 		InvocationInfoProxy.getInstance().setGroupId(NCDataConstant.PK_GROUP.getValue());
 		try	{
 			if (mdtype.equals("Customer")){
-				String code = getXMLValue(data, "custNo");
+				String code = getXMLValue(data, "custNo"); 
 				String name = getXMLValue(data, "custName");
 				boolean isFinancial = getXMLValue(data, "isFinancial").toUpperCase().equals("TRUE");
 				
@@ -76,9 +75,14 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 		int s = xml.indexOf("<"+sec+">");
 		if (s==-1) return "";
 		s+=sec.length()+2;
-		int e = xml.indexOf("<", s);
+		int e = xml.indexOf("</"+sec+">", s);
 		if (e==-1) return "";
 		
-		return xml.substring(s, e);
+		String ret = xml.substring(s, e);
+		if (ret.toUpperCase().indexOf("<![CDATA[") != -1){
+			ret = ret.substring(9, ret.length()-3);
+		}
+		
+		return ret;
 	}
 }
