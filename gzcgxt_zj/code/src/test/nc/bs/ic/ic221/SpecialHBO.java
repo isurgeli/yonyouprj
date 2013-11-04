@@ -1277,6 +1277,11 @@ public ArrayList saveBill(SpecialBillVO vo)
 
 //lxt 2013-07 gzcg
 private void updateBillType4331Num(SpecialBillVO vo, boolean del) throws BusinessException{
+	for(int i=0;i<vo.getChildrenVO().length;i++){
+		if (vo.getChildrenVO()[i].getAttributeValue("csourcebillbid") == null) 
+			return; //自制转库单不处理。
+	}
+	
 	BaseDAO dao = new BaseDAO();
 	String sHid = (String) vo.getParentVO().getAttributeValue("cspecialhid");
 	Hashtable<String, UFDouble> updateDatas = new Hashtable<String, UFDouble>();

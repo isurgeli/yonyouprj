@@ -6901,8 +6901,12 @@ public class CheckBillMaintainUI extends nc.ui.pub.ToftPanel implements ChangeLi
 //		sql.append("' and qc_cghzbg_h.VBILLSTATUS="+IBillStatus.CHECKPASS);
 //		sql.append(" and nvl(qc_cghzbg_h.dr,0)=0 order by gzcg_bd_sampledoc.vsampleno");
 		
+		String invname = ((UIRefPane)getBillCardPanel().getHeadItem("cinventorycode").getComponent()).getRefName();
 		sql.append("select gzcg_bd_sampledoc.vsampleno, qc_cghzbg_b.checkitem, qc_cghzbg_b.checkvalue from gzcg_bd_sampledoc, qc_cghzbg_b where gzcg_bd_sampledoc.vsampleno=qc_cghzbg_b.jcpici");
-		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.zdy2='通过' and (gzcg_bd_sampledoc.vsampleno='");
+		sql.append(" and gzcg_bd_sampledoc.vdef1=qc_cghzbg_b.ypname and qc_cghzbg_b.zdy2='通过' ");
+		sql.append(" and qc_cghzbg_b.ypname='");
+		sql.append(invname);
+		sql.append("' and (gzcg_bd_sampledoc.vsampleno='");
 		sql.append(vsmplecode);
 		sql.append("' or gzcg_bd_sampledoc.vsamplenofar='");
 		sql.append(vsmplecode);
