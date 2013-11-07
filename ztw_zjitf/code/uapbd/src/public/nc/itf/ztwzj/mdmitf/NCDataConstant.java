@@ -1,6 +1,11 @@
 package nc.itf.ztwzj.mdmitf;
 
+import java.io.IOException;
+import java.util.Properties;
+
+import nc.bs.logging.Logger;
 import nc.vo.pfxx.xlog.XlogVO;
+import nc.vo.pub.BusinessException;
 import nc.vo.pub.lang.UFBoolean;
 import nc.vo.pub.lang.UFDateTime;
 
@@ -15,7 +20,8 @@ public enum NCDataConstant {
 //	PK_FINANCIALCUSTCLASS("1002A410000000000XU2"),
 //	PK_DOMESTICSUPPCLASS("1002A410000000000XU8"),
 //	PK_FOREIGNSUPPCLASS("1002A410000000000XU8"),
-//	PK_FINANCIALSUPPCLASS("1002A410000000000XUA");
+//	PK_FINANCIALSUPPCLASS("1002A410000000000XUA"),
+//	PK_SYSUSER("1002A510000000001OAL");
 	
 	PK_GROUP("0001A5100000000003J3"),
 	PK_FORMAT("FMT0Z000000000000000"),
@@ -27,7 +33,8 @@ public enum NCDataConstant {
 	PK_FINANCIALCUSTCLASS("1002A510000000000BW0"),
 	PK_DOMESTICSUPPCLASS("1002A510000000000BW5"),
 	PK_FOREIGNSUPPCLASS("1002A510000000000BW6"),
-	PK_FINANCIALSUPPCLASS("1002A510000000000BW7");
+	PK_FINANCIALSUPPCLASS("1002A510000000000BW7"),
+	PK_SYSUSER("1002A510000000001OAL");
 	
 	private String value;
 	
@@ -55,5 +62,21 @@ public enum NCDataConstant {
 		xlog.setBusibill(retmsg);
 		
 		return xlog;
+	}
+	
+	public static String getDataSource() throws BusinessException{
+		Properties prop = new Properties();
+		 
+    	try {
+    		prop.load(NCDataConstant.class.getResourceAsStream("config.properties"));
+    		String datasrc = prop.getProperty("datasrc").toString();
+    		if (datasrc != null && datasrc.length()==0)
+    			throw new BusinessException("数据源配置不正确", "S01");
+    		
+    		return datasrc;
+    	} catch (IOException ex) {
+    		Logger.error(ex.getMessage(),ex);
+			throw new BusinessException("数据源配置不正确", "S01");
+        }
 	}
 }

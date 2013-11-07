@@ -13,20 +13,22 @@ import nc.vo.pub.BusinessException;
 import nc.vo.pub.lang.UFBoolean;
 
 public class SupplierProcessor extends CustSuppBaseProcessor {
-	public void processSupplier(String code, String name, boolean financial) throws BusinessException{
+	public String processSupplier(String code, String name, boolean financial) throws BusinessException{
 		String pk_supp = isSupplierExist(code);
 		if (pk_supp != null){
 			updateSupplier(pk_supp, code, name, financial);
-			return;
+			return "更新";
 		}
 		
 		String pk_cust = isCustomerExist(code);
 		if (pk_cust != null){
 			addSupplierFromCustomer(pk_cust, code, name, financial);
-			return;
+			return "关联客户";
 		}
 		
 		addSupplier(code, name, financial);
+		
+		return "增加";
 	}
 	
 	private void addSupplier(String code, String name, boolean financial) throws BusinessException{

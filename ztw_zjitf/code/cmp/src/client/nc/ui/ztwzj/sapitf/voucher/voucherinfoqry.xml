@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- 环境变量 -->
+	<bean id="context" class="nc.vo.uif2.LoginContext" />
+	
+	<!-- 模型部分配置########################################################### -->
+
+	<!-- 应用服务类，负责进行模型操作的处理 -->	
+	<bean id="tableService" class="nc.ui.ztwzj.sapitf.voucher.TableService">
+	</bean>
+
+
+	<!-- 对象转换器工厂，由此获取操作对象的特征信息 -->
+	<bean id="boadatorfactory" class="nc.vo.bd.meta.BDObjectAdpaterFactory" />
+
+	<!-- 应用模型 -->
+	<bean id="tableModel" class="nc.ui.uif2.model.BillTableModel">
+		<property name="service" ref="tableService"></property>
+		<property name="businessObjectAdapterFactory" ref="boadatorfactory">
+		</property>
+		<property name="context" ref="context"></property>
+	</bean>
+
+	<!-- 数据模型管理器，主要负责各种方式的模型初始化 -->
+	<bean id="modelDataManager" class="nc.ui.ztwzj.sapitf.voucher.TableDataManager">
+		<property name="model" ref="tableModel"></property>
+		<property name="service" ref="tableService" />
+		<property name="context" ref="context" />
+	</bean>
+
+	<!-- 模板容器，负责对模板的统一装载 -->
+	<bean id="templateContainer" class="nc.ui.uif2.editor.TemplateContainer" init-method="load">
+		<property name="context" ref="context" />
+	</bean>
+
+
+	<!-- 界面元素 ###########################################################-->
+	<!-- 列表视图 -->
+	<bean id="listView" class="nc.ui.lxt.pub.editor.CSBillTable" init-method="initUI">
+		<property name="model" ref="tableModel"></property>
+		<property name="templateContainer" ref="templateContainer"></property>
+		<property name="selectCol" value="bselect"></property>
+	</bean>
+	
+	<bean id="orgpanel" class="nc.ui.ztwzj.sapitf.voucher.ZtwBDOrgPanel" init-method="initUI">
+		<property name="model" ref="tableModel" />
+		<property name="dataManager" ref="modelDataManager" />
+	</bean>
+	
+	<!-- Actions ########################################################### -->
+	<bean id="separatorAction" class="nc.funcnode.ui.action.SeparatorAction" />
+	
+	<bean id="pushAction" class="nc.ui.ztwzj.sapitf.voucher.PushAction">
+		<property name="model" ref="tableModel" />
+		<property name="editor" ref="listView" />
+	</bean>
+	
+	<bean id="refreshAction" class="nc.ui.uif2.actions.RefreshAction">
+		<property name="model" ref="tableModel" />
+		<property name="dataManager" ref="modelDataManager" />
+	</bean>
+		
+	<!-- 界面布局总装########################################################### -->
+	<bean id="container" class="nc.ui.uif2.TangramContainer" init-method="initUI">
+		<property name="tangramLayoutRoot">
+			<bean class="nc.ui.uif2.tangramlayout.node.VSNode">
+				<property name="up">
+					<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+						<property name="component" ref="orgpanel">
+						</property>
+					</bean>
+				</property>
+				<property name="down">
+					<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+						<property name="name" value="列表"></property>
+						<property name="component" ref="listView"></property>
+					</bean>
+				</property>
+				<property name="dividerLocation">
+					<value>0.1</value>
+				</property>
+			</bean>
+		</property>
+		<property name="model" ref="tableModel" />
+		<property name="actions">
+			<list>
+				<ref bean="pushAction" />
+				<ref bean="separatorAction" />
+				<ref bean="refreshAction" />
+			</list>
+		</property>
+	</bean>	
+</beans>

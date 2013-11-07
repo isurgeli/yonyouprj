@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="gb2312"?>
+<module name="ZTWSAPITFEJB">
+    <public>
+    	<component singleton="true" remote="true" tx="CMT">
+		<interface>nc.itf.ztwzj.sapitf.IPubService</interface>
+		<implementation>nc.imp.ztwzj.sapitf.PubService</implementation>
+    	</component>
+    </public>
+</module>

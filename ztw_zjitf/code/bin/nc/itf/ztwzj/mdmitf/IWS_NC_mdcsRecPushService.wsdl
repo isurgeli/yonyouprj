@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
+jaxb:version="2.0"
+xmlns:ns0="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService"
+targetNamespace="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService">
+
+<jaxws:bindings>
+	<jaxws:package name="nc.itf.ztwzj.mdmitf"/>
+</jaxws:bindings>
+
+<wsdl:types>
+   <xsd:schema xmlns:ns="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService"
+			attributeFormDefault="unqualified"
+			elementFormDefault="unqualified"
+			targetNamespace="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService" jaxb:version="2.0">
+	<xsd:annotation>
+    	<xsd:appinfo>
+   			<jaxb:schemaBindings>
+    			<jaxb:package name="nc.itf.ztwzj.mdmitf"/>
+    		</jaxb:schemaBindings>
+   		</xsd:appinfo>
+   	</xsd:annotation>
+	<xsd:element name="recvPushMdcsInfo">
+         <xsd:complexType>
+            <xsd:sequence>
+				<xsd:element name="string"  minOccurs="0" nillable="true" type="xsd:string"/>
+				<xsd:element name="string1"  minOccurs="0" nillable="true" type="xsd:string"/>
+             </xsd:sequence>  
+         </xsd:complexType>
+     </xsd:element>
+	<xsd:element name="recvPushMdcsInfoResponse">
+         <xsd:complexType>
+            <xsd:sequence>
+				<xsd:element name="return"  minOccurs="0" nillable="true" type="xsd:string"/>
+             </xsd:sequence>  
+         </xsd:complexType>
+     </xsd:element>
+   </xsd:schema>
+</wsdl:types>
+    <wsdl:message name="recvPushMdcsInfoRequest">
+        <wsdl:part name="parameters"  element="ns0:recvPushMdcsInfo"/>
+    </wsdl:message>
+    <wsdl:message name="recvPushMdcsInfoResponse">
+        <wsdl:part name="parameters"  element="ns0:recvPushMdcsInfoResponse"/>
+    </wsdl:message>
+
+    <wsdl:portType name="IWS_NC_mdcsRecPushServicePortType">
+        <wsdl:operation name="recvPushMdcsInfo">
+            <wsdl:input message="ns0:recvPushMdcsInfoRequest" wsaw:Action="urn:recvPushMdcsInfo"/>
+            <wsdl:output message="ns0:recvPushMdcsInfoResponse" wsaw:Action="urn:recvPushMdcsInfoResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    
+    
+    <wsdl:binding name="IWS_NC_mdcsRecPushServiceSOAP11Binding" type="ns0:IWS_NC_mdcsRecPushServicePortType">
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
+        <wsdl:operation name="recvPushMdcsInfo">
+            <soap:operation soapAction="urn:recvPushMdcsInfo" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="IWS_NC_mdcsRecPushService">
+        <wsdl:port name="IWS_NC_mdcsRecPushServiceSOAP11port_http" binding="ns0:IWS_NC_mdcsRecPushServiceSOAP11Binding">
+            <soap:address location="http://localhost/uapws/service/IWS_NC_mdcsRecPushService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

@@ -19,9 +19,12 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 		String retmsg = null;
 		String billcode = null;
 		UFBoolean correct = null;
-		InvocationInfoProxy.getInstance().setUserDataSource("nc63cmp");
-		InvocationInfoProxy.getInstance().setGroupId(NCDataConstant.PK_GROUP.getValue());
+		
 		try	{
+			InvocationInfoProxy.getInstance().setUserDataSource(NCDataConstant.getDataSource());
+			InvocationInfoProxy.getInstance().setGroupId(NCDataConstant.PK_GROUP.getValue());
+			InvocationInfoProxy.getInstance().setUserId(NCDataConstant.PK_SYSUSER.getValue());
+			
 			if (mdtype.equals("Customer")){
 				String code = getXMLValue(data, "custNo"); 
 				String name = getXMLValue(data, "custName");
@@ -29,9 +32,10 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 				
 				checkCodeName(code, name);
 				
-				billcode = code;
+				billcode = "客户"+code;
 				CustomerProcessor custP = new CustomerProcessor();
-				custP.processCustomer(code, name, isFinancial);
+				String flag = custP.processCustomer(code, name, isFinancial);
+				billcode += flag;
 			} else if (mdtype.equals("Vendor")){
 				String code = getXMLValue(data, "vendNo");
 				String name = getXMLValue(data, "vendName");
@@ -39,9 +43,10 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 				
 				checkCodeName(code, name);
 				
-				billcode = code;
+				billcode = "供应商"+code;
 				SupplierProcessor suppP = new SupplierProcessor();
-				suppP.processSupplier(code, name, isFinancial);
+				String flag = suppP.processSupplier(code, name, isFinancial);
+				billcode += flag;
 			} else {
 				throw new BusinessException("未知的客商类型", "C01");
 			}
