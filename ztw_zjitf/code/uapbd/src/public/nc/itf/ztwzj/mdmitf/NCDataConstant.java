@@ -1,8 +1,12 @@
 package nc.itf.ztwzj.mdmitf;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import nc.bs.framework.common.InvocationInfoProxy;
+import nc.bs.framework.common.RuntimeEnv;
 import nc.bs.logging.Logger;
 import nc.vo.pfxx.xlog.XlogVO;
 import nc.vo.pub.BusinessException;
@@ -68,7 +72,8 @@ public enum NCDataConstant {
 		Properties prop = new Properties();
 		 
     	try {
-    		prop.load(NCDataConstant.class.getResourceAsStream("config.properties"));
+    		String path = RuntimeEnv.getInstance().getNCHome()+File.separatorChar+"resources"+File.separatorChar+"ztwitf.properties";
+    		prop.load(new FileInputStream(path));
     		String datasrc = prop.getProperty("datasrc").toString();
     		if (datasrc != null && datasrc.length()==0)
     			throw new BusinessException("数据源配置不正确", "S01");
