@@ -1,0 +1,20 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="VoucherResultInfoList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="VoucherResultInfo" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="VOUCHERID"/>
+              <xs:element type="xs:string" name="BUKRS"/>
+              <xs:element type="xs:string" name="BUSITYPE"/>
+              <xs:element type="xs:string" name="DOCUMENTSTYPE"/>
+              <xs:element type="xs:string" name="DOCUMENTSNO"/>
+              <xs:element type="xs:string" name="TYPE"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VoucherResultInfoList>
+	<VoucherResultInfo>
+		<VOUCHERID>1AAAA00020131031ZZZZ</VOUCHERID>
+		<BUKRS>1000</BUKRS>
+		<BUSITYPE>资金上收-收款公司</BUSITYPE>
+		<DOCUMENTSTYPE>资金上划单</DOCUMENTSTYPE>
+		<DOCUMENTSNO>1000000</DOCUMENTSNO>
+		<TYPE>S</TYPE>
+	</VoucherResultInfo>
+	<VoucherResultInfo>
+		<VOUCHERID>1AAAA00020131031ZZZZ</VOUCHERID>
+		<BUKRS>1000</BUKRS>
+		<BUSITYPE>资金上收-收款公司</BUSITYPE>
+		<DOCUMENTSTYPE>资金上划单</DOCUMENTSTYPE>
+		<DOCUMENTSNO>1000000</DOCUMENTSNO>
+		<TYPE>S</TYPE>
+	</VoucherResultInfo>
+</VoucherResultInfoList>

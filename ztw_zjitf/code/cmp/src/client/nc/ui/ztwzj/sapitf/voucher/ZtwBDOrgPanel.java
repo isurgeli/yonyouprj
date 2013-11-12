@@ -6,7 +6,7 @@ import java.awt.event.ItemListener;
 import nc.ui.bd.pub.BDOrgPanel;
 import nc.ui.pub.beans.UIComboBox;
 import nc.ui.pub.beans.UILabel;
-import nc.vo.ztwzj.sapitf.voucher.IZtwConstant;
+import nc.vo.ztwzj.sapitf.voucher.ZtwVoucherConstant;
 
 public class ZtwBDOrgPanel extends BDOrgPanel implements ItemListener{
 
@@ -38,11 +38,6 @@ public class ZtwBDOrgPanel extends BDOrgPanel implements ItemListener{
 	public UIComboBox getComboBox() {
 		if (comBox == null) {
 			comBox = new UIComboBox();
-			comBox.addItem(IZtwConstant.BUSITYPE_REVFDOWN);
-			comBox.addItem(IZtwConstant.BUSITYPE_PAYTDOWN);
-			comBox.addItem(IZtwConstant.BUSITYPE_PAYTUP);
-			comBox.addItem(IZtwConstant.BUSITYPE_REVFUP);
-			comBox.addItem(IZtwConstant.BUSITYPE_ADJUST);
 			comBox.addItemListener(this);
 		}
 		return comBox;
@@ -61,9 +56,9 @@ public class ZtwBDOrgPanel extends BDOrgPanel implements ItemListener{
 
 	private void setContextPara(String item) {
 		if (getModel().getContext().getStatusRegistery().getAppStatusMemento().getAppStatusMap()!=null &&
-				getModel().getContext().getStatusRegistery().getAppStatusMemento().getAppStatusMap().containsKey(IZtwConstant.BUSITYPE))
-			getModel().getContext().getStatusRegistery().getAppStatusMemento().getAppStatusMap().remove(IZtwConstant.BUSITYPE);
+				getModel().getContext().getStatusRegistery().getAppStatusMemento().getAppStatusMap().containsKey(ZtwVoucherConstant.BTID.getValue()))
+			getModel().getContext().getStatusRegistery().getAppStatusMemento().getAppStatusMap().remove(ZtwVoucherConstant.BTID.getValue());
 		
-		getModel().getContext().getStatusRegistery().getAppStatusMemento().addAppStatusInfo(IZtwConstant.BUSITYPE, item);
+		getModel().getContext().getStatusRegistery().getAppStatusMemento().addAppStatusInfo(ZtwVoucherConstant.BTID.getValue(), item);
 	}
 }

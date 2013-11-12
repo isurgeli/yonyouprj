@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<module name="uapbd">
+<module name="UAPBD_EJB">
 	<public>
-		<component name="mdmws">
+		<component name= "mdmws" remote="true" singleton="true" tx="CMT">
 			<interface>nc.itf.ztwzj.mdmitf.IWS_NC_mdcsRecPushService</interface>
 			<implementation>nc.impl.ztwzj.mdmitf.WS_NC_mdcsRecPushServiceImpl</implementation>
 			<extension class="nc.uap.ws.deploy.OxbWSExtensionProcessor">
-				<wsdl>nc/itf/ztwzj/mdmitf/IWS_NC_mdcsRecPushService.wsdl</wsdl>
+				<wsdl>/nc/itf/ztwzj/mdmitf/IWS_NC_mdcsRecPushService.wsdl</wsdl>
 				<address>/mdmws</address>
 			</extension>
     	</component>

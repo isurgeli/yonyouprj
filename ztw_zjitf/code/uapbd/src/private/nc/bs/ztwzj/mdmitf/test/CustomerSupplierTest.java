@@ -1,13 +1,24 @@
 package nc.bs.ztwzj.mdmitf.test;
 
+import junit.framework.TestCase;
 import nc.bs.framework.common.RuntimeEnv;
 import nc.bs.ztwzj.cust_supp.CustomerProcessor;
 import nc.impl.ztwzj.mdmitf.WS_NC_mdcsRecPushServiceImpl;
-import junit.framework.TestCase;
+
+import org.antlr.stringtemplate.StringTemplate;
+import org.antlr.stringtemplate.language.DefaultTemplateLexer;
 
 public class CustomerSupplierTest extends TestCase {
 	public CustomerSupplierTest(String name) {
 		super(name);
+	}
+	
+	public void testST(){
+		StringTemplate hello = new StringTemplate("Hello, $name$", DefaultTemplateLexer.class);
+		hello.setAttribute("name", "World $two$");
+		StringTemplate hello1 = new StringTemplate(hello.toString(), DefaultTemplateLexer.class);
+		hello1.setAttribute("two", "OK");
+		System.out.println(hello1.toString());
 	}
 	
 	public void testCustomer(){

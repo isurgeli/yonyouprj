@@ -7,13 +7,11 @@ import nc.ui.uif2.ShowStatusBarMsgUtil;
 import nc.ui.uif2.UIState;
 import nc.ui.uif2.editor.IEditor;
 import nc.ui.uif2.model.AbstractAppModel;
-import nc.ui.uif2.model.BillTableModel;
 import nc.uif2.annoations.MethodType;
 import nc.uif2.annoations.ModelMethod;
 import nc.uif2.annoations.ModelType;
 import nc.uif2.annoations.ViewMethod;
 import nc.uif2.annoations.ViewType;
-import nc.vo.ztwzj.sapitf.voucher.VoucherQryInfo;
 
 public class PushAction extends NCAction {
 	
@@ -58,8 +56,8 @@ public class PushAction extends NCAction {
 	
 	@Override
 	public void doAction(ActionEvent e) throws Exception {
-		VoucherQryInfo[] value = (VoucherQryInfo[])editor.getValue();
-		((TableService)((BillTableModel)model).getService()).setBillFlag(value);
+		//VoucherQryInfo[] value = (VoucherQryInfo[])editor.getValue();
+		//((TableService)((BillTableModel)model).getService()).setBillFlag(value);
 		
 		ShowStatusBarMsgUtil.showStatusBarMsg("…Ë÷√≥…π¶°£", getModel().getContext());
 	}

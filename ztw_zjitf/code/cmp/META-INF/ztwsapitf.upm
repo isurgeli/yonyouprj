@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="gb2312"?>
-<module name="ZTWSAPITFEJB">
+<module name="CMPEJB">
     <public>
     	<component singleton="true" remote="true" tx="CMT">
-		<interface>nc.itf.ztwzj.sapitf.IPubService</interface>
-		<implementation>nc.imp.ztwzj.sapitf.PubService</implementation>
+			<interface>nc.itf.ztwzj.sapitf.IVoucherService</interface>
+			<implementation>nc.impl.ztwzj.sapitf.VoucherService</implementation>
+    	</component>
+    	<component name="sapvouws" singleton="true" remote="true" tx="CMT">
+			<interface>nc.itf.ztwzj.sapitf.IWS_NC_SAPVoucherQueryService</interface>
+			<implementation>nc.impl.ztwzj.sapitf.WS_NC_SAPVoucherQueryService</implementation>
+			<extension class="nc.uap.ws.deploy.OxbWSExtensionProcessor">
+				<wsdl>/nc/itf/ztwzj/sapitf/IWS_NC_SAPVoucherQueryService.wsdl</wsdl>
+				<address>/sapvouws</address>
+			</extension>
     	</component>
     </public>
 </module>

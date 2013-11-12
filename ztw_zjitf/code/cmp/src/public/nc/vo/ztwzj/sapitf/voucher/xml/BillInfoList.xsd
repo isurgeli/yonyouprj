@@ -1,0 +1,36 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="BillInfoList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element type="xs:string" name="success"/>
+        <xs:element type="xs:string" name="errcode"/>
+        <xs:element type="xs:string" name="message"/>
+        <xs:element name="BillInfo" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="VOUCHERID"/>
+              <xs:element type="xs:string" name="BUKRS"/>
+              <xs:element type="xs:string" name="BUKRSLEVEL"/>
+              <xs:element type="xs:string" name="BUSITYPE"/>
+              <xs:element type="xs:string" name="DOCUMENTSTYPE"/>
+              <xs:element type="xs:string" name="DOCUMENTSNO"/>
+              <xs:element type="xs:string" name="ABSTRACT"/>
+              <xs:element type="xs:string" name="BUDAT"/>
+              <xs:element type="xs:string" name="CUSTCODE"/>
+              <xs:element type="xs:string" name="CUSTNAME"/>
+              <xs:element type="xs:string" name="WRBTR"/>
+              <xs:element type="xs:string" name="EXBANK"/>
+              <xs:element type="xs:string" name="EXBANKNUM"/>
+              <xs:element type="xs:string" name="OPPEXBANK"/>
+              <xs:element type="xs:string" name="OPPEXBANKNUM"/>
+              <xs:element type="xs:string" name="OUTBANK"/>
+              <xs:element type="xs:string" name="OUTBANKNUM"/>
+              <xs:element type="xs:string" name="INBANK"/>
+              <xs:element type="xs:string" name="INBANKNUM"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
