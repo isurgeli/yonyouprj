@@ -1,5 +1,7 @@
 package nc.impl.ztwzj.sapitf;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -27,6 +29,7 @@ import nc.itf.ztwzj.sapitf.IVoucherService;
 import nc.jdbc.framework.processor.BeanListProcessor;
 import nc.jdbc.framework.processor.VectorProcessor;
 import nc.vo.pub.BusinessException;
+import nc.vo.pub.lang.UFDate;
 import nc.vo.ztwzj.sapitf.voucher.VoucherQryInfo;
 import nc.vo.ztwzj.sapitf.voucher.ZtwVoucherConstant;
 import nc.vo.ztwzj.sapitf.voucher.BillInfo.BillInfoList;
@@ -95,14 +98,21 @@ public class VoucherService implements IVoucherService {
 		}
 		SQLWhereClause[] flexWheres = new SQLWhereClause[] {
 			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "pk_qryorg", OPERATOR.EQ, DELIMITER.getParaExp("CORP")),
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.EQ, DELIMITER.getParaExp("BUDATS")),
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.EQ, DELIMITER.getParaExp("BUDATE")),
+			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.GTE, DELIMITER.getParaExp("BUDATS")),
+			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.LTE, DELIMITER.getParaExp("BUDATE")),
+			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "voucherflag", OPERATOR.NEQ, "'Y'")
 		};
 		paras.put("BUKRSLEVEL", DELIMITER.getStringParaValue(org_level));
 		paras.put("BUSITYPE", DELIMITER.getStringParaValue(busitype));
 		paras.put("CORP", DELIMITER.getStringParaValue(pk_org));
-		paras.put("BUDATS", DELIMITER.getStringParaValue(budats));
-		paras.put("BUDATE", DELIMITER.getStringParaValue(budate));
+		SimpleDateFormat sFormat = new SimpleDateFormat("yyyyMMdd");
+		try {
+			paras.put("BUDATS", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budats)).toString()));
+			paras.put("BUDATE", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budate)).toString()));
+		} catch (ParseException e) {
+			throw new BusinessException(e.getMessage() ,e);
+		}
+		
 		
 		if (busitype.equals(ZtwVoucherConstant.BT_DELIHEADCORP.getValue())) {
 			paras.put("ABSTRACTS", "'ÊÕ['");
@@ -124,6 +134,7 @@ public class VoucherService implements IVoucherService {
 	}
 
 	private Pair<String, String> getOrgPkLevel(String bukrs) throws BusinessException {
+		if (bukrs.equals("0001")) bukrs = "100099";
 		bukrs = "9999"+bukrs;
 		BaseDAO dao = new BaseDAO();
 		@SuppressWarnings("unchecked")
@@ -133,14 +144,14 @@ public class VoucherService implements IVoucherService {
 		if (data == null || data.size() != 1)
 			throw new BusinessException("×éÖ¯±àÂë´íÎó¡£");
 		String level = null;
-		if (bukrs.equals("0001") || bukrs.equals("100099"))
+		if (bukrs.equals("9999100099"))
 			level = "1";
 		else if (data.get(0).get(1).equals(ZtwVoucherConstant.PK_MONEYCENTER.getValue()))
 			level = "2";
 		else
 			level = "3";
 		
-		return Pair.create(data.get(0).get(1).toString(), level);
+		return Pair.create(data.get(0).get(0).toString(), level);
 	}
 
 	@Override

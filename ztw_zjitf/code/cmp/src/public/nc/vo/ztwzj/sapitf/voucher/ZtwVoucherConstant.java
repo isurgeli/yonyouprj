@@ -14,10 +14,10 @@ import nc.vo.pub.lang.UFDateTime;
 
 public enum ZtwVoucherConstant {
 	PK_MONEYCENTER("0001A510000000000KW6"),
-	BT_DELIHEADCORP("资金上收-收款公司"),
-	BT_DELIBODYCORP("资金上收-缴款公司"),
-	BT_ALLOHEADCORP("资金下拨-拨款公司"),
-	BT_ALLOBODYCORP("资金下拨-收款公司"),
+	BT_DELIHEADCORP("资金上收-收款公司"), //一级 "sf_delivery_b"."vuserdef9" 二级 "cmp_recbilldetail"."def20"
+	BT_DELIBODYCORP("资金上收-缴款公司"), //一级 "sf_deliveryreceipt"."vueserdef9" 二级 "cmp_recbilldetail"."def19"
+	BT_ALLOHEADCORP("资金下拨-拨款公司"), //一级 "sf_allocate_b"."vuserdef9" 二级 "cmp_paybilldetail"."def20"
+	BT_ALLOBODYCORP("资金下拨-收款公司"), //一级 "sf_allocatereceipt"."vueserdef9" 二级 "cmp_paybilldetail"."def19"
 	BT_ADJU("银行调户"),
 	BTID("BUSITYPE");
 	

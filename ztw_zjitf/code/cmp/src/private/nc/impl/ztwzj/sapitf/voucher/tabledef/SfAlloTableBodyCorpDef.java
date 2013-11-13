@@ -7,7 +7,7 @@ public class SfAlloTableBodyCorpDef extends SfAlloTableDef{
 	@Override
 	public SQLField[] getSQLFields() {
 		SQLField[] cur = new SQLField[] {
-				new SQLField("voucherflag",	"sf_allocatereceipt",	"vuserdef9"),
+				new SQLField("voucherflag",	"sf_allocatereceipt",	"vueserdef9"),
 				new SQLField("pk_qryorg",	"sf_allocate_b",		"pk_org_r")
 		};
 		

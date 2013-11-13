@@ -7,7 +7,7 @@ public class SfDeliTableBodyCorpDef extends SfDeliTableDef {
 	@Override
 	public SQLField[] getSQLFields() {
 		SQLField[] cur = new SQLField[] {
-				new SQLField("voucherflag",	"sf_deliveryreceipt",	"vuserdef9"),
+				new SQLField("voucherflag",	"sf_deliveryreceipt",	"vueserdef9"),
 				new SQLField("pk_qryorg",	"sf_delivery_b",		"pk_org_p")
 		};
 		
