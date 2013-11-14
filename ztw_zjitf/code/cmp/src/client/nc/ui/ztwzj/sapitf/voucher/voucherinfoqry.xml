@@ -10,6 +10,7 @@
 
 	<!-- 应用服务类，负责进行模型操作的处理 -->	
 	<bean id="tableService" class="nc.ui.ztwzj.sapitf.voucher.TableService">
+		<property name="context" ref="context"></property>
 	</bean>
 
 
@@ -19,16 +20,14 @@
 	<!-- 应用模型 -->
 	<bean id="tableModel" class="nc.ui.uif2.model.BillTableModel">
 		<property name="service" ref="tableService"></property>
-		<property name="businessObjectAdapterFactory" ref="boadatorfactory">
-		</property>
+		<property name="businessObjectAdapterFactory" ref="boadatorfactory"></property>
 		<property name="context" ref="context"></property>
 	</bean>
 
 	<!-- 数据模型管理器，主要负责各种方式的模型初始化 -->
-	<bean id="modelDataManager" class="nc.ui.ztwzj.sapitf.voucher.TableDataManager">
+	<bean id="modelDataManager" class="nc.ui.pubapp.uif2app.query2.model.ModelDataManager">
 		<property name="model" ref="tableModel"></property>
 		<property name="service" ref="tableService" />
-		<property name="context" ref="context" />
 	</bean>
 
 	<!-- 模板容器，负责对模板的统一装载 -->
@@ -39,13 +38,15 @@
 
 	<!-- 界面元素 ###########################################################-->
 	<!-- 列表视图 -->
-	<bean id="listView" class="nc.ui.lxt.pub.editor.CSBillTable" init-method="initUI">
+	<bean id="listView" class="nc.ui.uif2.editor.BillTable" init-method="initUI">
 		<property name="model" ref="tableModel"></property>
 		<property name="templateContainer" ref="templateContainer"></property>
-		<property name="selectCol" value="bselect"></property>
+		<property name="ComponentValueManager">
+			<bean class="nc.ui.uif2.editor.value.BillCardPanelBodyVOValueAdapter"></bean>
+		</property>
 	</bean>
 	
-	<bean id="orgpanel" class="nc.ui.ztwzj.sapitf.voucher.ZtwBDOrgPanel" init-method="initUI">
+	<bean id="orgpanel" class="nc.ui.bd.pub.BDOrgPanel" init-method="initUI">
 		<property name="model" ref="tableModel" />
 		<property name="dataManager" ref="modelDataManager" />
 	</bean>
@@ -53,15 +54,22 @@
 	<!-- Actions ########################################################### -->
 	<bean id="separatorAction" class="nc.funcnode.ui.action.SeparatorAction" />
 	
-	<bean id="pushAction" class="nc.ui.ztwzj.sapitf.voucher.PushAction">
-		<property name="model" ref="tableModel" />
-		<property name="editor" ref="listView" />
-	</bean>
-	
-	<bean id="refreshAction" class="nc.ui.uif2.actions.RefreshAction">
+	<bean name="queryAction" class="nc.ui.pubapp.uif2app.query2.action.DefaultQueryAction">
 		<property name="model" ref="tableModel" />
 		<property name="dataManager" ref="modelDataManager" />
 	</bean>
+
+	<bean id="refreshAllAction" class="nc.ui.pubapp.uif2app.query2.action.DefaultRefreshAction">
+		<property name="model" ref="tableModel" />
+		<property name="dataManager" ref="modelDataManager"></property>
+	</bean>
+	
+	<bean id="queryArea" class="nc.ui.uif2.actions.QueryAreaShell" init-method="initUI">
+		<property name="queryArea">
+			<bean factory-bean="queryAction" factory-method="createQueryArea" />
+		</property>
+	</bean>
+	
 		
 	<!-- 界面布局总装########################################################### -->
 	<bean id="container" class="nc.ui.uif2.TangramContainer" init-method="initUI">
@@ -74,22 +82,34 @@
 					</bean>
 				</property>
 				<property name="down">
-					<bean class="nc.ui.uif2.tangramlayout.node.CNode">
-						<property name="name" value="列表"></property>
-						<property name="component" ref="listView"></property>
+					<bean class="nc.ui.uif2.tangramlayout.node.HSNode">
+						<property name="left">
+							<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+								<property name="component" ref="queryArea" />
+							</bean>
+						</property>
+						<property name="right">
+							<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+								<property name="name" value="列表"></property>
+								<property name="component" ref="listView"></property>
+							</bean>
+						</property>
+						<property name="dividerLocation">
+						<value>0.2f</value>
+						</property>
 					</bean>
 				</property>
 				<property name="dividerLocation">
-					<value>0.1</value>
+					<value>0.1f</value>
 				</property>
 			</bean>
 		</property>
 		<property name="model" ref="tableModel" />
 		<property name="actions">
 			<list>
-				<ref bean="pushAction" />
+				<ref bean="queryAction" />
 				<ref bean="separatorAction" />
-				<ref bean="refreshAction" />
+				<ref bean="refreshAllAction" />
 			</list>
 		</property>
 	</bean>	

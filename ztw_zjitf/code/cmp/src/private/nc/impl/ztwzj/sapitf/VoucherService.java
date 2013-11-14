@@ -3,12 +3,14 @@ package nc.impl.ztwzj.sapitf;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.xml.bind.JAXBException;
 
 import nc.bs.dao.BaseDAO;
+import nc.bs.dao.DAOException;
 import nc.bs.logging.Logger;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpPayTableBodyCorpDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpPayTableHeadCorpDef;
@@ -28,20 +30,56 @@ import nc.itf.lxt.pub.type.Pair;
 import nc.itf.ztwzj.sapitf.IVoucherService;
 import nc.jdbc.framework.processor.BeanListProcessor;
 import nc.jdbc.framework.processor.VectorProcessor;
+import nc.vo.lxt.pub.HashVO;
 import nc.vo.pub.BusinessException;
+import nc.vo.pub.SuperVO;
 import nc.vo.pub.lang.UFDate;
-import nc.vo.ztwzj.sapitf.voucher.VoucherQryInfo;
 import nc.vo.ztwzj.sapitf.voucher.ZtwVoucherConstant;
 import nc.vo.ztwzj.sapitf.voucher.BillInfo.BillInfoList;
 import nc.vo.ztwzj.sapitf.voucher.BillInfo.BillInfoList.BillInfo;
 import nc.vo.ztwzj.sapitf.voucher.BillQry.BillQryPara;
+import nc.vo.ztwzj.sapitf.voucher.VoucherResult.VoucherResultInfoList;
+import nc.vo.ztwzj.sapitf.voucher.VoucherResult.VoucherResultInfoList.VoucherResultInfo;
 
 public class VoucherService implements IVoucherService {
 
 	@Override
 	public void setTMVoucherBillFlag(String retInfo) throws BusinessException {
-		// TODO Auto-generated method stub
-		
+		try {
+			VoucherResultInfoList vouInfoList = JaxbTools.getObjectFromString(VoucherResultInfoList.class, retInfo);
+			BaseDAO dao = new BaseDAO();
+			for (VoucherResultInfo vouInfo : vouInfoList.getVoucherResultInfo()) {
+				Pair<String, String> orgInfo = getOrgPkLevel(vouInfo.getBUKRS());
+				String org_level = orgInfo.second;
+				String busitype = vouInfo.getBUSITYPE();
+				String sql = null;
+
+				if (org_level.equals("1") && busitype.equals(ZtwVoucherConstant.BT_DELIHEADCORP.getValue())) { //一级上收-收款公司
+					sql = "update sf_delivery_b set vuserdef9='"+vouInfo.getTYPE()+"' where pk_delivery_b='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("2") && busitype.equals(ZtwVoucherConstant.BT_DELIHEADCORP.getValue())) { //二级上收-收款公司
+					sql = "update cmp_recbilldetail set def20='"+vouInfo.getTYPE()+"' where pk_recbill_detail='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("2") && busitype.equals(ZtwVoucherConstant.BT_DELIBODYCORP.getValue())) { //一级上收-缴款公司
+					sql = "update sf_deliveryreceipt set vueserdef9='"+vouInfo.getTYPE()+"' where pk_srcbill_b='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("3") && busitype.equals(ZtwVoucherConstant.BT_DELIBODYCORP.getValue())) { //二级上收-缴款公司
+					sql = "update cmp_recbilldetail set def19='"+vouInfo.getTYPE()+"' where pk_recbill_detail='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("1") && busitype.equals(ZtwVoucherConstant.BT_ALLOHEADCORP.getValue())) { //一级下拨-拨款公司
+					sql = "update sf_allocate_b set vuserdef9='"+vouInfo.getTYPE()+"' where pk_allocate_b='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("2") && busitype.equals(ZtwVoucherConstant.BT_ALLOHEADCORP.getValue())) { //二级下拨-拨款公司
+					sql = "update cmp_paybilldetail set def20='"+vouInfo.getTYPE()+"' where pk_paybill_detail='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("2") && busitype.equals(ZtwVoucherConstant.BT_ALLOBODYCORP.getValue())) { //一级下拨-收款公司
+					sql = "update sf_allocatereceipt set vueserdef9='"+vouInfo.getTYPE()+"' where pk_srcbill_b='"+vouInfo.getVOUCHERID()+"'";
+				} else if (org_level.equals("3") && busitype.equals(ZtwVoucherConstant.BT_ALLOBODYCORP.getValue())) { //二级下拨-收款公司
+					sql = "update cmp_paybilldetail set def19='"+vouInfo.getTYPE()+"' where pk_paybill_detail='"+vouInfo.getVOUCHERID()+"'";
+				} else {
+					throw new BusinessException("["+org_level+"]公司没有["+busitype+"]业务。");
+				}
+				
+				dao.executeUpdate(sql);
+			}
+		} catch (JAXBException e) {
+			Logger.error(e.getMessage(), e);
+			throw new BusinessException(e);
+		}
 	}
 
 	@Override
@@ -52,7 +90,7 @@ public class VoucherService implements IVoucherService {
 			String pk_org = orgInfo.first;
 			String org_level = orgInfo.second;
 			
-			String sql = getQryTMVoucherBillSQl(pk_org, org_level, paraObj.getBUSITYPE(), paraObj.getBUDATS(), paraObj.getBUDATE());
+			String sql = getQryTMVoucherBillSQl(pk_org, org_level, paraObj.getBUSITYPE(), paraObj.getBUDATS(), paraObj.getBUDATE(), true);
 			
 			BaseDAO dao = new BaseDAO();
 			@SuppressWarnings("unchecked")
@@ -74,7 +112,7 @@ public class VoucherService implements IVoucherService {
 	}
 
 	private String getQryTMVoucherBillSQl(String pk_org, String org_level,
-			String busitype, String budats, String budate) throws BusinessException {
+			String busitype, String budats, String budate, boolean noVou) throws BusinessException {
 		SQLBuilderTool st = null;
 		Hashtable<String, Object> paras  = new Hashtable<String, Object>();
 		if (org_level.equals("1") && busitype.equals(ZtwVoucherConstant.BT_DELIHEADCORP.getValue())) { //一级上收-收款公司
@@ -96,19 +134,24 @@ public class VoucherService implements IVoucherService {
 		} else {
 			throw new BusinessException("["+org_level+"]公司没有["+busitype+"]业务。");
 		}
-		SQLWhereClause[] flexWheres = new SQLWhereClause[] {
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "pk_qryorg", OPERATOR.EQ, DELIMITER.getParaExp("CORP")),
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.GTE, DELIMITER.getParaExp("BUDATS")),
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.LTE, DELIMITER.getParaExp("BUDATE")),
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "voucherflag", OPERATOR.NEQ, "'Y'")
-		};
+		ArrayList<SQLWhereClause> flexWheres = new ArrayList<SQLWhereClause>();
+		flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "pk_qryorg", OPERATOR.EQ, DELIMITER.getParaExp("CORP")));
+		if (budats != null && budats.length() > 0)
+			flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.GTE, DELIMITER.getParaExp("BUDATS")));
+		if (budate != null && budate.length() > 0)
+			flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUDAT", OPERATOR.LTE, DELIMITER.getParaExp("BUDATE")));
+		if (noVou)
+			flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "voucherflag", OPERATOR.NEQ, "'S'"));
+
 		paras.put("BUKRSLEVEL", DELIMITER.getStringParaValue(org_level));
 		paras.put("BUSITYPE", DELIMITER.getStringParaValue(busitype));
 		paras.put("CORP", DELIMITER.getStringParaValue(pk_org));
 		SimpleDateFormat sFormat = new SimpleDateFormat("yyyyMMdd");
 		try {
-			paras.put("BUDATS", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budats)).toString()));
-			paras.put("BUDATE", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budate)).toString()));
+			if (budats != null && budats.length() > 0)
+				paras.put("BUDATS", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budats)).toString()));
+			if (budate != null && budate.length() > 0)
+				paras.put("BUDATE", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budate)).toString()));
 		} catch (ParseException e) {
 			throw new BusinessException(e.getMessage() ,e);
 		}
@@ -128,9 +171,15 @@ public class VoucherService implements IVoucherService {
 			paras.put("ABSTRACTE", "']下拨资金款'");
 		}
 		
-		return st.buildSQL(new String[] { "VOUCHERID","BUKRS","BUKRSLEVEL","BUSITYPE","DOCUMENTSTYPE","DOCUMENTSNO",
+		ArrayList<String> fields = new ArrayList<String>();
+		fields.addAll(Arrays.asList(new String[] { "VOUCHERID","BUKRS","BUKRSLEVEL","BUSITYPE","DOCUMENTSTYPE","DOCUMENTSNO",
 				"ABSTRACT","BUDAT","CUSTCODE","CUSTNAME","WRBTR","EXBANK","EXBANKNUM","OPPEXBANK","OPPEXBANKNUM","OUTBANK",
-				"OUTBANKNUM","INBANK","INBANKNUM" }, flexWheres, paras);
+				"OUTBANKNUM","INBANK","INBANKNUM" }));
+		
+		if (!noVou)
+			fields.add("voucherflag");
+		
+		return st.buildSQL(fields.toArray(new String[] {}), flexWheres.toArray(new SQLWhereClause[] {}), paras);
 	}
 
 	private Pair<String, String> getOrgPkLevel(String bukrs) throws BusinessException {
@@ -155,10 +204,35 @@ public class VoucherService implements IVoucherService {
 	}
 
 	@Override
-	public VoucherQryInfo[] qryTMVoucherBillInfoVo(String para)
+	public SuperVO[] qryTMVoucherBillInfoVo(String pk_org, String[] busitypes, String sd, String ed)
 			throws BusinessException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			String org_level = getOrgLevel(pk_org);
+			
+			String sql = getQryTMVoucherBillSQl(pk_org, org_level, busitypes[0], sd, ed, false);
+			
+			BaseDAO dao = new BaseDAO();
+			@SuppressWarnings("unchecked")
+			ArrayList<HashVO> infos = (ArrayList<HashVO>)dao.executeQuery(sql, new BeanListProcessor(HashVO.class));
+			return infos.toArray(new HashVO[] {});
+		} catch (DAOException e) {
+			Logger.error(e.getMessage(), e);
+			throw new BusinessException(e);
+		}
 	}
 
+	private String getOrgLevel(String pk_org) throws DAOException {
+		if (pk_org.equals("0001A510000000000KW6") || pk_org.equals("0001A510000000000KWC"))
+			return "1";
+		BaseDAO dao = new BaseDAO();
+		@SuppressWarnings("unchecked")
+		Vector<Vector<Object>> data = 
+				(Vector<Vector<Object>>)dao.executeQuery("select org_orgs.pk_fatherorg from org_orgs where org_orgs.pk_org='"+pk_org+"'", 
+				new VectorProcessor());
+
+		if (data.get(0).get(0).equals("0001A510000000000KW6"))
+			return "2";
+		else
+			return "3";
+	}
 }

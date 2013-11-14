@@ -14,6 +14,7 @@ import nc.vo.pfxx.xlog.XlogVO;
 import nc.vo.pub.BusinessException;
 import nc.vo.pub.lang.UFBoolean;
 import nc.vo.ztwzj.sapitf.voucher.BillInfo.BillInfoList;
+import nc.vo.ztwzj.sapitf.voucher.VoucherResultRtn.RecvVoucherResultRtn;
 
 public class WS_NC_SAPVoucherQueryService implements
 		IWS_NC_SAPVoucherQueryService {
@@ -29,7 +30,7 @@ public class WS_NC_SAPVoucherQueryService implements
 			correct  = new UFBoolean(true);
 		} catch (BusinessException e) {
 			BillInfoList infoList = new BillInfoList();
-			infoList.setSuccess("1");
+			infoList.setSuccess("0");
 			infoList.setErrcode(e.getErrorCodeString());
 			infoList.setMessage(e.getMessage());
 			
@@ -52,7 +53,37 @@ public class WS_NC_SAPVoucherQueryService implements
 
 	@Override
 	public String pushVoucherResultInfo(String info) {
-		return "Hello one";
+		IVoucherService bp = NCLocator.getInstance().lookup(IVoucherService.class);
+		UFBoolean correct = null;
+		RecvVoucherResultRtn retObj = new RecvVoucherResultRtn();
+		String retStr = null;
+		try {
+			InvocationInfoProxy.getInstance().setUserDataSource(NCDataConstant.getDataSource());
+			bp.setTMVoucherBillFlag(info);
+			correct  = new UFBoolean(true);
+			retObj.setSuccess("1");
+			retObj.setErrcode("");
+			retObj.setMessage("");
+		} catch (BusinessException e) {
+			retObj.setSuccess("0");
+			retObj.setErrcode(e.getErrorCodeString());
+			retObj.setMessage(e.getMessage());
+			
+			correct = new UFBoolean(false);
+		} finally {
+			try {
+				retStr = JaxbTools.getStringFromObject(retObj);
+			} catch (JAXBException e1) {
+			}
+			XlogVO xlog = NCDataConstant.getBaseXlogVO("VOUBILLQRY", "", correct, info, retStr);
+			try {
+				PfxxUtils.lookUpPFxxEJBService().writeLogs_RequiresNew(new XlogVO[]{xlog});
+			} catch (BusinessException e) {
+				Logger.error(e.getMessage(),e);
+			}
+		}
+		
+		return retStr;
 	}
 
 }

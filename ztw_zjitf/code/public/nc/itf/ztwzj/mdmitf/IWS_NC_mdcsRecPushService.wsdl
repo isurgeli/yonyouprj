@@ -6,7 +6,7 @@ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
 xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
 xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
-jaxb:version="2.0"
+jaxb:version="2.1"
 xmlns:ns0="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService"
 targetNamespace="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService">
 
@@ -18,7 +18,7 @@ targetNamespace="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService">
    <xsd:schema xmlns:ns="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService"
 			attributeFormDefault="unqualified"
 			elementFormDefault="unqualified"
-			targetNamespace="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService" jaxb:version="2.0">
+			targetNamespace="http://mdmitf.ztwzj.itf.nc/IWS_NC_mdcsRecPushService" jaxb:version="2.1">
 	<xsd:annotation>
     	<xsd:appinfo>
    			<jaxb:schemaBindings>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="gb2312"?>
 <module name="CMPEJB">
     <public>
-    	<component singleton="true" remote="true" tx="CMT">
+    	<component singleton="true" remote="true" tx="none">
 			<interface>nc.itf.ztwzj.sapitf.IVoucherService</interface>
 			<implementation>nc.impl.ztwzj.sapitf.VoucherService</implementation>
     	</component>
-    	<component name="sapvouws" singleton="true" remote="true" tx="CMT">
+    	<component name="sapvouws" singleton="true" remote="false" tx="none">
 			<interface>nc.itf.ztwzj.sapitf.IWS_NC_SAPVoucherQueryService</interface>
 			<implementation>nc.impl.ztwzj.sapitf.WS_NC_SAPVoucherQueryService</implementation>
 			<extension class="nc.uap.ws.deploy.OxbWSExtensionProcessor">
