@@ -25,7 +25,7 @@
 	</bean>
 
 	<!-- 数据模型管理器，主要负责各种方式的模型初始化 -->
-	<bean id="modelDataManager" class="nc.ui.pubapp.uif2app.query2.model.ModelDataManager">
+	<bean id="modelDataManager" class="nc.ui.ztwzj.sapitf.voucher.ModelDataManager">
 		<property name="model" ref="tableModel"></property>
 		<property name="service" ref="tableService" />
 	</bean>

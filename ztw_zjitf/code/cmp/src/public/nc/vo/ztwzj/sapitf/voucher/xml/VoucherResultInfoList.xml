@@ -64,4 +64,12 @@
         <DOCUMENTSNO>F42013110100000001</DOCUMENTSNO>
         <TYPE>S</TYPE>
     </VoucherResultInfo>
+    <VoucherResultInfo>
+        <VOUCHERID>1002AA10000000004PRD</VOUCHERID>
+        <BUKRS>0001</BUKRS>
+        <BUSITYPE>银行调户</BUSITYPE>
+        <DOCUMENTSTYPE>划账结算</DOCUMENTSTYPE>
+        <DOCUMENTSNO>36S42013111500000002</DOCUMENTSNO>
+        <TYPE>S</TYPE>
+    </VoucherResultInfo>
 </VoucherResultInfoList>

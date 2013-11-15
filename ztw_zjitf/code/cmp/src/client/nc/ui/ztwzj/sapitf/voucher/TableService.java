@@ -9,7 +9,7 @@ import nc.ui.querytemplate.querytree.IQueryScheme;
 import nc.ui.uif2.model.IAppModelService;
 import nc.vo.pub.BusinessException;
 import nc.vo.pub.SuperVO;
-import nc.vo.pub.lang.UFDate;
+import nc.vo.pub.lang.UFDateTime;
 import nc.vo.pubapp.query2.sql.process.QueryCondition;
 import nc.vo.uif2.LoginContext;
 
@@ -26,18 +26,28 @@ public class TableService implements IQueryService, IAppModelService {
 
 	@Override
 	public Object[] queryByQueryScheme(IQueryScheme queryScheme) throws Exception {
-		if (context.getPk_org() == null)
+		if (context.getPk_org() == null) {
 			throw new BusinessException("请选择组织。");
+		}
 		@SuppressWarnings("unchecked")
 		HashMap<String, QueryCondition> conditions = (HashMap<String, QueryCondition>)queryScheme.get("all_condition");
-		String[] date = conditions.get("budat").getValues();
-		if (date[0]==null || date[0].length()==0)
-			date[0] = "2013-01-01";
-		if (date[1]==null || date[1].length()==0)
-			date[1] = new UFDate().toString();
+		if (conditions.get("busitype") == null || conditions.get("busitype").getValues().length == 0) {
+			throw new BusinessException("请选择至少一种业务类型。");
+		}
+		
+		String dates[] = new String[] {"2013-01-01", new UFDateTime().getDateTimeAfter(1).toString()};
+		if (conditions.get("budat") != null) {
+			String[] cdates = conditions.get("budat").getValues();
+			
+			if (cdates[0]!=null && cdates[0].length()>0)
+				dates[0] = cdates[0];
+			if (cdates[1]!=null && cdates[1].length()>0)
+				dates[1] = cdates[1];
+		}
+		
 		IVoucherService bp = NCLocator.getInstance().lookup(IVoucherService.class);
 		SuperVO[] ret = bp.qryTMVoucherBillInfoVo(context.getPk_org(), conditions.get("busitype").getValues(), 
-				date[0].replaceAll("-", "").substring(0, 8), date[1].replaceAll("-", "").substring(0, 8));
+				dates[0].replaceAll("-", "").substring(0, 8), dates[1].replaceAll("-", "").substring(0, 8));
 		
 		return ret;
 	}

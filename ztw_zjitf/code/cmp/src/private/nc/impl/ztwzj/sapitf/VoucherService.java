@@ -16,6 +16,7 @@ import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpPayTableBodyCorpDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpPayTableHeadCorpDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpRecTableBodyCorpDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpRecTableHeadCorpDef;
+import nc.impl.ztwzj.sapitf.voucher.tabledef.CmpTransferTableDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.SfAlloTableBodyCorpDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.SfAlloTableHeadCorpDef;
 import nc.impl.ztwzj.sapitf.voucher.tabledef.SfDeliTableBodyCorpDef;
@@ -70,6 +71,8 @@ public class VoucherService implements IVoucherService {
 					sql = "update sf_allocatereceipt set vueserdef9='"+vouInfo.getTYPE()+"' where pk_srcbill_b='"+vouInfo.getVOUCHERID()+"'";
 				} else if (org_level.equals("3") && busitype.equals(ZtwVoucherConstant.BT_ALLOBODYCORP.getValue())) { //二级下拨-收款公司
 					sql = "update cmp_paybilldetail set def19='"+vouInfo.getTYPE()+"' where pk_paybill_detail='"+vouInfo.getVOUCHERID()+"'";
+				} else if (busitype.equals(ZtwVoucherConstant.BT_ADJU.getValue())) { //调户
+					sql = "update cmp_transformbill set vdef20='"+vouInfo.getTYPE()+"' where pk_transformbill='"+vouInfo.getVOUCHERID()+"'";
 				} else {
 					throw new BusinessException("["+org_level+"]公司没有["+busitype+"]业务。");
 				}
@@ -131,6 +134,8 @@ public class VoucherService implements IVoucherService {
 			st = new SQLBuilderTool(new SfAlloTableBodyCorpDef());
 		} else if (org_level.equals("3") && busitype.equals(ZtwVoucherConstant.BT_ALLOBODYCORP.getValue())) { //二级下拨-收款公司
 			st = new SQLBuilderTool(new CmpPayTableBodyCorpDef());
+		} else if (busitype.equals(ZtwVoucherConstant.BT_ADJU.getValue())) { //调户
+			st = new SQLBuilderTool(new CmpTransferTableDef());
 		} else {
 			throw new BusinessException("["+org_level+"]公司没有["+busitype+"]业务。");
 		}
@@ -169,6 +174,9 @@ public class VoucherService implements IVoucherService {
 		} else if (busitype.equals(ZtwVoucherConstant.BT_ALLOBODYCORP.getValue())) {
 			paras.put("ABSTRACTS", "'收['");
 			paras.put("ABSTRACTE", "']下拨资金款'");
+		} else if (busitype.equals(ZtwVoucherConstant.BT_ADJU.getValue())) {
+			paras.put("ABSTRACTS", "''");
+			paras.put("ABSTRACTE", "'调户款'");
 		}
 		
 		ArrayList<String> fields = new ArrayList<String>();
@@ -207,14 +215,19 @@ public class VoucherService implements IVoucherService {
 	public SuperVO[] qryTMVoucherBillInfoVo(String pk_org, String[] busitypes, String sd, String ed)
 			throws BusinessException {
 		try {
-			String org_level = getOrgLevel(pk_org);
-			
-			String sql = getQryTMVoucherBillSQl(pk_org, org_level, busitypes[0], sd, ed, false);
-			
 			BaseDAO dao = new BaseDAO();
-			@SuppressWarnings("unchecked")
-			ArrayList<HashVO> infos = (ArrayList<HashVO>)dao.executeQuery(sql, new BeanListProcessor(HashVO.class));
-			return infos.toArray(new HashVO[] {});
+			String org_level = getOrgLevel(pk_org);
+			ArrayList<HashVO> ret = new ArrayList<HashVO>();
+			for(String busitype : busitypes) {
+				try {
+					String sql = getQryTMVoucherBillSQl(pk_org, org_level, busitype, sd, ed, false);
+					@SuppressWarnings("unchecked")
+					ArrayList<HashVO> infos = (ArrayList<HashVO>)dao.executeQuery(sql, new BeanListProcessor(HashVO.class));
+					ret.addAll(infos);
+				}catch (BusinessException be) {
+				}
+			}
+			return ret.toArray(new HashVO[] {});
 		} catch (DAOException e) {
 			Logger.error(e.getMessage(), e);
 			throw new BusinessException(e);
