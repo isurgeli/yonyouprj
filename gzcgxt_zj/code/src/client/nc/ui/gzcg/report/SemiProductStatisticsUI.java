@@ -53,6 +53,8 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 		if (sqlProcesser==null){
 			sqlProcesser = new IAdditionSQLProcess() {	
 				public void additionSQLWhereClause(StringBuffer sql) {
+					sql.append(" and qc_cghzbg_b.zdy1 = '无系统号' ");
+					sql.append(" and qc_cghzbg_b.zdy2 = '通过' ");
 				}				
 				public void additionSQLQueryClause(StringBuffer sql) {
 				}				
@@ -66,7 +68,7 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 
 	@Override
 	protected String getMainViewName() {
-		return GZCGConstant.SEMIPRODUCTMAINVIEW.getValue();
+		return GZCGConstant.SEMIPRODUCTMAINVIEWS.getValue();
 	}
 	
 	@Override

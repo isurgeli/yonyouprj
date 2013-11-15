@@ -33,6 +33,7 @@ import nc.ui.pub.bill.BillModelCellEditableController;
 import nc.ui.pub.bill.IBillItem;
 import nc.ui.pub.linkoperate.ILinkQuery;
 import nc.ui.pub.linkoperate.ILinkQueryData;
+import nc.ui.pub.para.SysInitBO_Client;
 import nc.ui.pub.report.ReportItem;
 import nc.ui.qc.standard.CheckstandardHelper;
 import nc.ui.scm.pub.report.ReportPanel;
@@ -630,14 +631,16 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 		String checkStandardid = null;
 		
 		StringBuffer sql = new StringBuffer();
-		if (!isSemiProduct()){
-			sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-'), nvl(bd_measdoc.measname,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc, bd_measdoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and bd_invbasdoc.pk_measdoc=bd_measdoc.pk_measdoc(+) and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
-			sql.append(invDocRef.getRefPK()+"'");
-		}else{
-			sql.append("select qc_checkstandard.ccheckstandardid from qc_checkstandard where qc_checkstandard.ccheckstandardcode = 'SYJS001'");
-		}
 		IUAPQueryBS dao = (IUAPQueryBS)NCLocator.getInstance().lookup(IUAPQueryBS.class.getName());
 		try {
+			if (!isSemiProduct()){
+				sql.append("select qc_invrelate.ccheckstandardid, nvl(bd_invbasdoc.invspec,'-'), nvl(bd_measdoc.measname,'-') from qc_invrelate, bd_invbasdoc, bd_invmandoc, bd_measdoc where bd_invbasdoc.pk_invbasdoc=bd_invmandoc.pk_invbasdoc and bd_invmandoc.pk_invmandoc=qc_invrelate.cmangid and bd_invbasdoc.pk_measdoc=bd_measdoc.pk_measdoc(+) and qc_invrelate.bdefault='Y' and qc_invrelate.cmangid='");
+				sql.append(invDocRef.getRefPK()+"'");
+			}else{
+				String standardCode = SysInitBO_Client.getParaString(getCorpPrimaryKey(), GZCGConstant.SEMIPRODUCTSTANDCODE.getValue());
+				sql.append("select qc_checkstandard.ccheckstandardid from qc_checkstandard where qc_checkstandard.ccheckstandardcode = '"
+						+standardCode+"'");
+			}
 			@SuppressWarnings("unchecked")
 			Vector<Vector<Object>> checkStandard = (Vector<Vector<Object>>)dao.executeQuery(sql.toString(), new VectorProcessor());
 			if (checkStandard!=null && checkStandard.size()>0) {
@@ -730,6 +733,8 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 				
 				for(int i=0;i<voCondition.length;i++){
 					if (!voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.cmangid")){
+						if (voCondition[i].getFieldCode().equals("gzcg_qcrp_checkbill_v.dpraydate"))
+							voCondition[i].setFieldCode("qc_cghzbg_b.zdy5");
 						newCondition.add(voCondition[i]);
 					}
 				}

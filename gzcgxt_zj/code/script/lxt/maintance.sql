@@ -159,8 +159,14 @@ select distinct qc_cghzbg_h.pk_corp,
   from qc_cghzbg_h, qc_cghzbg_b
  where qc_cghzbg_h.pk_cghzbg_h=qc_cghzbg_b.pk_cghzbg_h
    and nvl(qc_cghzbg_h.dr, 0) = 0
-   and qc_cghzbg_b.jcpici not in (select gzcg_bd_sampledoc.vsampleno from gzcg_bd_sampledoc where gzcg_bd_sampledoc.vqctype = 'M' or gzcg_bd_sampledoc.vqctype = 'P')
+   and qc_cghzbg_b.ypname in (select docname from bd_defdoc where pk_defdoclist='0001881000000001WE4D')
+   and qc_cghzbg_b.checkvalue is not null
+   and qc_cghzbg_b.checkvalue <> 'null'
+   and qc_cghzbg_b.zdy1 = '无系统号'
+   and qc_cghzbg_b.zdy2 = '通过'
+   
 );
+
 
 --删除模板
 delete from sm_funcregister where (sm_funcregister.fun_code >= 'C0020410' and sm_funcregister.fun_code < 'C0020439') or (sm_funcregister.fun_code >= 'C0010115' and sm_funcregister.fun_code < 'C0010120');
