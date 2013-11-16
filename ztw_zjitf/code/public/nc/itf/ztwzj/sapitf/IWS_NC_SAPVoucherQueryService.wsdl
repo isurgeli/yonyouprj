@@ -1,110 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wsdl:definitions
-xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
-xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
-xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
-xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"
-jaxb:version="2.0"
-xmlns:ns0="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService"
-targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService">
-
-<jaxws:bindings>
-	<jaxws:package name="nc.itf.ztwzj.sapitf"/>
-</jaxws:bindings>
-
-<wsdl:types>
-   <xsd:schema xmlns:ns="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService"
-			attributeFormDefault="unqualified"
-			elementFormDefault="unqualified"
-			targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService" jaxb:version="2.0">
-	<xsd:annotation>
-    	<xsd:appinfo>
-   			<jaxb:schemaBindings>
-    			<jaxb:package name="nc.itf.ztwzj.sapitf"/>
-    		</jaxb:schemaBindings>
-   		</xsd:appinfo>
-   	</xsd:annotation>
-	<xsd:element name="qryVoucherBillInfo">
-         <xsd:complexType>
-            <xsd:sequence>
-				<xsd:element name="string"  minOccurs="0" nillable="true" type="xsd:string"/>
-             </xsd:sequence>  
-         </xsd:complexType>
-     </xsd:element>
-	<xsd:element name="qryVoucherBillInfoResponse">
-         <xsd:complexType>
-            <xsd:sequence>
-				<xsd:element name="return"  minOccurs="0" nillable="true" type="xsd:string"/>
-             </xsd:sequence>  
-         </xsd:complexType>
-     </xsd:element>
-	<xsd:element name="pushVoucherResultInfo">
-         <xsd:complexType>
-            <xsd:sequence>
-				<xsd:element name="string"  minOccurs="0" nillable="true" type="xsd:string"/>
-             </xsd:sequence>  
-         </xsd:complexType>
-     </xsd:element>
-	<xsd:element name="pushVoucherResultInfoResponse">
-         <xsd:complexType>
-            <xsd:sequence>
-				<xsd:element name="return"  minOccurs="0" nillable="true" type="xsd:string"/>
-             </xsd:sequence>  
-         </xsd:complexType>
-     </xsd:element>
-   </xsd:schema>
-</wsdl:types>
-    <wsdl:message name="qryVoucherBillInfoRequest">
-        <wsdl:part name="parameters"  element="ns0:qryVoucherBillInfo"/>
-    </wsdl:message>
-    <wsdl:message name="qryVoucherBillInfoResponse">
-        <wsdl:part name="parameters"  element="ns0:qryVoucherBillInfoResponse"/>
-    </wsdl:message>
-    <wsdl:message name="pushVoucherResultInfoRequest">
-        <wsdl:part name="parameters"  element="ns0:pushVoucherResultInfo"/>
-    </wsdl:message>
-    <wsdl:message name="pushVoucherResultInfoResponse">
-        <wsdl:part name="parameters"  element="ns0:pushVoucherResultInfoResponse"/>
-    </wsdl:message>
-
-    <wsdl:portType name="IWS_NC_SAPVoucherQueryServicePortType">
-        <wsdl:operation name="qryVoucherBillInfo">
-            <wsdl:input message="ns0:qryVoucherBillInfoRequest" wsaw:Action="urn:qryVoucherBillInfo"/>
-            <wsdl:output message="ns0:qryVoucherBillInfoResponse" wsaw:Action="urn:qryVoucherBillInfoResponse"/>
-        </wsdl:operation>
-        <wsdl:operation name="pushVoucherResultInfo">
-            <wsdl:input message="ns0:pushVoucherResultInfoRequest" wsaw:Action="urn:pushVoucherResultInfo"/>
-            <wsdl:output message="ns0:pushVoucherResultInfoResponse" wsaw:Action="urn:pushVoucherResultInfoResponse"/>
-        </wsdl:operation>
-    </wsdl:portType>
-    
-    
-    <wsdl:binding name="IWS_NC_SAPVoucherQueryServiceSOAP11Binding" type="ns0:IWS_NC_SAPVoucherQueryServicePortType">
-        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
-        <wsdl:operation name="qryVoucherBillInfo">
-            <soap:operation soapAction="urn:qryVoucherBillInfo" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="pushVoucherResultInfo">
-            <soap:operation soapAction="urn:pushVoucherResultInfo" style="document"/>
-            <wsdl:input>
-                <soap:body use="literal"/>
-            </wsdl:input>
-            <wsdl:output>
-                <soap:body use="literal"/>
-            </wsdl:output>
-        </wsdl:operation>
-    </wsdl:binding>
-    <wsdl:service name="IWS_NC_SAPVoucherQueryService">
-        <wsdl:port name="IWS_NC_SAPVoucherQueryServiceSOAP11port_http" binding="ns0:IWS_NC_SAPVoucherQueryServiceSOAP11Binding">
-            <soap:address location="http://localhost/uapws/service/IWS_NC_SAPVoucherQueryService"/>
-        </wsdl:port>
-    </wsdl:service>
+<wsdl:definitions name="IWS_NC_SAPVoucherQueryServiceService" 
+	targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+	xmlns:tns="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+	<wsdl:documentation source="eip_version">63</wsdl:documentation>
+	<wsdl:types>
+		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" 
+			targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPVoucherQueryService">
+			<xsd:include schemaLocation="/nc/itf/ztwzj/sapitf/IWS_NC_SAPVoucherQueryService.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="qryVoucherBillInfo">
+		<wsdl:part name="parameters" element="tns:qryVoucherBillInfo">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="qryVoucherBillInfoResponse">
+		<wsdl:part name="parameters" element="tns:qryVoucherBillInfoResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="pushVoucherResultInfoResponse">
+		<wsdl:part name="parameters" element="tns:pushVoucherResultInfoResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="pushVoucherResultInfo">
+		<wsdl:part name="parameters" element="tns:pushVoucherResultInfo">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="IWS_NC_SAPVoucherQueryServicePortType">
+		<wsdl:documentation>
+			<annotation name="deprecated">false</annotation>
+			<annotation name="level">Platform</annotation>
+			<annotation name="version">1.0.0</annotation>
+		</wsdl:documentation>
+		<wsdl:operation name="qryVoucherBillInfo">
+			<wsdl:input name="qryVoucherBillInfo" message="tns:qryVoucherBillInfo">
+			</wsdl:input>
+			<wsdl:output name="qryVoucherBillInfoResponse" message="tns:qryVoucherBillInfoResponse">
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="pushVoucherResultInfo">
+			<wsdl:input name="pushVoucherResultInfo" message="tns:pushVoucherResultInfo">
+			</wsdl:input>
+			<wsdl:output name="pushVoucherResultInfoResponse" message="tns:pushVoucherResultInfoResponse">
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="IWS_NC_SAPVoucherQueryServiceServiceSoapBinding" type="tns:IWS_NC_SAPVoucherQueryServicePortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="qryVoucherBillInfo">
+			<soap:operation soapAction="" style="document"/>
+			<wsdl:input name="qryVoucherBillInfo">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="qryVoucherBillInfoResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="pushVoucherResultInfo">
+			<soap:operation soapAction="" style="document"/>
+			<wsdl:input name="pushVoucherResultInfo">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="pushVoucherResultInfoResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="IWS_NC_SAPVoucherQueryService">
+		<wsdl:port name="IWS_NC_SAPVoucherQueryServicePort" binding="tns:IWS_NC_SAPVoucherQueryServiceServiceSoapBinding">
+			<soap:address location="http://localhost:9090/IWS_NC_SAPVoucherQueryServicePort"/>
+		</wsdl:port>
+	</wsdl:service>
 </wsdl:definitions>

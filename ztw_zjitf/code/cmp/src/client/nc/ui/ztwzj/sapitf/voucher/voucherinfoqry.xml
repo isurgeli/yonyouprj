@@ -100,7 +100,7 @@
 					</bean>
 				</property>
 				<property name="dividerLocation">
-					<value>0.1f</value>
+					<value>30f</value>
 				</property>
 			</bean>
 		</property>
