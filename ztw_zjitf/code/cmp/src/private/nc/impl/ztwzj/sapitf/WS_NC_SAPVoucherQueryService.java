@@ -25,6 +25,10 @@ public class WS_NC_SAPVoucherQueryService implements
 		String ret = null;
 		UFBoolean correct = null;
 		try {
+			if (para == null || para.length() == 0) {
+				para = "null";
+				throw new BusinessException("参数为空", "S01");
+			}
 			InvocationInfoProxy.getInstance().setUserDataSource(ZtwVoucherConstant.getDataSource());
 			ret = bp.qryTMVoucherBillInfoXml(para);
 			correct  = new UFBoolean(true);
@@ -58,6 +62,10 @@ public class WS_NC_SAPVoucherQueryService implements
 		RecvVoucherResultRtn retObj = new RecvVoucherResultRtn();
 		String retStr = null;
 		try {
+			if (info == null || info.length() == 0) {
+				info = "null";
+				throw new BusinessException("参数为空", "S01");
+			}
 			InvocationInfoProxy.getInstance().setUserDataSource(ZtwVoucherConstant.getDataSource());
 			bp.setTMVoucherBillFlag(info);
 			correct  = new UFBoolean(true);

@@ -22,6 +22,17 @@ public class WS_NC_mdcsRecPushServiceImpl implements IWS_NC_mdcsRecPushService {
 		UFBoolean correct = null;
 		
 		try	{
+			if (data == null || data.length() == 0) {
+				data = "null";
+				throw new BusinessException("参数为空", "S01");
+			}
+			
+			if (mdtype == null || mdtype.length() == 0) {
+				mdtype = "null";
+				throw new BusinessException("参数为空", "S01");
+			}
+			
+			
 			InvocationInfoProxy.getInstance().setUserDataSource(NCDataConstant.getDataSource());
 			InvocationInfoProxy.getInstance().setGroupId(NCDataConstant.PK_GROUP.getValue());
 			InvocationInfoProxy.getInstance().setUserId(NCDataConstant.PK_SYSUSER.getValue());
