@@ -1,0 +1,6 @@
+nc_home=G:/NC/Projects/2013ztw/env/nc63gold
+patchdir=G:/NC/Projects/2013ztw/patch/MDMITF
+projectdir=G:/NC/GitBase/yonyouprj/ztw_zjitf/code
+module=uapbd
+wsfile=nc/itf/ztwzj/mdmitf
+zipname=MDMITF

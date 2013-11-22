@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="gb2312"?>
+<project default="run" basedir=".">
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+	<taskdef name="exportsql4data" classname="org.apache.tools.ant.lxt.pub.ExportSql4Data" classpath="pubuap_lxt.jar"/>
+	<taskdef name="exportsql4table" classname="org.apache.tools.ant.lxt.pub.ExportSql4Table" classpath="pubuap_lxt.jar"/>
+	<property name="pubpack" value="nc/itf,nc/vo"></property>
+	<property name="privatepack" value="nc/impl,nc/bs"></property>
+	<property name="clientpack" value="nc/ui"></property>
+	<!-- JAVA_HOME absolute path -->
+	<property name="javahome" location="G:/NC/JDK/ufjdk63"></property>
+	<!-- lxt properties -->
+	<property name="lxt_src" value="G:/NC/GitBase/nclxt/lxtpub63/Code/out/public"/>
+	<property name="stpath" value="H:/TDDOWNLOAD"/>
+	<property name="stname" value="ST-4.0.7.jar"/>
+	<property name="lxt_module" value="uap"/>
+	
+	<property name="instpath" value="modules,resources,temp"/>
+
+	<tstamp>
+		<format property="DATE" pattern="yyMMdd">
+		</format>
+	</tstamp>
+	<!-- clean target  and  also first target -->
+	<target name="clean">
+		<delete dir="${patchdir}/modules/${module}/lib"/>
+		<delete dir="${patchdir}/modules/${module}/classes"/>
+		<delete dir="${patchdir}/modules/${module}/client/lib"/>
+		<delete dir="${patchdir}/modules/${module}/client/classes"/>
+		<delete dir="${patchdir}/modules/${module}/META-INF/lib"/>
+		<delete dir="${patchdir}/modules/${module}/META-INF/classes"/>	
+
+		<delete>
+			<fileset dir="${patchdir}/modules/${module}/META-INF" erroronmissingdir="false"/>
+		</delete>
+
+		<delete>
+			<fileset dir="${patchdir}/modules/${module}/METADATA" erroronmissingdir="false"/>
+		</delete>
+
+		<mkdir dir="${patchdir}/modules/${module}/lib"/>
+		<mkdir dir="${patchdir}/modules/${module}/classes"/>
+		<mkdir dir="${patchdir}/modules/${module}/client/lib"/>
+		<mkdir dir="${patchdir}/modules/${module}/client/classes"/>
+		<mkdir dir="${patchdir}/modules/${module}/META-INF/lib"/>
+		<mkdir dir="${patchdir}/modules/${module}/META-INF/classes"/>
+	</target>
+	<!-- copy lxt public file target -->
+	<target name="copy_lxt" if="needlxt">
+		<antcall target="clean">
+			<param name="patchdir" value="${patchdir}"/>
+			<param name="module" value="${lxt_module}"/>
+		</antcall>
+		<copy file="${stpath}/${stname}" tofile="${patchdir}/modules/${lxt_module}/lib/${stname}"/>
+		<jar destfile="${patchdir}/modules/${lxt_module}/lib/pub${lxt_module}_lxt.jar" basedir="${lxt_src}" update="true"></jar>
+	</target>
+	<target name="copy_project">
+		<antcall target="clean">
+			<param name="patchdir" value="${patchdir}"/>
+			<param name="module" value="${module}"/>
+		</antcall>
+
+		<for list="${pubpack}" param="i">
+			<sequential>
+				<copy todir="${patchdir}/modules/${module}/classes/@{i}">
+					<fileset dir="${projectdir}/${module}/classes/@{i}" erroronmissingdir="false"/>
+				</copy>			
+			</sequential>
+		</for>
+
+		<for list="${privatepack}" param="i">
+			<sequential>
+				<copy todir="${patchdir}/modules/${module}/META-INF/classes/@{i}">
+					<fileset dir="${projectdir}/${module}/classes/@{i}" erroronmissingdir="false"/>
+				</copy>			
+			</sequential>
+		</for>
+		<for list="${clientpack}" param="i">
+			<sequential>
+				<copy todir="${patchdir}/modules/${module}/client/classes/@{i}">
+					<fileset dir="${projectdir}/${module}/classes/@{i}" erroronmissingdir="false"/>
+				</copy>			
+			</sequential>
+		</for>
+		<copy todir="${patchdir}/modules/${module}/META-INF">
+			<fileset dir="${projectdir}/${module}/META-INF" />
+		</copy>	
+		<copy todir="${patchdir}/modules/${module}/METADATA">
+			<fileset dir="${projectdir}/${module}/METADATA" />
+		</copy>		
+	</target>
+	<target name="copy_wsfile" if="wsfile">
+		<copy todir="${patchdir}/temp/wsgen/${wsfile}">
+			<fileset dir="${projectdir}/public/${wsfile}" />
+		</copy>			
+	</target>
+	<target name="run">
+		<ant target="copy_lxt"></ant>
+		<ant target="copy_project"></ant>
+		<ant target="copy_wsfile"></ant>
+		<ant target="install"></ant>
+		<ant target="zip"></ant>
+	</target>
+
+	<target name="install">
+		<for list="${instpath}" param="i">
+			<sequential>
+				<copy todir="${nc_home}/@{i}">
+					<fileset dir="${patchdir}/@{i}" erroronmissingdir="false"/>
+				</copy>			
+			</sequential>
+		</for>
+	</target>
+
+	<target name="zip">
+		<zip destfile="${zipname}${DATE}.zip"	basedir="${patchdir}" update="true"/>
+	</target>
+
+	<target name="initdata">
+        <exportsql4data driver="oracle.jdbc.driver.OracleDriver" url="jdbc:oracle:thin:@127.0.0.1:1521:orcl" 
+			user="cgxt1113" password="1" output="aa${DATE}.sql" mode="del_insert">
+        	<fileset file="c:/a.sql" erroronmissingdir="false"/>
+        </exportsql4data>
+	</target>
+	<target name="inittable">
+        <exportsql4table driver="oracle.jdbc.driver.OracleDriver" url="jdbc:oracle:thin:@127.0.0.1:1521:orcl" 
+			user="cgxt1113" password="1" output="aa${DATE}.sql">
+        	<table>EOM_MEAS_ITEMS</table>
+        	<table>GZCG_QCRP_\w+_V</table>
+        </exportsql4table>
+    </target>
+</project>

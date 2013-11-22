@@ -1,0 +1,7 @@
+nc_home=G:/NC/Projects/2013ztw/env/nc63gold
+patchdir=G:/NC/Projects/2013ztw/patch/SAPVOUITF
+projectdir=G:/NC/GitBase/yonyouprj/ztw_zjitf/code
+module=cmp
+needlxt=true
+wsfile=nc/itf/ztwzj/sapitf
+zipname=SAPVOUITF
