@@ -11,12 +11,14 @@ public class BillColumnHelper {
 	private BillCardPanel rp;
 	private String selectColKey;
 	private CheckBoxRenderer stockChecker;
+	private int offset;
 	
-	public BillColumnHelper(BillCardPanel _rp, String _selectColKey){
+	public BillColumnHelper(BillCardPanel _rp, String _selectColKey, int _offset){
 		rp = _rp;
 		selectColKey = _selectColKey;
 		stockChecker = new CheckBoxRenderer();
 		stockChecker.setSelected(true);
+		offset = _offset;
 	}
 	
 	public void setSelectColumnHeader(){
@@ -28,7 +30,7 @@ public class BillColumnHelper {
 		rp.getBillTable().getTableHeader().addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e){
-				if(rp.getBillTable().getColumnModel().getColumnIndexAtX(e.getX())==rp.getBillModel().getBodyColByKey(selectColKey)){//如果点击的是第0列，即checkbox这一列
+				if(rp.getBillTable().getColumnModel().getColumnIndexAtX(e.getX())+offset==rp.getBillModel().getBodyColByKey(selectColKey)){//如果点击的是第0列，即checkbox这一列
 					boolean b = !stockChecker.isSelected();
 					stockChecker.setSelected(b);
 					rp.getBillTable().getTableHeader().repaint();
@@ -49,7 +51,7 @@ public class BillColumnHelper {
 			public void mousePressed(MouseEvent e) {
 				 int LEFT_CTRL_MASK = InputEvent.BUTTON1_MASK + InputEvent.CTRL_MASK;
 				 if ((e.getModifiers() & LEFT_CTRL_MASK) == LEFT_CTRL_MASK) {
-					 int col = rp.getBillTable().columnAtPoint(e.getPoint());
+					 int col = rp.getBillTable().columnAtPoint(e.getPoint())+offset;
 				     int row = rp.getBillTable().rowAtPoint(e.getPoint());
 				     if (col==rp.getBillModel().getBodyColByKey(selectColKey) && row>=0 && row<rp.getBillTable().getRowCount()){
 				    	 startRow = row;

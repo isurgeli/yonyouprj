@@ -27,8 +27,8 @@ public class ProductStatisticsUI extends ReportStatisticsUI{
 	}
 
 	@Override
-	protected void hideReportPanel(ReportPanel reportpanel) {
-		reportpanel.hideColumn(new String[]{"vorderbillcode", "vcustcode", "vcustname"});
+	protected String[] getHideReportCol() {
+		return new String[]{"vorderbillcode", "vcustname"};
 	}
 
 	@Override
@@ -77,6 +77,7 @@ public class ProductStatisticsUI extends ReportStatisticsUI{
 	}
 	
 	@Override
-	protected void afterHideReportPanel(ReportPanel reportPanel) {
+	protected int getLockCol() {
+		return 6;
 	}
 }

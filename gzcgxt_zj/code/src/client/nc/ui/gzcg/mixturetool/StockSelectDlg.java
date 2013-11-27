@@ -137,7 +137,12 @@ public class StockSelectDlg extends UIDialog {
 				String cwarehouseid = checkValue.get(i).get(0).toString();
 				String vstockbatch = checkValue.get(i).get(1).toString();
 				String checkitemid = checkValue.get(i).get(2).toString();
-				UFDouble checkvalue = new UFDouble(checkValue.get(i).get(3).toString());
+				UFDouble checkvalue = null;
+				try{
+					checkvalue = new UFDouble(checkValue.get(i).get(3).toString());
+				}catch (NumberFormatException e){
+					continue;
+				}
 				String indate = checkValue.get(i).get(4).toString();
 				String custname = checkValue.get(i).get(5).toString();
 				
@@ -212,7 +217,7 @@ public class StockSelectDlg extends UIDialog {
 				reportPanel.getBillTable().getTableHeader().addMouseListener(
 						reportPanel);
 				
-				colHelper = new BillColumnHelper(reportPanel, "bselect");
+				colHelper = new BillColumnHelper(reportPanel, "bselect", 0);
 				
 				initBodyItems = reportPanel.getBody_Items();
 				ArrayList<ReportItem> rps = new ArrayList<ReportItem>();

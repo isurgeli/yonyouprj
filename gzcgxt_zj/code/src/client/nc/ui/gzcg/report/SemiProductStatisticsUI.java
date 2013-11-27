@@ -1,14 +1,11 @@
 package nc.ui.gzcg.report;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 
 import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.gzcg.pub.GZCGReportStatisticsConst;
 import nc.itf.gzcg.pub.ISQLSection;
 import nc.ui.pub.beans.UICheckBox;
-import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
 public class SemiProductStatisticsUI extends ReportStatisticsUI{
@@ -29,8 +26,10 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 	}
 
 	@Override
-	protected void hideReportPanel(ReportPanel reportpanel) {
-		reportpanel.hideColumn(new String[]{"vorderbillcode", "vcustcode", "vcustname"});
+	protected String[] getHideReportCol() {
+		return new String[]{"vcheckbillcode", "bqualified", "vfree1", "vorderbillcode", "vstockbatch", 
+				"vcustname", /*"vinvdocname",*/ "vprocessname", 
+				"ninnum", "nstocknum"};
 	}
 
 	@Override
@@ -75,19 +74,10 @@ public class SemiProductStatisticsUI extends ReportStatisticsUI{
 	protected boolean isSemiProduct() {
 		return true;
 	}
-	
+
 	@Override
-	protected void afterHideReportPanel(ReportPanel reportPanel) {
-		ArrayList<String> hideCol = new ArrayList<String>();
-		hideCol.addAll(Arrays.asList(new String[]{"vorderbillcode", "vstockbatch", "vcustcode", "vcustname", "vinvdoccode", "vinvdocname", "vprocessname", "ninnum", "nstocknum"}));
-		
-		String[] checkItems = getSelectedCheckItem();
-		for(int i=0;i<checkItems.length;i++){
-			if (!checkItemHaveData.containsKey("_CHECKTITEM"+i))
-				hideCol.add("_CHECKTITEM"+i);
-		}
-		
-		reportpanel.hideColumn(hideCol.toArray(new String[]{}));
+	protected int getLockCol() {
+		return 3;
 	}
 }
 

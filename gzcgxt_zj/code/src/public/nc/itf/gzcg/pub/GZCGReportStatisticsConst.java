@@ -3,8 +3,8 @@ package nc.itf.gzcg.pub;
 public enum GZCGReportStatisticsConst implements ISQLSection{
 	PUBLIC ("PUBLIC",
 			"公共",
-			new String[]{"vstockbatch", "vinvdoccode", "vinvdocname", "ninnum", "vprocessname", "dcheck", "vsamplecode", "vchargepsn"},
-			new String[]{"gzcg_qcrp_checkbill_v.vbatchcode", "bd_invbasdoc.invcode", 
+			new String[]{"vcheckbillcode", "bqualified", "vfree1", "vstockbatch", "vinvdoccode", "vinvdocname", "ninnum", "vprocessname", "dcheck", "vsamplecode", "vchargepsn"},
+			new String[]{"gzcg_qcrp_checkbill_v.vcheckbillcode", "gzcg_qcrp_checkbill_v.bqualified", "gzcg_qcrp_checkbill_v.vfree1", "gzcg_qcrp_checkbill_v.vbatchcode", "bd_invbasdoc.invcode", 
 			"bd_invbasdoc.invname", "gzcg_qcrp_checkbill_v.nchecknum", "nvl(qc_defectprocess.cdefectprocessname, '其它')", "gzcg_qcrp_checkbill_v.dpraydate", "qc_checkbill_b2.vsamplecode", 
 			"sm_user.user_name"},
 			new String[]{"qc_checkbill_b2", "bd_invmandoc", "bd_invbasdoc", "sm_user", "qc_defectprocess"},

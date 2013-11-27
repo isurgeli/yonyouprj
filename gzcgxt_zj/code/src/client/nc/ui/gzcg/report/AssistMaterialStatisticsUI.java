@@ -6,7 +6,6 @@ import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.gzcg.pub.GZCGReportStatisticsConst;
 import nc.itf.gzcg.pub.ISQLSection;
 import nc.ui.pub.beans.UICheckBox;
-import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
 public class AssistMaterialStatisticsUI extends ReportStatisticsUI{
@@ -27,9 +26,10 @@ public class AssistMaterialStatisticsUI extends ReportStatisticsUI{
 	}
 
 	@Override
-	protected void hideReportPanel(ReportPanel reportpanel) {
+	protected String[] getHideReportCol() {
+		return new String[]{};
 	}
-
+	
 	@Override
 	protected void setReportStatisticsConfig() {
 		sqlCtrls = new Hashtable<ISQLSection, UICheckBox>();
@@ -74,9 +74,10 @@ public class AssistMaterialStatisticsUI extends ReportStatisticsUI{
 	protected boolean isSemiProduct() {
 		return false;
 	}
-
+	
 	@Override
-	protected void afterHideReportPanel(ReportPanel reportPanel) {
+	protected int getLockCol() {
+		return 6;
 	}
 }
 

@@ -6,7 +6,6 @@ import nc.itf.gzcg.pub.GZCGConstant;
 import nc.itf.gzcg.pub.GZCGReportStatisticsConst;
 import nc.itf.gzcg.pub.ISQLSection;
 import nc.ui.pub.beans.UICheckBox;
-import nc.ui.scm.pub.report.ReportPanel;
 
 @SuppressWarnings("restriction")
 public class MaterialStatisticsUI extends ReportStatisticsUI{
@@ -27,7 +26,8 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 	}
 
 	@Override
-	protected void hideReportPanel(ReportPanel reportpanel) {
+	protected String[] getHideReportCol() {
+		return new String[]{};
 	}
 
 	@Override
@@ -76,6 +76,7 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 	}
 	
 	@Override
-	protected void afterHideReportPanel(ReportPanel reportPanel) {
+	protected int getLockCol() {
+		return 6;
 	}
 }

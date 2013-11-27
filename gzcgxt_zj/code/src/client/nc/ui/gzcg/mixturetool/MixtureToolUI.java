@@ -88,6 +88,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 	private Hashtable<String, Integer> m_checkItemIdNo;
 	
 	TableCellValueRangeRender leftGridCellRender;
+	private UITextField newBatchNoCtrl;
 
 	@Override
 	public String getBusitype() {
@@ -724,6 +725,10 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 			panel1.add(new UILabel("单位数量"));
 			panel1.add(mixtureAmountText);
 			
+			newBatchNoCtrl = new UITextField(10);
+			panel1.add(new UILabel("混后批号"));
+			panel1.add(newBatchNoCtrl);
+			
 			conditionpanel.add(panel1);
 			//conditionpanel.add(panel2);
 		}
@@ -855,7 +860,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 			//m_billCardPanel.getBillTable().getColumnModel().getColumn(4).setMaxWidth(100);
 			//m_billCardPanel.getBillTable().getColumnModel().getColumn(4).setPreferredWidth(100);
 			
-			leftColHelper = new BillColumnHelper(m_billCardPanel, "bselect");
+			leftColHelper = new BillColumnHelper(m_billCardPanel, "bselect", 0);
 			leftColHelper.setSelectColumnHeader();
 			
 			leftgridpanel.add(m_billCardPanel);
@@ -903,7 +908,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 	public ReportPanel getReportPanel() {
 		if (reportpanel ==null) {
 			super.getReportPanel();
-			reportColHelper = new BillColumnHelper(reportpanel, "bselect");
+			reportColHelper = new BillColumnHelper(reportpanel, "bselect", 0);
 			initBodyItems = reportpanel.getBody_Items();
 			((nc.ui.pub.bill.BillModel)getReportPanel().getBillTable().getModel()).setCellEditableController(new BillModelCellEditableController() {
 				public boolean isCellEditable(boolean value, int row, String itemkey) {
@@ -952,12 +957,14 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		ArrayList<String> custNames = new ArrayList<String>();
 		ArrayList<String> stockBatchs = new ArrayList<String>();
 		ArrayList<String> unitNumbers = new ArrayList<String>();
+		ArrayList<String> newBatchNo = new ArrayList<String>();
 		String mainWarehouse = null;
 		
 		Hashtable<String, Integer> wareHouseCountHash = new Hashtable<String, Integer>();
 		
 		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
-			if (new UFDouble(reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString()).doubleValue()>0){
+			if (reportpanel.getBillModel().getValueAt(row, "nunitusenum") != null && 
+					new UFDouble(reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString()).doubleValue()>0){
 				String warehouse = reportpanel.getBillModel().getValueAt(row, "vstock").toString();
 				if (!wareHouseCountHash.containsKey(warehouse))
 					wareHouseCountHash.put(warehouse, 1);
@@ -972,7 +979,8 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		}
 		
 		for (int row=0;row<reportpanel.getBillModel().getRowCount();row++ ){
-			if (new UFDouble(reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString()).doubleValue()>0){
+			if (reportpanel.getBillModel().getValueAt(row, "nunitusenum") != null &&
+					new UFDouble(reportpanel.getBillModel().getValueAt(row, "nunitusenum").toString()).doubleValue()>0){
 				String warehouse = reportpanel.getBillModel().getValueAt(row, "vstock").toString();
 				String invname = reportpanel.getBillModel().getValueAt(row, "vinvdocname").toString();
 				String batchNo = reportpanel.getBillModel().getValueAt(row, "vbatchcode").toString();
@@ -988,6 +996,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 				custNames.add(custname);
 				stockBatchs.add(batchNo);
 				unitNumbers.add(unitNum);
+				newBatchNo.add(newBatchNoCtrl.getText());
 			}
 		}
 		
@@ -996,6 +1005,7 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		dataSrc.addItemValue("vbatchno", stockBatchs.toArray(new String[]{}));
 		dataSrc.addItemValue("vcustname", custNames.toArray(new String[]{}));
 		dataSrc.addItemValue("nusernum", unitNumbers.toArray(new String[]{}));
+		dataSrc.addItemValue("vnewbatchno", newBatchNo.toArray(new String[]{}));
 		
 		return dataSrc;
 	}
