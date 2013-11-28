@@ -131,10 +131,10 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 			leftColHelper.setSelectColumnHeader();
 			
 			leftgridpanel.add(m_leftBillCard);
-			
-			MouseListener[] listeners = m_leftBillCard.getBillTable().getTableHeader().getMouseListeners();
-			for(MouseListener listener : listeners)
-				m_leftBillCard.getBillTable().getTableHeader().removeMouseListener(listener);
+			m_leftBillCard.getBillTable().removeSortListener();
+			//MouseListener[] listeners = m_leftBillCard.getBillTable().getTableHeader().getMouseListeners();
+			//for(MouseListener listener : listeners)
+			//	m_leftBillCard.getBillTable().getTableHeader().removeMouseListener(listener);
 		}
 		
 		return leftgridpanel;
@@ -593,6 +593,7 @@ public abstract class ReportStatisticsUI extends ReportUIEx implements ILinkQuer
 				reportpanel.getBillModel().getItemByKey(lockCol).setWidth(120);
 			reportpanel.getBillModel().getItemByKey("bqualified").setWidth(40);
 			reportpanel.getBillModel().getItemByKey("vprocessname").setWidth(40);
+			
 		}
 		return reportpanel;
 	}

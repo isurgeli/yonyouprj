@@ -519,9 +519,9 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 		return true;
 	}
 	
-	private Hashtable<String, double[]> getSysStandardValueRange() {
-		return getStandardValueRange("vstandardvalue");
-	}
+//	private Hashtable<String, double[]> getSysStandardValueRange() {
+//		return getStandardValueRange("vstandardvalue");
+//	}
 	
 	private Hashtable<String, double[]> getManuStandardValueRange() {
 		return getStandardValueRange("vrequirevalue");
@@ -850,10 +850,10 @@ public class MixtureToolUI extends ReportUIEx implements BillEditListener{
 					, ClientEnvironment.getInstance().getCorporation().getPrimaryKey());
 			
 			m_billCardPanel.addEditListener(this);
-			
-			MouseListener[] listeners = m_billCardPanel.getBillTable().getTableHeader().getMouseListeners();
-			for(MouseListener listener : listeners)
-				m_billCardPanel.getBillTable().getTableHeader().removeMouseListener(listener);
+			m_billCardPanel.getBillTable().removeSortListener();
+			//MouseListener[] listeners = m_billCardPanel.getBillTable().getTableHeader().getMouseListeners();
+			//for(MouseListener listener : listeners)
+			//	m_billCardPanel.getBillTable().getTableHeader().removeMouseListener(listener);
 			
 			m_billCardPanel.getBillModel().getItemByKey("vcomputevalue").setDecimalDigits(4);
 			//m_billCardPanel.getBillTable().getColumnModel().getColumn(4).setMinWidth(100);

@@ -77,6 +77,6 @@ public class MaterialStatisticsUI extends ReportStatisticsUI{
 	
 	@Override
 	protected int getLockCol() {
-		return 6;
+		return 1;
 	}
 }
