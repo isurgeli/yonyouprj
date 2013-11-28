@@ -1,0 +1,114 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="ZfiFkdjkResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="IAedat" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Sign"/>
+                    <xs:element type="xs:string" name="Option"/>
+                    <xs:element type="xs:string" name="Low"/>
+                    <xs:element type="xs:string" name="High"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="IBukrs" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Sign"/>
+                    <xs:element type="xs:string" name="Option"/>
+                    <xs:element type="xs:string" name="Low"/>
+                    <xs:element type="xs:string" name="High"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ILifnr" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Sign"/>
+                    <xs:element type="xs:string" name="Option"/>
+                    <xs:element type="xs:string" name="Low"/>
+                    <xs:element type="xs:string" name="High"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="IPrepayReqNum" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="Sign"/>
+                    <xs:element type="xs:string" name="Option"/>
+                    <xs:element type="xs:string" name="Low"/>
+                    <xs:element type="xs:string" name="High"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ITab" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="PrepayReqNum"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element type="xs:string" name="OResult" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="OTab" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="PrepayReqNum"/>
+                    <xs:element type="xs:string" name="Bukrs"/>
+                    <xs:element type="xs:string" name="Lifnr"/>
+                    <xs:element type="xs:string" name="Vertn"/>
+                    <xs:element type="xs:string" name="Statu"/>
+                    <xs:element type="xs:string" name="Name1"/>
+                    <xs:element type="xs:string" name="Zbankn"/>
+                    <xs:element type="xs:string" name="Banka"/>
+                    <xs:element type="xs:string" name="AmtPrepay"/>
+                    <xs:element type="xs:string" name="Memo"/>
+                    <xs:element type="xs:string" name="Zlsch"/>
+                    <xs:element type="xs:string" name="Ekgrp"/>
+                    <xs:element type="xs:string" name="Eknam"/>
+                    <xs:element type="xs:string" name="CatQian"/>
+                    <xs:element type="xs:string" name="PlanQian"/>
+                    <xs:element type="xs:string" name="PerioQian"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

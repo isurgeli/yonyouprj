@@ -13,5 +13,18 @@
 				<address>/sapvouws</address>
 			</extension>
     	</component>
+    	
+    	<component singleton="true" remote="true" tx="NONE">
+			<interface>nc.itf.ztwzj.sapitf.IBillService</interface>
+			<implementation>nc.impl.ztwzj.sapitf.BillService</implementation>
+    	</component>
+    	<component name="sapbillws" singleton="true" remote="false" tx="NONE">
+			<interface>nc.itf.ztwzj.sapitf.IWS_NC_SAPBill</interface>
+			<implementation>nc.impl.ztwzj.sapitf.WS_NC_SAPBill</implementation>
+			<extension class="nc.uap.ws.deploy.OxbWSExtensionProcessor">
+				<wsdl>/nc/itf/ztwzj/sapitf/IWS_NC_SAPBill.wsdl</wsdl>
+				<address>/sapvouws</address>
+			</extension>
+    	</component>
     </public>
 </module>

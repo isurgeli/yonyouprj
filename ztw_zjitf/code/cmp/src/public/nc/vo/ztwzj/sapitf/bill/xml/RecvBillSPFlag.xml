@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecvBillSPFlag> <!-- 收款单SAP处理标志 -->
+	<BUKRS>1000</BUKRS>
+	<Item>
+		<RECBID>20位</RECBID>
+		<RECBID>20位</RECBID>
+	</Item>
+	<STATUS>S</STATUS>
+</RecvBillSPFlag>

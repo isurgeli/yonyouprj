@@ -1,0 +1,41 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPBill" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPBill">
+    <xsd:annotation>
+        <xsd:documentation source="eip_version">63</xsd:documentation>
+    </xsd:annotation>
+    <xsd:element name="qryRecvBillInfo" type="tns:qryRecvBillInfo"/>
+    <xsd:complexType name="qryRecvBillInfo">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="arg0" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="qryRecvBillInfoResponse" type="tns:qryRecvBillInfoResponse"/>
+    <xsd:complexType name="qryRecvBillInfoResponse">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="return" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="setRecvBillSHFlag" type="tns:setRecvBillSHFlag"/>
+    <xsd:complexType name="setRecvBillSHFlag">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="arg0" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="setRecvBillSHFlagResponse" type="tns:setRecvBillSHFlagResponse"/>
+    <xsd:complexType name="setRecvBillSHFlagResponse">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="return" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="qryBankReceiptInfo" type="tns:qryBankReceiptInfo"/>
+    <xsd:complexType name="qryBankReceiptInfo">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="arg0" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:element name="qryBankReceiptInfoResponse" type="tns:qryBankReceiptInfoResponse"/>
+    <xsd:complexType name="qryBankReceiptInfoResponse">
+        <xsd:sequence>
+            <xsd:element minOccurs="0" name="return" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

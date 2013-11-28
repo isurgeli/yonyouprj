@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecvBillQryPara> <!-- 收款单查询参数 -->
+	<BUKRS>1000</BUKRS>
+	<ZSKRQS>
+		<ZSKRQ low="" high="" sign="" option=""></ZSKRQ>
+		<ZSKRQ low="" high="" sign="" option=""></ZSKRQ>
+	</ZSKRQS>
+	<RECEIVE_NUMS>
+		<RECEIVE_NUM low="" high="" sign="" option=""></RECEIVE_NUM>
+		<RECEIVE_NUM low="" high="" sign="" option=""></RECEIVE_NUM>
+	</RECEIVE_NUMS>
+	<KUNNRS>
+		<KUNNR low="" high="" sign="" option=""></KUNNR>
+		<KUNNR low="" high="" sign="" option=""></KUNNR>
+	</KUNNRS>
+</RecvBillQryPara>

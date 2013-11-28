@@ -1,0 +1,47 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="RecvBillQryRet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SystemInfo">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="success"/>
+              <xs:element type="xs:string" name="errcode"/>
+              <xs:element type="xs:string" name="message"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="RecvBillList">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="RecvBillInfo" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="BUKRS"/>
+                    <xs:element type="xs:string" name="ZYEAR"/>
+                    <xs:element type="xs:string" name="ZDJLX"/>
+                    <xs:element type="xs:string" name="ZSKFS"/>
+                    <xs:element type="xs:string" name="ZLSCH"/>
+                    <xs:element type="xs:string" name="ZSKRQ"/>
+                    <xs:element type="xs:string" name="BLDAT"/>
+                    <xs:element type="xs:string" name="WAERS"/>
+                    <xs:element type="xs:string" name="ZSKJE"/>
+                    <xs:element type="xs:string" name="KUNNR"/>
+                    <xs:element type="xs:string" name="STATU"/>
+                    <xs:element type="xs:string" name="ZKS_BANKN"/>
+                    <xs:element type="xs:string" name="ZKS_BANMS"/>
+                    <xs:element type="xs:string" name="BKTXT"/>
+                    <xs:element type="xs:string" name="NUMPG"/>
+                    <xs:element type="xs:string" name="REMARK"/>
+                    <xs:element type="xs:string" name="RECEIVE_NUM"/>
+                    <xs:element type="xs:string" name="RECBID"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

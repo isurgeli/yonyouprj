@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="IWS_NC_SAPBillService" targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPBill"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPBill"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+	<wsdl:documentation source="eip_version">63</wsdl:documentation>
+	<wsdl:types>
+		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://sapitf.ztwzj.itf.nc/IWS_NC_SAPBill">
+			<xsd:include schemaLocation="/nc/itf/ztwzj/sapitf/IWS_NC_SAPBill.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="qryBankReceiptInfo">
+		<wsdl:part name="parameters" element="tns:qryBankReceiptInfo">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="qryRecvBillInfo">
+		<wsdl:part name="parameters" element="tns:qryRecvBillInfo">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="qryBankReceiptInfoResponse">
+		<wsdl:part name="parameters" element="tns:qryBankReceiptInfoResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="setRecvBillSHFlag">
+		<wsdl:part name="parameters" element="tns:setRecvBillSHFlag">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="qryRecvBillInfoResponse">
+		<wsdl:part name="parameters" element="tns:qryRecvBillInfoResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="setRecvBillSHFlagResponse">
+		<wsdl:part name="parameters" element="tns:setRecvBillSHFlagResponse">
+		</wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="IWS_NC_SAPBillPortType">
+		<wsdl:documentation>
+			<annotation name="deprecated">false</annotation>
+			<annotation name="level">Platform</annotation>
+			<annotation name="version">1.0.0</annotation>
+		</wsdl:documentation>
+		<wsdl:operation name="qryRecvBillInfo">
+			<wsdl:input name="qryRecvBillInfo" message="tns:qryRecvBillInfo">
+			</wsdl:input>
+			<wsdl:output name="qryRecvBillInfoResponse" message="tns:qryRecvBillInfoResponse">
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="setRecvBillSHFlag">
+			<wsdl:input name="setRecvBillSHFlag" message="tns:setRecvBillSHFlag">
+			</wsdl:input>
+			<wsdl:output name="setRecvBillSHFlagResponse" message="tns:setRecvBillSHFlagResponse">
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="qryBankReceiptInfo">
+			<wsdl:input name="qryBankReceiptInfo" message="tns:qryBankReceiptInfo">
+			</wsdl:input>
+			<wsdl:output name="qryBankReceiptInfoResponse" message="tns:qryBankReceiptInfoResponse">
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="IWS_NC_SAPBillServiceSoapBinding" type="tns:IWS_NC_SAPBillPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="qryRecvBillInfo">
+			<soap:operation soapAction="" style="document"/>
+			<wsdl:input name="qryRecvBillInfo">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="qryRecvBillInfoResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="qryBankReceiptInfo">
+			<soap:operation soapAction="" style="document"/>
+			<wsdl:input name="qryBankReceiptInfo">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="qryBankReceiptInfoResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="setRecvBillSHFlag">
+			<soap:operation soapAction="" style="document"/>
+			<wsdl:input name="setRecvBillSHFlag">
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output name="setRecvBillSHFlagResponse">
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="IWS_NC_SAPBill">
+		<wsdl:port name="IWS_NC_SAPBillPort" binding="tns:IWS_NC_SAPBillServiceSoapBinding">
+			<soap:address location="http://localhost:9090/IWS_NC_SAPBillPort"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

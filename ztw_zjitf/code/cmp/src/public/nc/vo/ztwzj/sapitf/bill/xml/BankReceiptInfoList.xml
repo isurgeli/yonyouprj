@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BankReceiptQryRet><!-- 银行对账查询返回 -->
+	<SystemInfo>
+		<success>1</success>
+		<errcode></errcode>
+		<message></message>
+	</SystemInfo>
+	<BankReceiptList>
+		<Count>2</Count>
+		<TotalDebit>2000</TotalDebit>
+		<TotalCredit>0</TotalCredit>
+		<BankReceiptInfo>
+			<BUDAT>20130911</BUDAT>
+			<ZHB_BANMS>成都银行正府街支行</ZHB_BANMS>
+			<ZHB_BANKN>18438502301</ZHB_BANKN>
+			<BUKRS>1000</BUKRS>
+			<SHKZG>S</SHKZG>
+			<WRBTR>1000</WRBTR>
+			<UNITN>大同煤矿</UNITN>
+			<EXNUM>5432994575</EXNUM>
+			<USEAGE>采购</USEAGE>
+		</BankReceiptInfo>
+		<BankReceiptInfo>
+			<BUDAT>20130911</BUDAT>
+			<ZHB_BANMS>成都银行正府街支行</ZHB_BANMS>
+			<ZHB_BANKN>18438502301</ZHB_BANKN>
+			<BUKRS>1000</BUKRS>
+			<SHKZG>S</SHKZG>
+			<WRBTR>1000</WRBTR>
+			<UNITN>大同煤矿</UNITN>
+			<EXNUM>5432994575</EXNUM>
+			<USEAGE>采购</USEAGE>
+		</BankReceiptInfo>
+	</BankReceiptList>
+</BankReceiptQryRet>
