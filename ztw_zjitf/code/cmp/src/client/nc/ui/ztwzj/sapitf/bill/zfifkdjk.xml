@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+	<!-- 环境变量 -->
+	<bean id="context" class="nc.vo.uif2.LoginContext">
+	</bean>
+	
+	<!-- 模型部分配置########################################################### -->
+	
+	<!-- 应用服务类，负责进行模型操作的处理 -->
+	<bean id="manageModelService" class="nc.ui.ztwzj.sapitf.bill.ZfiFkdjkModelService">
+		<property name="context" ref="context"></property>
+	</bean>
+	
+	
+	<!-- 对象转换器工厂，由此获取操作对象的特征信息 -->
+	<bean id="boadatorfactory" class="nc.vo.bd.meta.BDObjectAdpaterFactory"/>
+	
+	<!-- 管理应用模型 -->
+	<bean id="manageAppModel" class="nc.ui.uif2.model.BillManageModel">
+		<property name="service" ref="manageModelService"></property>
+		<property name="businessObjectAdapterFactory" ref="boadatorfactory"></property>
+		<property name="context" ref="context"></property>
+	</bean>
+	
+	<!-- 数据模型管理器，主要负责各种方式的模型初始化 -->
+	<bean id="modelDataManager" class="nc.ui.ztwzj.sapitf.voucher.ModelDataManager">
+		<property name="model" ref="manageAppModel"></property>
+		<property name="service" ref="manageModelService" />
+	</bean>
+	
+	<!-- 模板容器，负责对模板的统一装载 -->
+	<bean id="templateContainer" class="nc.ui.uif2.editor.TemplateContainer"  init-method="load">
+		<property name="context" ref="context"/>
+	</bean>
+	
+	
+	<!-- 界面元素 ###########################################################-->
+	<!-- 列表视图 -->
+	<bean id="listView" class="nc.ui.uif2.editor.BillListView" init-method="initUI">
+		<property name="model" ref="manageAppModel"></property>
+		<property name="multiSelectionEnable"> <value>false</value></property>
+		<property name="templateContainer" ref="templateContainer"></property>
+	</bean>
+	<!--卡控件-->
+	<bean id="billFormEditor" class="nc.ui.uif2.editor.BillForm" init-method="initUI">
+		<property name="model" ref="manageAppModel"></property>
+		<property name="templateContainer" ref="templateContainer"/>
+	</bean>
+	
+	<bean id="orgpanel" class="nc.ui.bd.pub.BDOrgPanel" init-method="initUI">
+		<property name="model" ref="manageAppModel" />
+		<property name="dataManager" ref="modelDataManager" />
+	</bean>
+	
+	<bean id="queryArea" class="nc.ui.uif2.actions.QueryAreaShell" init-method="initUI">
+		<property name="queryArea">
+			<bean factory-bean="queryAction" factory-method="createQueryArea" />
+		</property>
+	</bean>
+	<!-- Actions ###########################################################-->
+	<bean id="separatorAction" class="nc.funcnode.ui.action.SeparatorAction" />
+	
+	<bean name="queryAction" class="nc.ui.pubapp.uif2app.query2.action.DefaultQueryAction">
+		<property name="model" ref="manageAppModel" />
+		<property name="dataManager" ref="modelDataManager" />
+	</bean>
+	
+	<!-- 界面布局总装########################################################### -->
+	<bean id="container" class="nc.ui.uif2.TangramContainer" init-method="initUI">
+		<property name="tangramLayoutRoot">
+			<bean class="nc.ui.uif2.tangramlayout.node.VSNode">
+				<property name="up">
+					<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+						<property name="component" ref="orgpanel">
+						</property>
+					</bean>
+				</property>
+				<property name="down">
+					<bean class="nc.ui.uif2.tangramlayout.node.HSNode">
+						<property name="left">
+							<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+								<property name="component" ref="queryArea" />
+							</bean>
+						</property>
+						<property name="right">
+							<bean class="nc.ui.uif2.tangramlayout.node.TBNode">
+								<property name="tabs">
+									<list>
+										<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+											<property name="name" value="列表"></property>
+											<property name="component" ref="listView"></property>
+										</bean>
+										<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+											<property name="name" value="卡片"></property>
+											<property name="component" ref="billFormEditor"></property>
+										</bean>
+									</list>
+								</property>
+							</bean>
+						</property>
+						<property name="dividerLocation">
+						<value>0.2f</value>
+						</property>
+					</bean>
+				</property>
+				<property name="dividerLocation">
+					<value>30f</value>
+				</property>
+			</bean>
+			
+		</property>
+		<property name="actions">
+			<list>
+				<ref bean="queryAction"/>
+			</list>
+		</property>
+	</bean>
+	
+</beans>

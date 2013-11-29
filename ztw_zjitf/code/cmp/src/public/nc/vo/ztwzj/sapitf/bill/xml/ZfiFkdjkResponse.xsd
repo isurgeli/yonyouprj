@@ -92,6 +92,7 @@
                     <xs:element type="xs:string" name="Vertn"/>
                     <xs:element type="xs:string" name="Statu"/>
                     <xs:element type="xs:string" name="Name1"/>
+                    <xs:element type="xs:string" name="Aedat"/>
                     <xs:element type="xs:string" name="Zbankn"/>
                     <xs:element type="xs:string" name="Banka"/>
                     <xs:element type="xs:string" name="AmtPrepay"/>

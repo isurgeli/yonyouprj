@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+ <wsdl:definitions targetNamespace="urn:sap-com:document:sap:soap:functions:mc-style" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="urn:sap-com:document:sap:soap:functions:mc-style" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:n1="urn:sap-com:document:sap:rfc:functions">
+ <wsdl:documentation>
+  <sidl:sidl xmlns:sidl="http://www.sap.com/2007/03/sidl" /> 
+  </wsdl:documentation>
+  <wsp:UsingPolicy wsdl:required="true" /> 
+ <wsp:Policy wsu:Id="BN_BN_ZWS_FKDJK">
+  <saptrnbnd:OptimizedXMLTransfer uri="http://xml.sap.com/2006/11/esi/esp/binxml" xmlns:saptrnbnd="http://www.sap.com/webas/710/soap/features/transportbinding/" wsp:Optional="true" /> 
+  <saptrnbnd:OptimizedXMLTransfer uri="http://www.w3.org/2004/08/soap/features/http-optimization" xmlns:saptrnbnd="http://www.sap.com/webas/710/soap/features/transportbinding/" wsp:Optional="true" /> 
+  <wsp:ExactlyOne xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:sapsp="http://www.sap.com/webas/630/soap/features/security/policy" xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702" xmlns:wsa="http://www.w3.org/2005/08/addressing" xmlns:wst="http://docs.oasis-open.org/ws-sx/ws-trust/200512" xmlns:wsu="http://schemas.xmlsoap.org/ws/2002/07/utility" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" /> 
+  </wsp:Policy>
+ <wsp:Policy wsu:Id="IF_IF_ZWS_FKDJK">
+ <sapsession:Session xmlns:sapsession="http://www.sap.com/webas/630/soap/features/session/">
+  <sapsession:enableSession>false</sapsession:enableSession> 
+  </sapsession:Session>
+  <sapcentraladmin:CentralAdministration xmlns:sapcentraladmin="http://www.sap.com/webas/700/soap/features/CentralAdministration/" wsp:Optional="true" /> 
+  </wsp:Policy>
+ <wsp:Policy wsu:Id="OP_IF_OP_ZfiFkdjk">
+  <sapcomhnd:enableCommit xmlns:sapcomhnd="http://www.sap.com/NW05/soap/features/commit/">false</sapcomhnd:enableCommit> 
+  <sapblock:enableBlocking xmlns:sapblock="http://www.sap.com/NW05/soap/features/blocking/">true</sapblock:enableBlocking> 
+  <saptrhnw05:required xmlns:saptrhnw05="http://www.sap.com/NW05/soap/features/transaction/">no</saptrhnw05:required> 
+  <saprmnw05:enableWSRM xmlns:saprmnw05="http://www.sap.com/NW05/soap/features/wsrm/">false</saprmnw05:enableWSRM> 
+  </wsp:Policy>
+ <wsdl:types>
+ <xsd:schema attributeFormDefault="qualified" targetNamespace="urn:sap-com:document:sap:rfc:functions">
+ <xsd:simpleType name="char1">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="1" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char10">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="10" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char120">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="120" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char18">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="18" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char2">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="2" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char20">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="20" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char3">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="3" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char4">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="4" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char50">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="50" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char60">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="60" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="char80">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="80" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="curr13.2">
+ <xsd:restriction base="xsd:decimal">
+  <xsd:totalDigits value="13" /> 
+  <xsd:fractionDigits value="2" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="date">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="10" /> 
+  <xsd:pattern value="\d\d\d\d-\d\d-\d\d" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+ <xsd:simpleType name="numeric10">
+ <xsd:restriction base="xsd:string">
+  <xsd:maxLength value="10" /> 
+  <xsd:pattern value="\d*" /> 
+  </xsd:restriction>
+  </xsd:simpleType>
+  </xsd:schema>
+ <xsd:schema attributeFormDefault="qualified" targetNamespace="urn:sap-com:document:sap:soap:functions:mc-style" xmlns:n0="urn:sap-com:document:sap:rfc:functions">
+  <xsd:import namespace="urn:sap-com:document:sap:rfc:functions" /> 
+ <xsd:complexType name="Zraedat">
+ <xsd:sequence>
+  <xsd:element name="Sign" type="n0:char1" /> 
+  <xsd:element name="Option" type="n0:char2" /> 
+  <xsd:element name="Low" type="n0:date" /> 
+  <xsd:element name="High" type="n0:date" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="ZfiFkdjkOs">
+ <xsd:sequence>
+  <xsd:element name="PrepayReqNum" type="n0:numeric10" /> 
+  <xsd:element name="Bukrs" type="n0:char4" /> 
+  <xsd:element name="Lifnr" type="n0:char10" /> 
+  <xsd:element name="Vertn" type="n0:char20" /> 
+  <xsd:element name="Statu" type="n0:char2" /> 
+  <xsd:element name="Name1" type="n0:char80" /> 
+  <xsd:element name="Aedat" type="n0:date" /> 
+  <xsd:element name="Zbankn" type="n0:char50" /> 
+  <xsd:element name="Banka" type="n0:char60" /> 
+  <xsd:element name="AmtPrepay" type="n0:curr13.2" /> 
+  <xsd:element name="Memo" type="n0:char120" /> 
+  <xsd:element name="Zlsch" type="n0:char1" /> 
+  <xsd:element name="Ekgrp" type="n0:char3" /> 
+  <xsd:element name="Eknam" type="n0:char18" /> 
+  <xsd:element name="CatQian" type="n0:char2" /> 
+  <xsd:element name="PlanQian" type="n0:char2" /> 
+  <xsd:element name="PerioQian" type="n0:char20" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="Zrbukrs">
+ <xsd:sequence>
+  <xsd:element name="Sign" type="n0:char1" /> 
+  <xsd:element name="Option" type="n0:char2" /> 
+  <xsd:element name="Low" type="n0:char4" /> 
+  <xsd:element name="High" type="n0:char4" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="ZrprepayReqNum">
+ <xsd:sequence>
+  <xsd:element name="Sign" type="n0:char1" /> 
+  <xsd:element name="Option" type="n0:char2" /> 
+  <xsd:element name="Low" type="n0:numeric10" /> 
+  <xsd:element name="High" type="n0:numeric10" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="Zrlifnr">
+ <xsd:sequence>
+  <xsd:element name="Sign" type="n0:char1" /> 
+  <xsd:element name="Option" type="n0:char2" /> 
+  <xsd:element name="Low" type="n0:char10" /> 
+  <xsd:element name="High" type="n0:char10" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="ZfiFkdjkIs">
+ <xsd:sequence>
+  <xsd:element name="PrepayReqNum" type="n0:numeric10" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="TableOfZraedat">
+ <xsd:sequence>
+  <xsd:element name="item" type="tns:Zraedat" minOccurs="0" maxOccurs="unbounded" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="TableOfZfiFkdjkOs">
+ <xsd:sequence>
+  <xsd:element name="item" type="tns:ZfiFkdjkOs" minOccurs="0" maxOccurs="unbounded" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="TableOfZrbukrs">
+ <xsd:sequence>
+  <xsd:element name="item" type="tns:Zrbukrs" minOccurs="0" maxOccurs="unbounded" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="TableOfZrprepayReqNum">
+ <xsd:sequence>
+  <xsd:element name="item" type="tns:ZrprepayReqNum" minOccurs="0" maxOccurs="unbounded" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="TableOfZrlifnr">
+ <xsd:sequence>
+  <xsd:element name="item" type="tns:Zrlifnr" minOccurs="0" maxOccurs="unbounded" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:complexType name="TableOfZfiFkdjkIs">
+ <xsd:sequence>
+  <xsd:element name="item" type="tns:ZfiFkdjkIs" minOccurs="0" maxOccurs="unbounded" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+ <xsd:element name="ZfiFkdjk">
+ <xsd:complexType>
+ <xsd:sequence>
+  <xsd:element name="IAedat" type="tns:TableOfZraedat" minOccurs="0" /> 
+  <xsd:element name="IBukrs" type="tns:TableOfZrbukrs" minOccurs="0" /> 
+  <xsd:element name="ILifnr" type="tns:TableOfZrlifnr" minOccurs="0" /> 
+  <xsd:element name="IPrepayReqNum" type="tns:TableOfZrprepayReqNum" minOccurs="0" /> 
+  <xsd:element name="IStatus" type="n0:char1" /> 
+  <xsd:element name="ITab" type="tns:TableOfZfiFkdjkIs" minOccurs="0" /> 
+  <xsd:element name="OTab" type="tns:TableOfZfiFkdjkOs" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+  </xsd:element>
+ <xsd:element name="ZfiFkdjkResponse">
+ <xsd:complexType>
+ <xsd:sequence>
+  <xsd:element name="IAedat" type="tns:TableOfZraedat" /> 
+  <xsd:element name="IBukrs" type="tns:TableOfZrbukrs" /> 
+  <xsd:element name="ILifnr" type="tns:TableOfZrlifnr" /> 
+  <xsd:element name="IPrepayReqNum" type="tns:TableOfZrprepayReqNum" /> 
+  <xsd:element name="ITab" type="tns:TableOfZfiFkdjkIs" /> 
+  <xsd:element name="OResult" type="n0:char1" /> 
+  <xsd:element name="OTab" type="tns:TableOfZfiFkdjkOs" /> 
+  </xsd:sequence>
+  </xsd:complexType>
+  </xsd:element>
+  </xsd:schema>
+  </wsdl:types>
+ <wsdl:message name="ZfiFkdjk">
+  <wsdl:part name="parameters" element="tns:ZfiFkdjk" /> 
+  </wsdl:message>
+ <wsdl:message name="ZfiFkdjkResponse">
+  <wsdl:part name="parameters" element="tns:ZfiFkdjkResponse" /> 
+  </wsdl:message>
+ <wsdl:portType name="ZWS_FKDJK">
+ <wsp:Policy>
+  <wsp:PolicyReference URI="#IF_IF_ZWS_FKDJK" /> 
+  </wsp:Policy>
+ <wsdl:operation name="ZfiFkdjk">
+ <wsp:Policy>
+  <wsp:PolicyReference URI="#OP_IF_OP_ZfiFkdjk" /> 
+  </wsp:Policy>
+  <wsdl:input message="tns:ZfiFkdjk" /> 
+  <wsdl:output message="tns:ZfiFkdjkResponse" /> 
+  </wsdl:operation>
+  </wsdl:portType>
+ <wsdl:binding name="ZWS_FKDJK" type="tns:ZWS_FKDJK">
+ <wsp:Policy>
+  <wsp:PolicyReference URI="#BN_BN_ZWS_FKDJK" /> 
+  </wsp:Policy>
+  <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" /> 
+ <wsdl:operation name="ZfiFkdjk">
+  <soap:operation soapAction="" style="document" /> 
+ <wsdl:input>
+  <soap:body use="literal" /> 
+  </wsdl:input>
+ <wsdl:output>
+  <soap:body use="literal" /> 
+  </wsdl:output>
+  </wsdl:operation>
+  </wsdl:binding>
+ <wsdl:service name="ZWS_FKDJK">
+ <wsdl:port name="ZWS_FKDJK" binding="tns:ZWS_FKDJK">
+  <soap:address location="http://erpdev.crmsc.com.cn:8000/sap/bc/srt/rfc/sap/zws_fkdjk/206/zws_fkdjk/zws_fkdjk" /> 
+  </wsdl:port>
+  </wsdl:service>
+  </wsdl:definitions>

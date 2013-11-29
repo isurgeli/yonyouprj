@@ -56,32 +56,32 @@ public class ObjectFactory {
      * Create an instance of {@link ZfiFkdjk.IPrepayReqNum }
      * 
      */
-    public ZfiFkdjk.IPrepayReqNum createZfiFkdjkIPrepayReqNum() {
-        return new ZfiFkdjk.IPrepayReqNum();
+    public ISAPQry createZfiFkdjkIPrepayReqNum() {
+        return new ISAPQry();
     }
 
     /**
      * Create an instance of {@link ZfiFkdjk.ILifnr }
      * 
      */
-    public ZfiFkdjk.ILifnr createZfiFkdjkILifnr() {
-        return new ZfiFkdjk.ILifnr();
+    public ISAPQry createZfiFkdjkILifnr() {
+        return new ISAPQry();
     }
 
     /**
      * Create an instance of {@link ZfiFkdjk.IBukrs }
      * 
      */
-    public ZfiFkdjk.IBukrs createZfiFkdjkIBukrs() {
-        return new ZfiFkdjk.IBukrs();
+    public ISAPQry createZfiFkdjkIBukrs() {
+        return new ISAPQry();
     }
 
     /**
      * Create an instance of {@link ZfiFkdjk.IAedat }
      * 
      */
-    public ZfiFkdjk.IAedat createZfiFkdjkIAedat() {
-        return new ZfiFkdjk.IAedat();
+    public ISAPQry createZfiFkdjkIAedat() {
+        return new ISAPQry();
     }
 
     /**
@@ -96,32 +96,32 @@ public class ObjectFactory {
      * Create an instance of {@link ZfiFkdjk.IPrepayReqNum.Item }
      * 
      */
-    public ZfiFkdjk.IPrepayReqNum.Item createZfiFkdjkIPrepayReqNumItem() {
-        return new ZfiFkdjk.IPrepayReqNum.Item();
+    public ISAPQry.Item createZfiFkdjkIPrepayReqNumItem() {
+        return new ISAPQry.Item();
     }
 
     /**
      * Create an instance of {@link ZfiFkdjk.ILifnr.Item }
      * 
      */
-    public ZfiFkdjk.ILifnr.Item createZfiFkdjkILifnrItem() {
-        return new ZfiFkdjk.ILifnr.Item();
+    public ISAPQry.Item createZfiFkdjkILifnrItem() {
+        return new ISAPQry.Item();
     }
 
     /**
      * Create an instance of {@link ZfiFkdjk.IBukrs.Item }
      * 
      */
-    public ZfiFkdjk.IBukrs.Item createZfiFkdjkIBukrsItem() {
-        return new ZfiFkdjk.IBukrs.Item();
+    public ISAPQry.Item createZfiFkdjkIBukrsItem() {
+        return new ISAPQry.Item();
     }
 
     /**
      * Create an instance of {@link ZfiFkdjk.IAedat.Item }
      * 
      */
-    public ZfiFkdjk.IAedat.Item createZfiFkdjkIAedatItem() {
-        return new ZfiFkdjk.IAedat.Item();
+    public ISAPQry.Item createZfiFkdjkIAedatItem() {
+        return new ISAPQry.Item();
     }
 
 }

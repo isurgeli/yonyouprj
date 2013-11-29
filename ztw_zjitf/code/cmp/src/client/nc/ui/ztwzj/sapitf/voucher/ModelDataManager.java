@@ -98,7 +98,7 @@ public class ModelDataManager implements IModelDataManager, IRefreshable {
 			}
 
 		} catch (BusinessException be) {
-			throw new BusinessRuntimeException(be.getMessage());
+			throw new BusinessRuntimeException(be.getMessage()); 
 		}catch (Exception e) {
 			throw new BusinessRuntimeException(nc.vo.ml.NCLangRes4VoTransl
 					.getNCLangRes().getStrByID("pubapp_0", "0pubapp-0007")/*

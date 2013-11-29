@@ -2,12 +2,13 @@
 // 此文件是由 JavaTM Architecture for XML Binding (JAXB) 引用实现 v2.2.7 生成的
 // 请访问 <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // 在重新编译源模式时, 对此文件的所有修改都将丢失。
-// 生成时间: 2013.11.28 时间 09:02:47 AM CST 
+// 生成时间: 2013.11.29 时间 10:31:48 AM CST 
 //
 
 
 package nc.vo.ztwzj.sapitf.bill.ZfiFkdjkResponse;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -161,6 +162,7 @@ import javax.xml.bind.annotation.XmlType;
  *                             &lt;element name="Vertn" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *                             &lt;element name="Statu" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *                             &lt;element name="Name1" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                             &lt;element name="Aedat" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *                             &lt;element name="Zbankn" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *                             &lt;element name="Banka" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *                             &lt;element name="AmtPrepay" type="{http://www.w3.org/2001/XMLSchema}string"/>
@@ -1375,6 +1377,7 @@ public class ZfiFkdjkResponse {
      *                   &lt;element name="Vertn" type="{http://www.w3.org/2001/XMLSchema}string"/>
      *                   &lt;element name="Statu" type="{http://www.w3.org/2001/XMLSchema}string"/>
      *                   &lt;element name="Name1" type="{http://www.w3.org/2001/XMLSchema}string"/>
+     *                   &lt;element name="Aedat" type="{http://www.w3.org/2001/XMLSchema}string"/>
      *                   &lt;element name="Zbankn" type="{http://www.w3.org/2001/XMLSchema}string"/>
      *                   &lt;element name="Banka" type="{http://www.w3.org/2001/XMLSchema}string"/>
      *                   &lt;element name="AmtPrepay" type="{http://www.w3.org/2001/XMLSchema}string"/>
@@ -1452,6 +1455,7 @@ public class ZfiFkdjkResponse {
          *         &lt;element name="Vertn" type="{http://www.w3.org/2001/XMLSchema}string"/>
          *         &lt;element name="Statu" type="{http://www.w3.org/2001/XMLSchema}string"/>
          *         &lt;element name="Name1" type="{http://www.w3.org/2001/XMLSchema}string"/>
+         *         &lt;element name="Aedat" type="{http://www.w3.org/2001/XMLSchema}string"/>
          *         &lt;element name="Zbankn" type="{http://www.w3.org/2001/XMLSchema}string"/>
          *         &lt;element name="Banka" type="{http://www.w3.org/2001/XMLSchema}string"/>
          *         &lt;element name="AmtPrepay" type="{http://www.w3.org/2001/XMLSchema}string"/>
@@ -1478,6 +1482,7 @@ public class ZfiFkdjkResponse {
             "vertn",
             "statu",
             "name1",
+            "aedat",
             "zbankn",
             "banka",
             "amtPrepay",
@@ -1489,9 +1494,13 @@ public class ZfiFkdjkResponse {
             "planQian",
             "perioQian"
         })
-        public static class Item {
+        public static class Item implements Serializable{
 
-            @XmlElement(name = "PrepayReqNum", required = true)
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+			@XmlElement(name = "PrepayReqNum", required = true)
             protected String prepayReqNum;
             @XmlElement(name = "Bukrs", required = true)
             protected String bukrs;
@@ -1503,6 +1512,8 @@ public class ZfiFkdjkResponse {
             protected String statu;
             @XmlElement(name = "Name1", required = true)
             protected String name1;
+            @XmlElement(name = "Aedat", required = true)
+            protected String aedat;
             @XmlElement(name = "Zbankn", required = true)
             protected String zbankn;
             @XmlElement(name = "Banka", required = true)
@@ -1532,7 +1543,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public String getPrepayReqNum() {
+            public String getPrepay_req_num() {
                 return prepayReqNum;
             }
 
@@ -1544,7 +1555,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public void setPrepayReqNum(String value) {
+            public void setPrepay_req_num(String value) {
                 this.prepayReqNum = value;
             }
 
@@ -1669,6 +1680,30 @@ public class ZfiFkdjkResponse {
             }
 
             /**
+             * 获取aedat属性的值。
+             * 
+             * @return
+             *     possible object is
+             *     {@link String }
+             *     
+             */
+            public String getAedat() {
+                return aedat;
+            }
+
+            /**
+             * 设置aedat属性的值。
+             * 
+             * @param value
+             *     allowed object is
+             *     {@link String }
+             *     
+             */
+            public void setAedat(String value) {
+                this.aedat = value;
+            }
+
+            /**
              * 获取zbankn属性的值。
              * 
              * @return
@@ -1724,7 +1759,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public String getAmtPrepay() {
+            public String getAmt_prepay_p() {
                 return amtPrepay;
             }
 
@@ -1736,7 +1771,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public void setAmtPrepay(String value) {
+            public void setAmt_prepay_p(String value) {
                 this.amtPrepay = value;
             }
 
@@ -1844,7 +1879,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public String getCatQian() {
+            public String getCat_qian() {
                 return catQian;
             }
 
@@ -1856,7 +1891,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public void setCatQian(String value) {
+            public void setCat_qian(String value) {
                 this.catQian = value;
             }
 
@@ -1868,7 +1903,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public String getPlanQian() {
+            public String getPlan_qian() {
                 return planQian;
             }
 
@@ -1880,7 +1915,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public void setPlanQian(String value) {
+            public void setPlan_qian(String value) {
                 this.planQian = value;
             }
 
@@ -1892,7 +1927,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public String getPerioQian() {
+            public String getPerio_qian() {
                 return perioQian;
             }
 
@@ -1904,7 +1939,7 @@ public class ZfiFkdjkResponse {
              *     {@link String }
              *     
              */
-            public void setPerioQian(String value) {
+            public void setPerio_qian(String value) {
                 this.perioQian = value;
             }
 
