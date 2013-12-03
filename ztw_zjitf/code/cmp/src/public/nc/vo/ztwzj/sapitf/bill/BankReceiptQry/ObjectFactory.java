@@ -10,6 +10,8 @@ package nc.vo.ztwzj.sapitf.bill.BankReceiptQry;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
+import nc.vo.ztwzj.sapitf.bill.RecvBillQry.RecvBillQryPara;
+
 
 /**
  * This object contains factory methods for each 
@@ -48,8 +50,8 @@ public class ObjectFactory {
      * Create an instance of {@link BankReceiptQryPara.BUDAT }
      * 
      */
-    public BankReceiptQryPara.BUDAT createBankReceiptQryParaBUDAT() {
-        return new BankReceiptQryPara.BUDAT();
+    public RecvBillQryPara.SAPRangePara createBankReceiptQryParaBUDAT() {
+        return new RecvBillQryPara.SAPRangePara();
     }
 
 }

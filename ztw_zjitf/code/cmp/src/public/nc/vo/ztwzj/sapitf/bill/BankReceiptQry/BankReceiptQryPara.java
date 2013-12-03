@@ -10,11 +10,11 @@ package nc.vo.ztwzj.sapitf.bill.BankReceiptQry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+
+import nc.vo.ztwzj.sapitf.bill.RecvBillQry.RecvBillQryPara;
 
 
 /**
@@ -59,17 +59,17 @@ import javax.xml.bind.annotation.XmlValue;
 public class BankReceiptQryPara {
 
     @XmlElement(name = "BUKRS")
-    protected short bukrs;
+    protected String bukrs;
     @XmlElement(name = "ZHB_BANKN")
-    protected int zhbbankn;
+    protected String zhbbankn;
     @XmlElement(name = "BUDAT", required = true)
-    protected BankReceiptQryPara.BUDAT budat;
+    protected RecvBillQryPara.SAPRangePara budat;
 
     /**
      * 获取bukrs属性的值。
      * 
      */
-    public short getBUKRS() {
+    public String getBUKRS() {
         return bukrs;
     }
 
@@ -77,7 +77,7 @@ public class BankReceiptQryPara {
      * 设置bukrs属性的值。
      * 
      */
-    public void setBUKRS(short value) {
+    public void setBUKRS(String value) {
         this.bukrs = value;
     }
 
@@ -85,7 +85,7 @@ public class BankReceiptQryPara {
      * 获取zhbbankn属性的值。
      * 
      */
-    public int getZHBBANKN() {
+    public String getZHBBANKN() {
         return zhbbankn;
     }
 
@@ -93,7 +93,7 @@ public class BankReceiptQryPara {
      * 设置zhbbankn属性的值。
      * 
      */
-    public void setZHBBANKN(int value) {
+    public void setZHBBANKN(String value) {
         this.zhbbankn = value;
     }
 
@@ -105,7 +105,7 @@ public class BankReceiptQryPara {
      *     {@link BankReceiptQryPara.BUDAT }
      *     
      */
-    public BankReceiptQryPara.BUDAT getBUDAT() {
+    public RecvBillQryPara.SAPRangePara getBUDAT() {
         return budat;
     }
 
@@ -117,168 +117,7 @@ public class BankReceiptQryPara {
      *     {@link BankReceiptQryPara.BUDAT }
      *     
      */
-    public void setBUDAT(BankReceiptQryPara.BUDAT value) {
+    public void setBUDAT(RecvBillQryPara.SAPRangePara value) {
         this.budat = value;
     }
-
-
-    /**
-     * <p>anonymous complex type的 Java 类。
-     * 
-     * <p>以下模式片段指定包含在此类中的预期内容。
-     * 
-     * <pre>
-     * &lt;complexType>
-     *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-     *       &lt;attribute name="low" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="high" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="sign" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="option" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/extension>
-     *   &lt;/simpleContent>
-     * &lt;/complexType>
-     * </pre>
-     * 
-     * 
-     */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "value"
-    })
-    public static class BUDAT {
-
-        @XmlValue
-        protected String value;
-        @XmlAttribute(name = "low")
-        protected String low;
-        @XmlAttribute(name = "high")
-        protected String high;
-        @XmlAttribute(name = "sign")
-        protected String sign;
-        @XmlAttribute(name = "option")
-        protected String option;
-
-        /**
-         * 获取value属性的值。
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getValue() {
-            return value;
-        }
-
-        /**
-         * 设置value属性的值。
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        /**
-         * 获取low属性的值。
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getLow() {
-            return low;
-        }
-
-        /**
-         * 设置low属性的值。
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setLow(String value) {
-            this.low = value;
-        }
-
-        /**
-         * 获取high属性的值。
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getHigh() {
-            return high;
-        }
-
-        /**
-         * 设置high属性的值。
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setHigh(String value) {
-            this.high = value;
-        }
-
-        /**
-         * 获取sign属性的值。
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSign() {
-            return sign;
-        }
-
-        /**
-         * 设置sign属性的值。
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSign(String value) {
-            this.sign = value;
-        }
-
-        /**
-         * 获取option属性的值。
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getOption() {
-            return option;
-        }
-
-        /**
-         * 设置option属性的值。
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setOption(String value) {
-            this.option = value;
-        }
-
-    }
-
 }

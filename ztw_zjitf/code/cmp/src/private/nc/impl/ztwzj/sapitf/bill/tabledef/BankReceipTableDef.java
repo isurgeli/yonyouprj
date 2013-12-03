@@ -32,7 +32,7 @@ public class BankReceipTableDef implements ISQLDefine {
 			new SQLField("SHKZG","ebank_dzd","CASE WHEN ebank_dzd.dbtacc=ebank_dzd.curacc THEN 'H' ELSE 'S' END"),
 			new SQLField("WRBTR","ebank_dzd","ebank_dzd.trsamt"),
 			new SQLField("UNITN","ebank_dzd","ebank_dzd.oppname"),
-			new SQLField("EXNUM","ebank_dzd","ebank_dzd.uid2"),
+			new SQLField("EXNUM","ebank_dzd","ebank_dzd.pk_ebank_dzd"),
 			new SQLField("USEAGE","ebank_dzd","ebank_dzd.trans_abstr"),
 			new SQLField("time","ebank_dzd","ebank_dzd.trans_time"),
 			new SQLField("SAPFLAG","ebank_dzd","ebank_dzd.obmdef5")

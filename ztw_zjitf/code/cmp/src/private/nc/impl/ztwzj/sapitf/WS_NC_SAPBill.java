@@ -12,6 +12,7 @@ import nc.vo.pfxx.util.PfxxUtils;
 import nc.vo.pfxx.xlog.XlogVO;
 import nc.vo.pub.BusinessException;
 import nc.vo.pub.lang.UFBoolean;
+import nc.vo.ztwzj.sapitf.bill.BankReceiptInfo.BankReceiptQryRet;
 import nc.vo.ztwzj.sapitf.bill.RecvBillInfo.RecvBillQryRet;
 import nc.vo.ztwzj.sapitf.bill.RecvBillInfo.RecvBillQryRet.SystemInfo;
 import nc.vo.ztwzj.sapitf.voucher.ZtwVoucherConstant;
@@ -104,8 +105,38 @@ public class WS_NC_SAPBill implements IWS_NC_SAPBill {
 
 	@Override
 	public String qryBankReceiptInfo(String para) {
-		// TODO Auto-generated method stub
-		return null;
+		IBillService bp = NCLocator.getInstance().lookup(IBillService.class);
+		String ret = null;
+		UFBoolean correct = null;
+		try {
+			if (para == null || para.length() == 0) {
+				para = "null";
+				throw new BusinessException("²ÎÊýÎª¿Õ", "S01");
+			}
+			InvocationInfoProxy.getInstance().setUserDataSource(ZtwVoucherConstant.getDataSource());
+			ret = bp.qryBankReceiptInfo(para);
+			correct  = new UFBoolean(true);
+		} catch (BusinessException e) {
+			BankReceiptQryRet infoList = new BankReceiptQryRet();
+			infoList.setSystemInfo(new BankReceiptQryRet.SystemInfo());
+			infoList.getSystemInfo().setSuccess("0");
+			infoList.getSystemInfo().setErrcode(e.getErrorCodeString());
+			infoList.getSystemInfo().setMessage(e.getMessage());
+			
+			try {
+				ret = JaxbTools.getStringFromObject(infoList);
+			} catch (JAXBException e1) {
+			}
+			correct = new UFBoolean(false);
+		} finally {
+			XlogVO xlog = ZtwVoucherConstant.getBaseXlogVO("BANKRECEIPTQRY", "", correct, para, ret);
+			try {
+				PfxxUtils.lookUpPFxxEJBService().writeLogs_RequiresNew(new XlogVO[]{xlog});
+			} catch (BusinessException e) {
+				Logger.error(e.getMessage(),e);
+			}
+		}
+		
+		return ret;
 	}
-
 }

@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 
 import nc.bs.dao.BaseDAO;
 import nc.bs.logging.Logger;
+import nc.impl.ztwzj.sapitf.bill.tabledef.BankReceipTableDef;
 import nc.impl.ztwzj.sapitf.bill.tabledef.CmpRecTableDef;
 import nc.itf.lxt.pub.jxabtool.JaxbTools;
 import nc.itf.lxt.pub.set.SetUtils;
@@ -22,8 +23,13 @@ import nc.itf.lxt.pub.sqltool.SQLWhereClause;
 import nc.itf.ztwzj.sapitf.IBillService;
 import nc.jdbc.framework.processor.BeanListProcessor;
 import nc.vo.lxt.pub.WSTool;
+import nc.vo.pfxx.util.PfxxUtils;
+import nc.vo.pfxx.xlog.XlogVO;
 import nc.vo.pub.BusinessException;
+import nc.vo.pub.lang.UFBoolean;
 import nc.vo.pub.lang.UFDate;
+import nc.vo.ztwzj.sapitf.bill.BankReceiptInfo.BankReceiptQryRet;
+import nc.vo.ztwzj.sapitf.bill.BankReceiptQry.BankReceiptQryPara;
 import nc.vo.ztwzj.sapitf.bill.RecvBillInfo.RecvBillQryRet;
 import nc.vo.ztwzj.sapitf.bill.RecvBillInfo.RecvBillQryRet.SystemInfo;
 import nc.vo.ztwzj.sapitf.bill.RecvBillQry.RecvBillQryPara;
@@ -131,8 +137,62 @@ public class BillService implements IBillService {
 	}
 
 	@Override
-	public String qryBankReceiptInfo(String para) {
-		return null;
+	public String qryBankReceiptInfo(String para) throws BusinessException {
+		try {
+			BankReceiptQryPara paraObj = JaxbTools.getObjectFromString(BankReceiptQryPara.class, para);
+			
+			String sql = getQryBankReceiptSQl(paraObj);
+			
+			BaseDAO dao = new BaseDAO();
+			@SuppressWarnings("unchecked")
+			ArrayList<BankReceiptQryRet.BankReceiptList.BankReceiptInfo> infos = 
+				(ArrayList<BankReceiptQryRet.BankReceiptList.BankReceiptInfo>)dao.executeQuery(sql, 
+				new BeanListProcessor(BankReceiptQryRet.BankReceiptList.BankReceiptInfo.class));
+			BankReceiptQryRet infoList = new BankReceiptQryRet();
+			infoList.setSystemInfo(new BankReceiptQryRet.SystemInfo());
+			infoList.getSystemInfo().setSuccess("1");
+			infoList.getSystemInfo().setErrcode("");
+			infoList.getSystemInfo().setMessage("");
+			infoList.setBankReceiptList(new BankReceiptQryRet.BankReceiptList());
+			for(BankReceiptQryRet.BankReceiptList.BankReceiptInfo info : infos)
+				infoList.getBankReceiptList().getBankReceiptInfo().add(info);
+			
+			String ret = JaxbTools.getStringFromObject(infoList);
+			
+			return ret;
+		} catch (JAXBException e) {
+			Logger.error(e.getMessage(), e);
+			throw new BusinessException(e);
+		}
+	}
+
+	private String getQryBankReceiptSQl(BankReceiptQryPara paraObj) throws BusinessException {
+		SQLBuilderTool st = null;
+		Hashtable<String, Object> paras  = new Hashtable<String, Object>();
+		st = new SQLBuilderTool(new BankReceipTableDef());
+		
+		ArrayList<SQLWhereClause> flexWheres = new ArrayList<SQLWhereClause>();
+		if (paraObj.getBUKRS() == null || paraObj.getBUKRS().length() == 0)
+			throw new BusinessException("参数错误 没有公司编码", "S1001");
+		flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "BUKRS", OPERATOR.EQ, DELIMITER.getParaExp("BUKRS")));
+		paras.put("BUKRS", DELIMITER.getStringParaValue(paraObj.getBUKRS()));
+		
+		if (paraObj.getZHBBANKN() == null || paraObj.getZHBBANKN().length() == 0)
+			throw new BusinessException("参数错误 没有银行账号", "S1001");
+		flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "ZHB_BANKN", OPERATOR.EQ, DELIMITER.getParaExp("ZHBBANKN")));
+		paras.put("ZHBBANKN", DELIMITER.getStringParaValue(paraObj.getZHBBANKN()));
+		
+		if (paraObj.getBUDAT() == null ) 
+			throw new BusinessException("参数错误 没有查询期间", "S1001");
+		
+		flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.LEFT, "1", OPERATOR.EQ, "1"));
+		flexWheres.addAll(paraObj.getBUDAT().getSQLWhere("BUDAT"));
+		flexWheres.add(new SQLWhereClause(OPERATOR.AND, BRACKET.RIGHT, "1", OPERATOR.EQ, "1"));
+		
+		ArrayList<String> fields = new ArrayList<String>();
+		fields.addAll(Arrays.asList(new String[] { "BUDAT","ZHB_BANMS","ZHB_BANKN","BUKRS","SHKZG","WRBTR","UNITN","EXNUM","USEAGE"}));
+		
+		return st.buildSQL(fields.toArray(new String[] {}), flexWheres.toArray(new SQLWhereClause[] {}), paras);
 	}
 
 	@Override
@@ -160,23 +220,33 @@ public class BillService implements IBillService {
 	}
 
 	private String callSAPWS(String xml) throws BusinessException {
-		xml = xml.substring(xml.indexOf('<', 1), xml.length());
-		xml = xml.replaceAll("ZfiFkdjk", "urn:ZfiFkdjk");
-		StringBuffer soap = new StringBuffer();
-		soap.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:sap-com:document:sap:soap:functions:mc-style\">");
-		soap.append("   <soapenv:Header/>");
-		soap.append("   <soapenv:Body>");
-		soap.append(xml);
-		soap.append("   </soapenv:Body>");
-		soap.append("</soapenv:Envelope>");
-
-		String url = ZtwVoucherConstant.getSAPPayBillWSUrl();
-		String soapResponseData = WSTool.callByHttp(url, soap.toString());
-		int sx = soapResponseData.indexOf("<urn:ZfiFkdjkResponse>");
-		int ex = soapResponseData.indexOf("</urn:ZfiFkdjkResponse>") + "</urn:ZfiFkdjkResponse>".length();
-		soapResponseData = soapResponseData.substring(sx, ex);
-		soapResponseData = soapResponseData.replaceAll("urn:ZfiFkdjkResponse", "ZfiFkdjkResponse");
-		return soapResponseData;
+		String soapResponseData = "";
+		try{
+			xml = xml.substring(xml.indexOf('<', 1), xml.length());
+			xml = xml.replaceAll("ZfiFkdjk", "urn:ZfiFkdjk");
+			StringBuffer soap = new StringBuffer();
+			soap.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:sap-com:document:sap:soap:functions:mc-style\">");
+			soap.append("   <soapenv:Header/>");
+			soap.append("   <soapenv:Body>");
+			soap.append(xml);
+			soap.append("   </soapenv:Body>");
+			soap.append("</soapenv:Envelope>");
+	
+			String url = ZtwVoucherConstant.getSAPPayBillWSUrl();
+			soapResponseData = WSTool.callByHttp(url, soap.toString());
+			int sx = soapResponseData.indexOf("<urn:ZfiFkdjkResponse>");
+			int ex = soapResponseData.indexOf("</urn:ZfiFkdjkResponse>") + "</urn:ZfiFkdjkResponse>".length();
+			soapResponseData = soapResponseData.substring(sx, ex);
+			soapResponseData = soapResponseData.replaceAll("urn:ZfiFkdjkResponse", "ZfiFkdjkResponse");
+			return soapResponseData;
+		}finally{
+			XlogVO xlog = ZtwVoucherConstant.getBaseXlogVO("SAPPAYBILL", "", new UFBoolean(true), xml, soapResponseData);
+			try {
+				PfxxUtils.lookUpPFxxEJBService().writeLogs_RequiresNew(new XlogVO[]{xlog});
+			} catch (BusinessException e) {
+				Logger.error(e.getMessage(),e);
+			}
+		}
 	}
 
 	@Override
