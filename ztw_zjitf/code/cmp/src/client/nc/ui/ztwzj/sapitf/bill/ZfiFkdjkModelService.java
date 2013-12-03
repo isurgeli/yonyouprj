@@ -6,7 +6,7 @@ import java.util.List;
 import nc.bs.framework.common.NCLocator;
 import nc.itf.lxt.pub.jxabtool.JaxbTools;
 import nc.itf.ztwzj.sapitf.IBillService;
-import nc.ui.lxt.pub.editor.LxtUITool;
+import nc.ui.lxt.pub.editor.NCUITool;
 import nc.ui.pubapp.uif2app.query2.model.IQueryService;
 import nc.ui.querytemplate.querytree.IQueryScheme;
 import nc.ui.uif2.model.IAppModelService;
@@ -58,15 +58,15 @@ public class ZfiFkdjkModelService implements IAppModelService, IQueryService {
 		@SuppressWarnings("unchecked")
 		HashMap<String, QueryCondition> conditions = (HashMap<String, QueryCondition>)queryScheme.get("all_condition");
 		
-		String dates[] = LxtUITool.getQueryCondition(conditions, "aedat", 
+		String dates[] = NCUITool.getQueryCondition(conditions, "aedat", 
 				new String[] {"2013-01-01", new UFDateTime().getDateTimeAfter(1).toString()});
 		dates[0] = dates[0].replaceAll("-", "").substring(0, 8);
 		dates[1] = dates[1].replaceAll("-", "").substring(0, 8);
 		
-		String[] prepayQeqNums = LxtUITool.getQueryCondition(conditions, "prepay_req_num", 
+		String[] prepayQeqNums = NCUITool.getQueryCondition(conditions, "prepay_req_num", 
 				new String[] {null, null});
 		
-		String[] suppliers = LxtUITool.getQueryCondition(conditions, "pk_supplier", 
+		String[] suppliers = NCUITool.getQueryCondition(conditions, "pk_supplier", 
 				new String[] {null, null});
 		
 		String[] formulas = new String[] {
@@ -76,7 +76,7 @@ public class ZfiFkdjkModelService implements IAppModelService, IQueryService {
 		HashMap<String, Object> vars = new HashMap<String, Object>();
 		vars.put("pk_org", context.getPk_org());
 		vars.put("pk_supplier", suppliers);
-		Object[][] values = LxtUITool.getValueByFormula(formulas, vars);
+		Object[][] values = NCUITool.getValueByFormula(formulas, vars);
 		suppliers[0] = values[1][0].equals("")?null:"00"+(String)values[1][0];
 		suppliers[1] = values[1].length==1 || values[1][1].equals("")?null:"00"+(String)values[1][1]; 
 		

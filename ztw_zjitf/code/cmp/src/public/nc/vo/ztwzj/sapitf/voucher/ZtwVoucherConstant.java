@@ -50,19 +50,27 @@ public enum ZtwVoucherConstant {
 	}
 	
 	public static String getDataSource() throws BusinessException{
+		return getProperty("datasrc");
+	}
+	
+	public static String getSAPPayBillWSUrl() throws BusinessException{
+		return getProperty("pbwsurl");
+	}
+	
+	public static String getProperty(String key) throws BusinessException{
 		Properties prop = new Properties();
 		 
     	try {
     		String path = RuntimeEnv.getInstance().getNCHome()+File.separatorChar+"resources"+File.separatorChar+"ztwitf.properties";
     		prop.load(new FileInputStream(path));
-    		String datasrc = prop.getProperty("datasrc").toString();
-    		if (datasrc != null && datasrc.length()==0)
-    			throw new BusinessException("数据源配置不正确", "S01");
+    		String property = prop.getProperty(key).toString();
+    		if (property != null && property.length()==0)
+    			throw new BusinessException("参数["+key+"]配置不正确", "S01");
     		
-    		return datasrc;
+    		return property;
     	} catch (IOException ex) {
     		Logger.error(ex.getMessage(),ex);
-			throw new BusinessException("数据源配置不正确", "S01");
+			throw new BusinessException("参数["+key+"]配置不正确", "S01");
         }
 	}
 }

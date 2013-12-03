@@ -2,5 +2,5 @@
 <BankReceiptQryPara> <!-- 银行对账单查询参数 -->
 	<BUKRS>1000</BUKRS>
 	<ZHB_BANKN>8482593</ZHB_BANKN>
-	<BUMON>201309</BUMON>
+	<BUDAT low="" high="" sign="" option=""></BUDAT>
 </BankReceiptQryPara>

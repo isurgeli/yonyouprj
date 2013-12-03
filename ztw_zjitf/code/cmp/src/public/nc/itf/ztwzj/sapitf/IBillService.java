@@ -12,4 +12,6 @@ public interface IBillService {
 	String qryBankReceiptInfo(String para) throws BusinessException;
 	
 	List<OTab.Item> qryPayBillInfo(String para) throws BusinessException;
+	
+	void setPayBillNCFlag(String statu, List<String> payNos) throws BusinessException;
 }

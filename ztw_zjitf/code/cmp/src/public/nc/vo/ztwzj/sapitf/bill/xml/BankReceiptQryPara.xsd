@@ -2,9 +2,20 @@
   <xs:element name="BankReceiptQryPara">
     <xs:complexType>
       <xs:sequence>
-        <xs:element type="xs:string" name="BUKRS"></xs:element>
-        <xs:element type="xs:string" name="ZHB_BANKN"/>
-        <xs:element type="xs:string" name="BUMON"/>
+        <xs:element type="xs:short" name="BUKRS"/>
+        <xs:element type="xs:int" name="ZHB_BANKN"/>
+        <xs:element name="BUDAT">
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="low"/>
+                <xs:attribute type="xs:string" name="high"/>
+                <xs:attribute type="xs:string" name="sign"/>
+                <xs:attribute type="xs:string" name="option"/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

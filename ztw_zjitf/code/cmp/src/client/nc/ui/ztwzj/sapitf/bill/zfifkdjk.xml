@@ -18,7 +18,7 @@
 	<bean id="boadatorfactory" class="nc.vo.bd.meta.BDObjectAdpaterFactory"/>
 	
 	<!-- 管理应用模型 -->
-	<bean id="manageAppModel" class="nc.ui.uif2.model.BillManageModel">
+	<bean id="manageAppModel" class="nc.ui.lxt.pub.model.BillManageModel">
 		<property name="service" ref="manageModelService"></property>
 		<property name="businessObjectAdapterFactory" ref="boadatorfactory"></property>
 		<property name="context" ref="context"></property>
@@ -38,13 +38,13 @@
 	
 	<!-- 界面元素 ###########################################################-->
 	<!-- 列表视图 -->
-	<bean id="listView" class="nc.ui.uif2.editor.BillListView" init-method="initUI">
+	<bean id="listView" class="nc.ui.lxt.pub.editor.ShowUpableBillListView" init-method="initUI">
 		<property name="model" ref="manageAppModel"></property>
 		<property name="multiSelectionEnable"> <value>false</value></property>
 		<property name="templateContainer" ref="templateContainer"></property>
 	</bean>
 	<!--卡控件-->
-	<bean id="billFormEditor" class="nc.ui.uif2.editor.BillForm" init-method="initUI">
+	<bean id="billFormEditor" class="nc.ui.lxt.pub.editor.ShowUpableBillForm" init-method="initUI">
 		<property name="model" ref="manageAppModel"></property>
 		<property name="templateContainer" ref="templateContainer"/>
 	</bean>
@@ -59,6 +59,36 @@
 			<bean factory-bean="queryAction" factory-method="createQueryArea" />
 		</property>
 	</bean>
+	
+	<bean id="queryInfo" class="nc.ui.uif2.tangramlayout.CardLayoutToolbarPanel">
+		<property name="model" ref="manageAppModel" />
+	</bean>
+	
+	<bean id="cardInfoPnl" class="nc.ui.uif2.tangramlayout.CardLayoutToolbarPanel">
+		<property name="actions">
+			<list>
+				<!-- 浏览按钮 卡片界面共享信息按钮 -->
+				<bean id="firstLineAction" class="nc.ui.uif2.actions.FirstLineAction">
+					<property name="model" ref="manageAppModel" />
+				</bean>
+				<bean id="preLineAction" class="nc.ui.uif2.actions.PreLineAction">
+					<property name="model" ref="manageAppModel" />
+				</bean>
+				<bean id="nextLineAction" class="nc.ui.uif2.actions.NextLineAction">
+					<property name="model" ref="manageAppModel" />
+				</bean>
+				<bean id="lastLineAction" class="nc.ui.uif2.actions.LastLineAction">
+					<property name="model" ref="manageAppModel" />
+				</bean>
+			</list>
+		</property>
+		<property name="titleAction">
+			<bean id="returnaction" class="nc.ui.uif2.actions.ShowMeUpAction">
+				<property name="goComponent" ref="listView" />
+			</bean>
+		</property>
+	</bean>
+	
 	<!-- Actions ###########################################################-->
 	<bean id="separatorAction" class="nc.funcnode.ui.action.SeparatorAction" />
 	
@@ -66,6 +96,12 @@
 		<property name="model" ref="manageAppModel" />
 		<property name="dataManager" ref="modelDataManager" />
 	</bean>
+	
+	<bean name="genPayAction" class="nc.ui.ztwzj.sapitf.bill.GenPayBillAction">
+		<property name="model" ref="manageAppModel" />
+	</bean>
+	
+	
 	
 	<!-- 界面布局总装########################################################### -->
 	<bean id="container" class="nc.ui.uif2.TangramContainer" init-method="initUI">
@@ -78,30 +114,49 @@
 					</bean>
 				</property>
 				<property name="down">
-					<bean class="nc.ui.uif2.tangramlayout.node.HSNode">
-						<property name="left">
-							<bean class="nc.ui.uif2.tangramlayout.node.CNode">
-								<property name="component" ref="queryArea" />
-							</bean>
-						</property>
-						<property name="right">
-							<bean class="nc.ui.uif2.tangramlayout.node.TBNode">
-								<property name="tabs">
-									<list>
+					<bean class="nc.ui.uif2.tangramlayout.node.TBNode">
+						<property name="showMode" value="CardLayout" />
+						<property name="tabs">
+							<list>
+								<bean class="nc.ui.uif2.tangramlayout.node.HSNode">
+									<property name="left">
 										<bean class="nc.ui.uif2.tangramlayout.node.CNode">
-											<property name="name" value="列表"></property>
-											<property name="component" ref="listView"></property>
+											<property name="component" ref="queryArea" />
 										</bean>
+									</property>
+									<property name="right">
+										<bean class="nc.ui.uif2.tangramlayout.node.VSNode">
+											<property name="up">
+												<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+													<property name="component" ref="queryInfo" />
+												</bean>
+											</property>
+											<property name="down">
+												<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+													<property name="name" value="列表" />
+													<property name="component" ref="listView" />
+												</bean>
+											</property>
+											<property name="dividerLocation" value="25f" />
+										</bean>
+									</property>
+									<property name="dividerLocation" value="0.22f" />
+								</bean>
+								<bean class="nc.ui.uif2.tangramlayout.node.VSNode">
+									<property name="up">
 										<bean class="nc.ui.uif2.tangramlayout.node.CNode">
-											<property name="name" value="卡片"></property>
-											<property name="component" ref="billFormEditor"></property>
+											<property name="component" ref="cardInfoPnl" />
 										</bean>
-									</list>
-								</property>
-							</bean>
-						</property>
-						<property name="dividerLocation">
-						<value>0.2f</value>
+									</property>
+									<property name="down">
+										<bean class="nc.ui.uif2.tangramlayout.node.CNode">
+											<property name="name" value="卡片" />
+											<property name="component" ref="billFormEditor" />
+										</bean>
+									</property>
+									<property name="dividerLocation" value="25f" />
+								</bean>
+							</list>
 						</property>
 					</bean>
 				</property>
@@ -114,8 +169,24 @@
 		<property name="actions">
 			<list>
 				<ref bean="queryAction"/>
+				<ref bean="separatorAction"/>
+				<ref bean="genPayAction"/>
 			</list>
 		</property>
+	</bean>
+	
+	<!-- 双击列表行后显示卡片 -->
+	<bean id="mouseClickShowPanelMediator" class="nc.ui.lxt.pub.editor.MouseClickShowPanelMediator">
+		<property name="listView" ref="listView" />
+		<property name="showUpComponent" ref="billFormEditor" />
+	</bean>
+	
+	<bean id="linkQueryHyperlinkMediator" class="nc.ui.pubapp.uif2app.linkquery.LinkQueryHyperlinkMediator">
+		<property name="model" ref="manageAppModel" />
+		<property name="srcBillIdField" value="pk_paybill" />
+		<!-- 超链字段名 -->
+		<property name="srcBillNOField" value="vstatus" />
+		<property name="srcBillType" value="F5" />
 	</bean>
 	
 </beans>

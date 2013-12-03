@@ -1,18 +1,13 @@
 package nc.impl.ztwzj.sapitf;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
 
 import nc.bs.dao.BaseDAO;
 import nc.bs.logging.Logger;
@@ -26,14 +21,19 @@ import nc.itf.lxt.pub.sqltool.SQLBuilderTool;
 import nc.itf.lxt.pub.sqltool.SQLWhereClause;
 import nc.itf.ztwzj.sapitf.IBillService;
 import nc.jdbc.framework.processor.BeanListProcessor;
+import nc.vo.lxt.pub.WSTool;
 import nc.vo.pub.BusinessException;
+import nc.vo.pub.lang.UFDate;
 import nc.vo.ztwzj.sapitf.bill.RecvBillInfo.RecvBillQryRet;
 import nc.vo.ztwzj.sapitf.bill.RecvBillInfo.RecvBillQryRet.SystemInfo;
 import nc.vo.ztwzj.sapitf.bill.RecvBillQry.RecvBillQryPara;
 import nc.vo.ztwzj.sapitf.bill.RecvBillQry.RecvBillQryPara.SAPRangePara;
 import nc.vo.ztwzj.sapitf.bill.RecvBillSPFlag.RecvBillSPFlag;
+import nc.vo.ztwzj.sapitf.bill.ZfiFkdjk.ZfiFkdjk;
+import nc.vo.ztwzj.sapitf.bill.ZfiFkdjk.ZfiFkdjk.ITab;
 import nc.vo.ztwzj.sapitf.bill.ZfiFkdjkResponse.ZfiFkdjkResponse;
 import nc.vo.ztwzj.sapitf.bill.ZfiFkdjkResponse.ZfiFkdjkResponse.OTab;
+import nc.vo.ztwzj.sapitf.voucher.ZtwVoucherConstant;
 
 public class BillService implements IBillService {
 
@@ -136,55 +136,68 @@ public class BillService implements IBillService {
 	}
 
 	@Override
-	public List<OTab.Item> qryPayBillInfo(String para)
-			throws BusinessException {
+	public List<OTab.Item> qryPayBillInfo(String para) throws BusinessException {
 		try {
 			String xmlret = callSAPWS(para);
 			ZfiFkdjkResponse ret = JaxbTools.getObjectFromString(ZfiFkdjkResponse.class, xmlret);
 			if (!ret.getOResult().equals("S"))
 				throw new BusinessException("WS请求返回错误。");
+			SimpleDateFormat sFormat = new SimpleDateFormat("yyyyMMdd");
+			for (OTab.Item item : ret.getOTab().getItem()) {
+				String date = item.getAedat();
+				item.setAedat(UFDate.getDate(sFormat.parse(date)).toString());
+				item.setVstatus("未处理");
+				item.setStatu("S");
+			}
 			return ret.getOTab().getItem();
 		}catch(JAXBException e) {
+			Logger.error(e.getMessage(), e);
+			throw new BusinessException(e);
+		} catch (ParseException e) {
 			Logger.error(e.getMessage(), e);
 			throw new BusinessException(e);
 		}
 	}
 
 	private String callSAPWS(String xml) throws BusinessException {
+		xml = xml.substring(xml.indexOf('<', 1), xml.length());
+		xml = xml.replaceAll("ZfiFkdjk", "urn:ZfiFkdjk");
+		StringBuffer soap = new StringBuffer();
+		soap.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:sap-com:document:sap:soap:functions:mc-style\">");
+		soap.append("   <soapenv:Header/>");
+		soap.append("   <soapenv:Body>");
+		soap.append(xml);
+		soap.append("   </soapenv:Body>");
+		soap.append("</soapenv:Envelope>");
+
+		String url = ZtwVoucherConstant.getSAPPayBillWSUrl();
+		String soapResponseData = WSTool.callByHttp(url, soap.toString());
+		int sx = soapResponseData.indexOf("<urn:ZfiFkdjkResponse>");
+		int ex = soapResponseData.indexOf("</urn:ZfiFkdjkResponse>") + "</urn:ZfiFkdjkResponse>".length();
+		soapResponseData = soapResponseData.substring(sx, ex);
+		soapResponseData = soapResponseData.replaceAll("urn:ZfiFkdjkResponse", "ZfiFkdjkResponse");
+		return soapResponseData;
+	}
+
+	@Override
+	public void setPayBillNCFlag(String statu, List<String> payNos)	throws BusinessException {
+		ZfiFkdjk zfi = new ZfiFkdjk();
+		zfi.setIStatus(statu);
+		zfi.setITab(new ZfiFkdjk.ITab());
+		for (String payNo : payNos) {
+			ITab.Item item = new ITab.Item();
+			item.setPrepayReqNum(payNo);
+			zfi.getITab().getItem().add(item);
+		}
+		
 		try {
-			xml = xml.substring(xml.indexOf('<', 1), xml.length());
-			xml = xml.replaceAll("ZfiFkdjk", "urn:ZfiFkdjk");
-			StringBuffer soap = new StringBuffer();
-			soap.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:sap-com:document:sap:soap:functions:mc-style\">");
-			soap.append("   <soapenv:Header/>");
-			soap.append("   <soapenv:Body>");
-			soap.append(xml);
-			soap.append("   </soapenv:Body>");
-			soap.append("</soapenv:Envelope>");
-
-			PostMethod postMethod = new PostMethod("http://127.0.0.1:8080/ZfiFkdjk?wsdl");
-
-			// 然后把Soap请求数据添加到PostMethod中
-			byte[] b = soap.toString().getBytes("utf-8");
-			InputStream is = new ByteArrayInputStream(b, 0, b.length);
-			RequestEntity re = new InputStreamRequestEntity(is, b.length, "application/soap+xml; charset=utf-8");
-			postMethod.setRequestEntity(re);
-
-			// 最后生成一个HttpClient对象，并发出postMethod请求
-			HttpClient httpClient = new HttpClient();
-			int statusCode = httpClient.executeMethod(postMethod);
-			if (statusCode == 200) {
-				String soapResponseData = postMethod.getResponseBodyAsString();
-				System.out.println(soapResponseData);
-				int sx = soapResponseData.indexOf("<urn:ZfiFkdjkResponse>");
-				int ex = soapResponseData.indexOf("</urn:ZfiFkdjkResponse>")+"</urn:ZfiFkdjkResponse>".length();
-				soapResponseData = soapResponseData.substring(sx, ex);
-				soapResponseData = soapResponseData.replaceAll("urn:ZfiFkdjkResponse", "ZfiFkdjkResponse");
-				return soapResponseData;
-			} else {
-				throw new BusinessException("错误 HTTP "+statusCode);
-			}
-		} catch (Exception e) {
+			String setXml = JaxbTools.getStringFromObject(zfi);
+			String xmlret = callSAPWS(setXml);
+			ZfiFkdjkResponse ret = JaxbTools.getObjectFromString(ZfiFkdjkResponse.class, xmlret);
+			if (!ret.getOResult().equals("S"))
+				throw new BusinessException("WS请求返回错误。");
+		} catch (JAXBException e) {
+			Logger.error(e.getMessage(), e);
 			throw new BusinessException(e);
 		}
 	}

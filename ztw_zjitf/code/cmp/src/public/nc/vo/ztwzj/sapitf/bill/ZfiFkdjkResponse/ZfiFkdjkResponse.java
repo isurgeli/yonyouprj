@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -1534,8 +1535,38 @@ public class ZfiFkdjkResponse {
             protected String planQian;
             @XmlElement(name = "PerioQian", required = true)
             protected String perioQian;
+            @XmlTransient
+            protected String pk_paybill;
+            @XmlTransient
+            protected String vstatus;
+            @XmlTransient
+            protected String verrmsg;
 
-            /**
+            public String getPk_paybill() {
+				return pk_paybill;
+			}
+
+			public void setPk_paybill(String pk_paybill) {
+				this.pk_paybill = pk_paybill;
+			}
+
+			public String getVstatus() {
+				return vstatus;
+			}
+
+			public void setVstatus(String vstatus) {
+				this.vstatus = vstatus;
+			}
+
+			public String getVerrmsg() {
+				return verrmsg;
+			}
+
+			public void setVerrmsg(String verrmsg) {
+				this.verrmsg = verrmsg;
+			}
+
+			/**
              * 获取prepayReqNum属性的值。
              * 
              * @return
