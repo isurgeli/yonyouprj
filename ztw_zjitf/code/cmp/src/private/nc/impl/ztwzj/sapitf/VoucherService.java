@@ -1,7 +1,5 @@
 package nc.impl.ztwzj.sapitf;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -34,7 +32,6 @@ import nc.jdbc.framework.processor.VectorProcessor;
 import nc.vo.lxt.pub.HashVO;
 import nc.vo.pub.BusinessException;
 import nc.vo.pub.SuperVO;
-import nc.vo.pub.lang.UFDate;
 import nc.vo.ztwzj.sapitf.voucher.ZtwVoucherConstant;
 import nc.vo.ztwzj.sapitf.voucher.BillInfo.BillInfoList;
 import nc.vo.ztwzj.sapitf.voucher.BillInfo.BillInfoList.BillInfo;
@@ -151,16 +148,11 @@ public class VoucherService implements IVoucherService {
 		paras.put("BUKRSLEVEL", DELIMITER.getStringParaValue(org_level));
 		paras.put("BUSITYPE", DELIMITER.getStringParaValue(busitype));
 		paras.put("CORP", DELIMITER.getStringParaValue(pk_org));
-		SimpleDateFormat sFormat = new SimpleDateFormat("yyyyMMdd");
-		try {
-			if (budats != null && budats.length() > 0)
-				paras.put("BUDATS", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budats)).toString()));
-			if (budate != null && budate.length() > 0)
-				paras.put("BUDATE", DELIMITER.getStringParaValue(UFDate.getDate(sFormat.parse(budate)).toString()));
-		} catch (ParseException e) {
-			throw new BusinessException(e.getMessage() ,e);
-		}
-		
+
+		if (budats != null && budats.length() > 0)
+			paras.put("BUDATS", DELIMITER.getStringParaValue(budats));
+		if (budate != null && budate.length() > 0)
+			paras.put("BUDATE", DELIMITER.getStringParaValue(budate));		
 		
 		if (busitype.equals(ZtwVoucherConstant.BT_DELIHEADCORP.getValue())) {
 			paras.put("ABSTRACTS", "'สี['");

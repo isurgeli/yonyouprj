@@ -19,7 +19,7 @@ public abstract class SfDeliTableDef extends SfBaseTableDef {
 		SQLField[] cur = new SQLField[] {
 				new SQLField("VOUCHERID",	"sf_delivery_b",			"pk_delivery_b"),
 				new SQLField("DOCUMENTSNO",	"sf_delivery_h",			"vbillno"),
-				new SQLField("BUDAT",		"sf_delivery_h",			"dapprovedate"),
+				new SQLField("BUDAT",		"sf_delivery_h",			"REPLACE(substr(sf_delivery_h.dapprovedate,1,10),'-','')"),
 				new SQLField("WRBTR",		"sf_delivery_b",			"amount"),
 				new SQLField("paystatus",	"sf_delivery_h",			"billstatus")
 		};

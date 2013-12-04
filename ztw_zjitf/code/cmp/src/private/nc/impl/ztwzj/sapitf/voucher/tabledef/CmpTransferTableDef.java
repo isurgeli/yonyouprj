@@ -50,7 +50,7 @@ public class CmpTransferTableDef implements ISQLDefine {
 				new SQLField("OPPEXBANKNUM",null,					"''"),
 				new SQLField("VOUCHERID",	"cmp_transformbill",	"pk_transformbill"),
 				new SQLField("DOCUMENTSNO",	"cmp_transformbill",	"vbillno"),
-				new SQLField("BUDAT",		"cmp_transformbill",	"settlementdate"),
+				new SQLField("BUDAT",		"cmp_transformbill",	"REPLACE(substr(cmp_transformbill.settlementdate,1,10),'-','')"),
 				new SQLField("WRBTR",		"cmp_transformbill",	"amount"),
 				new SQLField("paystatus",	"cmp_transformbill",	"settlesatus"),	
 				new SQLField("voucherflag",	"cmp_transformbill",	"vdef20"),

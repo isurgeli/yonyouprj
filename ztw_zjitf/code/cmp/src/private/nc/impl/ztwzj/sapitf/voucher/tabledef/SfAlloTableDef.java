@@ -19,7 +19,7 @@ public abstract class SfAlloTableDef extends SfBaseTableDef {
 		SQLField[] cur = new SQLField[] {
 				new SQLField("VOUCHERID",	"sf_allocate_b",			"pk_allocate_b"),
 				new SQLField("DOCUMENTSNO",	"sf_allocate_h",			"vbillno"),
-				new SQLField("BUDAT",		"sf_allocate_h",			"dapprovedate"),
+				new SQLField("BUDAT",		"sf_allocate_h",			"REPLACE(substr(sf_allocate_h.dapprovedate,1,10),'-','')"),
 				new SQLField("WRBTR",		"sf_allocate_b",			"amount"),
 				new SQLField("paystatus",	"sf_allocate_h",			"billstatus")
 		};

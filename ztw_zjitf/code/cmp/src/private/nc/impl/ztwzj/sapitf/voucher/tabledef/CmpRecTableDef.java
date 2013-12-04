@@ -17,7 +17,7 @@ public abstract class CmpRecTableDef extends CmpBaseTableDef {
 		SQLField[] cur = new SQLField[] {
 				new SQLField("VOUCHERID",	"cmp_recbilldetail",	"pk_recbill_detail"),
 				new SQLField("DOCUMENTSNO",	"cmp_recbill",			"bill_no"),
-				new SQLField("BUDAT",		"cmp_recbill",			"paydate"),
+				new SQLField("BUDAT",		"cmp_recbill",			"REPLACE(substr(cmp_recbill.paydate,1,10),'-','')"),
 				new SQLField("WRBTR",		"cmp_recbilldetail",	"rec_primal"),
 				new SQLField("paystatus",	"cmp_recbill",			"paystatus"),
 				new SQLField("pk_org",		"cmp_recbill",			"pk_org")
