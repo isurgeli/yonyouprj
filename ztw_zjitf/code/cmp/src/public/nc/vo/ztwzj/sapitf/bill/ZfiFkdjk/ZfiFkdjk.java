@@ -160,7 +160,8 @@ import javax.xml.bind.annotation.XmlType;
     "iLifnr",
     "iPrepayReqNum",
     "iStatus",
-    "iTab"
+    "iTab",
+    "oTab"
 })
 @XmlRootElement(name = "ZfiFkdjk")
 public class ZfiFkdjk {
@@ -177,6 +178,8 @@ public class ZfiFkdjk {
     protected String iStatus;
     @XmlElement(name = "ITab")
     protected ZfiFkdjk.ITab iTab;
+    @XmlElement(name = "OTab")
+    protected String oTab="";
 
     /**
      * 获取iAedat属性的值。

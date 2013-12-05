@@ -13,9 +13,11 @@ import nc.itf.uap.IUAPQueryBS;
 import nc.itf.ztwzj.sapitf.IBillService;
 import nc.jdbc.framework.processor.VectorProcessor;
 import nc.ui.cmp.bill.actions.BillUiUtil;
+import nc.ui.cmp.bill.actions.PayTransTypeAction;
 import nc.ui.lxt.pub.editor.NCUITool;
+import nc.ui.pub.beans.UIDialog;
+import nc.ui.pub.beans.UIRefPane;
 import nc.ui.uif2.AppEvent;
-import nc.ui.uif2.NCAction;
 import nc.ui.uif2.model.AbstractAppModel;
 import nc.ui.uif2.model.AppEventConst;
 import nc.ui.uif2.model.BillManageModel;
@@ -34,11 +36,11 @@ import nc.vo.pub.lang.UFDouble;
 import nc.vo.ztwzj.sapitf.bill.ZfiFkdjkResponse.ZfiFkdjkResponse.OTab;
 import nc.vo.ztwzj.sapitf.bill.ZfiFkdjkResponse.ZfiFkdjkResponse.OTab.Item;
 
-public class GenPayBillAction extends NCAction {
+public class GenPayBillAction extends PayTransTypeAction {
 
 	private static final long serialVersionUID = 1L;
 	private static final String RMB="1002Z0100000000001K1";
-	private static final String PATBILLBT="0001A510000000000ASX";
+	private static String PATBILLBT="0001A510000000000ASX";
 	
 	private AbstractAppModel model;
 	
@@ -47,9 +49,23 @@ public class GenPayBillAction extends NCAction {
 		putValue(Action.SHORT_DESCRIPTION, getBtnName());
 		putValue(INCAction.CODE, "生成付款单");
 	}
+	
+	public String showTrantypeDlgEx() {
+		UIRefPane uiRefPane = this.getTransTypeRef();
+		uiRefPane.showModel();
+		if (uiRefPane.getReturnButtonCode() == UIDialog.ID_CANCEL) {
+			return null;
+		}
+		@SuppressWarnings("unchecked")
+		Vector<Vector<Object>> cur = uiRefPane.getRefModel().getSelectedData();
+		return cur.get(0).get(2).toString();
+	}
 
 	@Override
 	public void doAction(ActionEvent e) throws Exception {
+		PATBILLBT = showTrantypeDlgEx();
+		if (PATBILLBT == null)
+			return;
 		Integer[] rows = ((BillManageModel)getModel()).getSelectedOperaRows();
 		ArrayList<String> sPayNos = new ArrayList<String>();
 		for (int i=0;i<rows.length;i++) {
@@ -97,8 +113,10 @@ public class GenPayBillAction extends NCAction {
 		}
 		
 		try {
-			IBillService bs = NCLocator.getInstance().lookup(IBillService.class);
-			bs.setPayBillNCFlag("S", sPayNos);
+			if (sPayNos.size() > 0) {
+				IBillService bs = NCLocator.getInstance().lookup(IBillService.class);
+				bs.setPayBillNCFlag("S", sPayNos);
+			}
 		}catch (BusinessException be){
 			Debug.error(be.getMessage());
 		}
@@ -205,6 +223,7 @@ public class GenPayBillAction extends NCAction {
 	}
 
 	private String getSupplierPk(String code) throws BusinessException {
+		code = code.substring(2);
 		String[] formulas = new String[] {"pk_supplier->getColValue(bd_supplier,pk_supplier,code,code)"};
 		HashMap<String, Object> vars = new HashMap<String, Object>();
 		vars.put("code", code);

@@ -99,8 +99,11 @@
 	
 	<bean name="genPayAction" class="nc.ui.ztwzj.sapitf.bill.GenPayBillAction">
 		<property name="model" ref="manageAppModel" />
+		<property name="transTypeRefModel" ref="transTypeRefModel" />
+		<property name="wherepart" value=" parentbilltype = 'F5'" />
 	</bean>
-	
+
+	<bean id="transTypeRefModel" class="nc.ui.cmp.ref.FiBillTypeRefModel" />
 	
 	
 	<!-- 界面布局总装########################################################### -->

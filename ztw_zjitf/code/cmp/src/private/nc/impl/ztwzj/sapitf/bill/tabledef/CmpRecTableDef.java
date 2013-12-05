@@ -71,7 +71,7 @@ public class CmpRecTableDef implements ISQLDefine {
 	@Override
 	public SQLWhereClause[] getFixWheres() {
 		return new SQLWhereClause[] {
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "trade_type", OPERATOR.EQ, "'D4'"),
+			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "trade_type", OPERATOR.IN, "('D4','F4-Cxx-03')"),
 			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "sapflag", OPERATOR.IN, "('~','D')")
 		};
 	}

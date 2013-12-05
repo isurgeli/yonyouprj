@@ -1,8 +1,11 @@
 package nc.impl.ztwzj.sapitf.voucher.tabledef;
 
 import nc.itf.lxt.pub.set.SetUtils;
+import nc.itf.lxt.pub.sqltool.BRACKET;
+import nc.itf.lxt.pub.sqltool.OPERATOR;
 import nc.itf.lxt.pub.sqltool.SQLField;
 import nc.itf.lxt.pub.sqltool.SQLJoinClause;
+import nc.itf.lxt.pub.sqltool.SQLWhereClause;
 
 
 public abstract class CmpRecTableDef extends CmpBaseTableDef {
@@ -20,7 +23,8 @@ public abstract class CmpRecTableDef extends CmpBaseTableDef {
 				new SQLField("BUDAT",		"cmp_recbill",			"REPLACE(substr(cmp_recbill.paydate,1,10),'-','')"),
 				new SQLField("WRBTR",		"cmp_recbilldetail",	"rec_primal"),
 				new SQLField("paystatus",	"cmp_recbill",			"paystatus"),
-				new SQLField("pk_org",		"cmp_recbill",			"pk_org")
+				new SQLField("pk_org",		"cmp_recbill",			"pk_org"),
+				new SQLField("trade_type",	"cmp_recbill",			"trade_type")
 		};
 		
 		return SetUtils.concatAll(super.getSQLFields(), cur);
@@ -39,5 +43,14 @@ public abstract class CmpRecTableDef extends CmpBaseTableDef {
 		};
 		
 		return SetUtils.concatAll(super.getTableJoins(), cur);
+	}
+	
+	@Override
+	public SQLWhereClause[] getFixWheres() {
+		SQLWhereClause[] cur = new SQLWhereClause[] {
+			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "trade_type", OPERATOR.EQ, "'F4-Cxx-01'")
+		};
+		
+		return SetUtils.concatAll(super.getFixWheres(), cur);
 	}
 }

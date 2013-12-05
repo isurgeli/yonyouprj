@@ -57,12 +57,22 @@ public enum ZtwVoucherConstant {
 		return getProperty("pbwsurl");
 	}
 	
+	public static String getSAPPayBillWSUser() throws BusinessException{
+		return getProperty("pbwsuser");
+	}
+	
+	public static String getSAPPayBillWSPass() throws BusinessException{
+		return getProperty("pbwspass");
+	}
+	
 	public static String getProperty(String key) throws BusinessException{
 		Properties prop = new Properties();
 		 
     	try {
     		String path = RuntimeEnv.getInstance().getNCHome()+File.separatorChar+"resources"+File.separatorChar+"ztwitf.properties";
     		prop.load(new FileInputStream(path));
+    		if (prop.getProperty(key) == null)
+    			return null;
     		String property = prop.getProperty(key).toString();
     		if (property != null && property.length()==0)
     			throw new BusinessException("参数["+key+"]配置不正确", "S01");

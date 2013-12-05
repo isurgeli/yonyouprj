@@ -222,22 +222,31 @@ public class BillService implements IBillService {
 	private String callSAPWS(String xml) throws BusinessException {
 		String soapResponseData = "";
 		try{
-			xml = xml.substring(xml.indexOf('<', 1), xml.length());
-			xml = xml.replaceAll("ZfiFkdjk", "urn:ZfiFkdjk");
+			int sidx = xml.indexOf("<ZfiFkdjk>") + "<ZfiFkdjk>".length();
+			int eidx = xml.indexOf("</ZfiFkdjk>") - 1;
+			String subxml = xml.substring(sidx, eidx);
 			StringBuffer soap = new StringBuffer();
 			soap.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:urn=\"urn:sap-com:document:sap:soap:functions:mc-style\">");
 			soap.append("   <soapenv:Header/>");
 			soap.append("   <soapenv:Body>");
-			soap.append(xml);
+			soap.append("      <urn:ZfiFkdjk>");
+			soap.append(subxml);
+			soap.append("      </urn:ZfiFkdjk>");
 			soap.append("   </soapenv:Body>");
 			soap.append("</soapenv:Envelope>");
 	
 			String url = ZtwVoucherConstant.getSAPPayBillWSUrl();
-			soapResponseData = WSTool.callByHttp(url, soap.toString());
-			int sx = soapResponseData.indexOf("<urn:ZfiFkdjkResponse>");
-			int ex = soapResponseData.indexOf("</urn:ZfiFkdjkResponse>") + "</urn:ZfiFkdjkResponse>".length();
+			String user = ZtwVoucherConstant.getSAPPayBillWSUser();
+			String pass = ZtwVoucherConstant.getSAPPayBillWSPass();
+			if (user != null && pass != null)
+				soapResponseData = WSTool.callByHttpBasicAuth(url, soap.toString(), user, pass);
+			else
+				soapResponseData = WSTool.callByHttp(url, soap.toString());
+			
+			int sx = soapResponseData.indexOf("<n0:ZfiFkdjkResponse");
+			int ex = soapResponseData.indexOf("</n0:ZfiFkdjkResponse>") + "</n0:ZfiFkdjkResponse>".length();
 			soapResponseData = soapResponseData.substring(sx, ex);
-			soapResponseData = soapResponseData.replaceAll("urn:ZfiFkdjkResponse", "ZfiFkdjkResponse");
+			soapResponseData = soapResponseData.replaceAll("n0:ZfiFkdjkResponse", "ZfiFkdjkResponse");
 			return soapResponseData;
 		}finally{
 			XlogVO xlog = ZtwVoucherConstant.getBaseXlogVO("SAPPAYBILL", "", new UFBoolean(true), xml, soapResponseData);
