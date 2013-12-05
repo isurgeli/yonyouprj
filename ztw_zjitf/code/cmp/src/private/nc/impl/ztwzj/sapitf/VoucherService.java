@@ -183,7 +183,7 @@ public class VoucherService implements IVoucherService {
 	}
 
 	private Pair<String, String> getOrgPkLevel(String bukrs) throws BusinessException {
-		if (bukrs.equals("0001")) bukrs = "100099";
+		if (bukrs.equals("1000")) bukrs = "100099";
 		bukrs = "9999"+bukrs;
 		BaseDAO dao = new BaseDAO();
 		@SuppressWarnings("unchecked")

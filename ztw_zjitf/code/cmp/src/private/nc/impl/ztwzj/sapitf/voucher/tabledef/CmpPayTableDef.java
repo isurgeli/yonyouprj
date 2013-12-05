@@ -47,7 +47,7 @@ public abstract class CmpPayTableDef extends CmpBaseTableDef {
 	@Override
 	public SQLWhereClause[] getFixWheres() {
 		SQLWhereClause[] cur = new SQLWhereClause[] {
-			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "trade_type", OPERATOR.IN, "('F5-Cxx-01', 'F5-Cxx-04'")
+			new SQLWhereClause(OPERATOR.AND, BRACKET.NONE, "trade_type", OPERATOR.IN, "('F5-Cxx-01', 'F5-Cxx-04')")
 		};
 		
 		return SetUtils.concatAll(super.getFixWheres(), cur);

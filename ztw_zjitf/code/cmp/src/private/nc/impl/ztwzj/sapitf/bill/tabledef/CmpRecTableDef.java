@@ -25,7 +25,7 @@ public class CmpRecTableDef implements ISQLDefine {
 	@Override
 	public SQLField[] getSQLFields() {
 		return new SQLField[] {
-			new SQLField("BUKRS","org_orgs","decode(substr(org_orgs.code,5),'100099','0001',substr(org_orgs.code,5))"),
+			new SQLField("BUKRS","org_orgs","decode(substr(org_orgs.code,5),'100099','1000',substr(org_orgs.code,5))"),
 			new SQLField("ZYEAR","cmp_recbill","substr(cmp_recbill.paydate,1,4)"),
 			new SQLField("ZDJLX",null,"'S'"),
 			new SQLField("ZSKFS","cmp_recbilldetail","decode(cmp_recbilldetail.pk_balatype,'0001Z0100000000000Y5','4','0001Z0100000000000Y6','3','2')"),

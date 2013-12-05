@@ -28,7 +28,7 @@ public class BankReceipTableDef implements ISQLDefine {
 			new SQLField("BUDAT","ebank_dzd","REPLACE(substr(ebank_dzd.trans_date,1,10),'-','')"),
 			new SQLField("ZHB_BANMS","bd_banktype","bd_banktype.name"),
 			new SQLField("ZHB_BANKN","ebank_dzd","curacc"),
-			new SQLField("BUKRS","org_orgs","decode(substr(org_orgs.code,5),'100099','0001',substr(org_orgs.code,5))"),
+			new SQLField("BUKRS","org_orgs","decode(substr(org_orgs.code,5),'100099','1000',substr(org_orgs.code,5))"),
 			new SQLField("SHKZG","ebank_dzd","CASE WHEN ebank_dzd.dbtacc=ebank_dzd.curacc THEN 'H' ELSE 'S' END"),
 			new SQLField("WRBTR","ebank_dzd","ebank_dzd.trsamt"),
 			new SQLField("UNITN","ebank_dzd","ebank_dzd.oppname"),

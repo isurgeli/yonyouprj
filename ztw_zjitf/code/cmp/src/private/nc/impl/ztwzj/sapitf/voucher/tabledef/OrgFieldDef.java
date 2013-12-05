@@ -7,9 +7,9 @@ public class OrgFieldDef {
 
 	public SQLField[] getHeadSQLFields() {
 		return new SQLField[] {
-				new SQLField("BUKRS",		"org_orgs_h",			"decode(substr(org_orgs_h.code,5),'100099','0001',substr(org_orgs_h.code,5))"),
+				new SQLField("BUKRS",		"org_orgs_h",			"decode(substr(org_orgs_h.code,5),'100099','1000',substr(org_orgs_h.code,5))"),
 				new SQLField("ABSTRACT",	"org_orgs_b",			DELIMITER.getParaExp("ABSTRACTS")+"||org_orgs_b.name||"+DELIMITER.getParaExp("ABSTRACTE")),
-				new SQLField("CUSTCODE",	"org_orgs_b",			"decode(substr(org_orgs_b.code,5),'100099','0001',substr(org_orgs_b.code,5))"),
+				new SQLField("CUSTCODE",	"org_orgs_b",			"decode(substr(org_orgs_b.code,5),'100099','1000',substr(org_orgs_b.code,5))"),
 				new SQLField("CUSTNAME",	"org_orgs_b",			"name"),
 				new SQLField("EXBANK",		"bd_bankdoc_h",			"name"),
 				new SQLField("EXBANKNUM",	"bd_bankaccsub_h",		"accnum"),
@@ -20,9 +20,9 @@ public class OrgFieldDef {
 	
 	public SQLField[] getBodySQLFields() {
 		return new SQLField[] {
-				new SQLField("BUKRS",		"org_orgs_b",			"decode(substr(org_orgs_b.code,5),'100099','0001',substr(org_orgs_b.code,5))"),
+				new SQLField("BUKRS",		"org_orgs_b",			"decode(substr(org_orgs_b.code,5),'100099','1000',substr(org_orgs_b.code,5))"),
 				new SQLField("ABSTRACT",	"org_orgs_h",			DELIMITER.getParaExp("ABSTRACTS")+"||org_orgs_h.name||"+DELIMITER.getParaExp("ABSTRACTE")),
-				new SQLField("CUSTCODE",	"org_orgs_h",			"decode(substr(org_orgs_h.code,5),'100099','0001',substr(org_orgs_h.code,5))"),
+				new SQLField("CUSTCODE",	"org_orgs_h",			"decode(substr(org_orgs_h.code,5),'100099','1000',substr(org_orgs_h.code,5))"),
 				new SQLField("CUSTNAME",	"org_orgs_h",			"name"),
 				new SQLField("EXBANK",		"bd_bankdoc_b",			"name"),
 				new SQLField("EXBANKNUM",	"bd_bankaccsub_b",		"accnum"),
